@@ -65,6 +65,78 @@ public class ServiceInstance {
         // FOREIGN KEY -> capability(id)
     )
     private Set<Capability> capabilities; // Lato owner
+
+        public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public ServiceType getType() {
+        return type;
+    }
+
+    public void setType(ServiceType type) {
+        this.type = type;
+    }
+
+    public ServiceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ServiceStatus status) {
+        this.status = status;
+    }
+
+    public double getAvgLatency() {
+        return avgLatency;
+    }
+
+    public void setAvgLatency(double avgLatency) {
+        this.avgLatency = avgLatency;
+    }
+
+    public double getCurrentLoad() {
+        return currentLoad;
+    }
+
+    public void setCurrentLoad(double currentLoad) {
+        this.currentLoad = currentLoad;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Set<Capability> getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(Set<Capability> capabilities) {
+        this.capabilities = capabilities;
+    }
 }
 
 

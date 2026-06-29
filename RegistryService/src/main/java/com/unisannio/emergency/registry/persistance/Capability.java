@@ -20,7 +20,31 @@ public class Capability {
     @Column(unique = true)
     private String name;
 
-    //Lato inverse
     @ManyToMany(mappedBy = "capabilities")
     private Set<ServiceInstance> serviceInstances = new HashSet<>();
+
+    // getter e setter (IMPORTANTI)
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Set<ServiceInstance> getServiceInstances() {
+        return serviceInstances;
+    }
+
+    public void setServiceInstances(Set<ServiceInstance> serviceInstances) {
+        this.serviceInstances = serviceInstances;
+    }
 }
