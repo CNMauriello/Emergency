@@ -34,29 +34,29 @@ public class EmergencyService {
 	
     @ManyToMany
     // Relazione molti-a-molti:
-    // un ServiceInstance ha molte Capability
-    // una Capability appartiene a molti ServiceInstance
+    // un EmergencyService ha molte Capability
+    // una Capability appartiene a molti EmergencyService
     //
     // SQL serve un tabella ponte
-    // CREATE TABLE service_instance_capability (
-    // service_instance_id VARCHAR(64) NOT NULL,
+    // CREATE TABLE emergency_service_capability (
+    // emergency_service_id VARCHAR(64) NOT NULL,
     // capability_id BIGINT NOT NULL,
 
-    // PRIMARY KEY(service_instance_id, capability_id),
+    // PRIMARY KEY(emergency_service_id, capability_id),
 
-    // FOREIGN KEY(service_instance_id)
-    //    REFERENCES service_instance(id),
+    // FOREIGN KEY(emergency_service_id)
+    //    REFERENCES emergency_service(id),
 
     // FOREIGN KEY(capability_id)
     //    REFERENCES capability(id)
     // );
 
     @JoinTable(
-        name = "service_instance_capability",
-        // SQL: CREATE TABLE service_instance_capability (...)
+        name = "emergency_service_capability", // Nome della tabella ponte
+        // SQL: CREATE TABLE emergency_service_capability (...)
 
         joinColumns = @JoinColumn(name = "service_instance_id"),
-        // Foreign Key verso questa entity (ServiceInstance)
+        // Foreign Key verso questa entity (EmergencyService)
         // SQL:
         // service_instance_id BIGINT
         // FOREIGN KEY -> service_instance(id)
