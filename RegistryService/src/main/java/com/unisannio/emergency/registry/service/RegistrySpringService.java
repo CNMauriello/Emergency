@@ -64,7 +64,7 @@ public class RegistrySpringService {
                 s.getLongitude(),
                 s.getCapabilities()
                         .stream()
-                        .map(Capability::getName)
+                        .map(c -> c.getName())
                         .toList()
         );
     }
