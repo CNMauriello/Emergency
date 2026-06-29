@@ -2,7 +2,7 @@ package com.unisannio.emergency.registry.controller;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.unisannio.emergency.registry.persistance.Capability;
+import com.unisannio.emergency.registry.model.CapabilityDTO;
 import com.unisannio.emergency.registry.service.CapabilityService;
 
 @RestController
@@ -17,7 +17,7 @@ public class CapabilityController {
 
     // CREATE capability
     @PostMapping
-    public Capability createCapability(@RequestBody Capability request) {
-        return service.createCapability(request.getName());
+    public CapabilityDTO createCapability(@RequestBody CapabilityDTO request) {
+        return service.createCapability(request);
     }
 }

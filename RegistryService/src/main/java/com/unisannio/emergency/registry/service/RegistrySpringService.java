@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.unisannio.emergency.registry.model.ServiceInstanceDTO;
+import com.unisannio.emergency.registry.model.EmergencyServiceDTO;
 import com.unisannio.emergency.registry.persistance.Capability;
 import com.unisannio.emergency.registry.persistance.EmergencyService;
 import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
@@ -25,47 +25,81 @@ public class RegistrySpringService {
         this.capabilityRepository = capabilityRepository;
     }
 
+    // =========================
+    // QUERY
+    // =========================
     @Transactional(readOnly = true)
-    public List<ServiceInstanceDTO> getServiceByCapability(String name) {
+    public List<EmergencyServiceDTO> getServiceByCapability(String name) {
         return repository.findDistinctByCapabilities_Name(name)
                 .stream()
                 .map(this::toDTO)
                 .toList();
     }
 
+    // =========================
+    // CREATE
+    // =========================
     @Transactional
-    public ServiceInstanceDTO createService(EmergencyService serviceInstance) {
-        System.out.println("CREATE SERVICE");
-        if (serviceInstance.getCapabilities() != null) {
+    public EmergencyServiceDTO createService(EmergencyServiceDTO request) {
 
-            Set<Capability> resolved = serviceInstance.getCapabilities()
-                    .stream()
-                    .map(c -> capabilityRepository.findByName(c.getName())
-                            .orElseThrow(() ->
-                                    new RuntimeException("Capability not found: " + c.getName())))
-                    .collect(Collectors.toSet());
-
-            serviceInstance.setCapabilities(resolved);
-        }
-
-        EmergencyService saved = repository.save(serviceInstance);
-
+        EmergencyService entity = toEntity(request);
+        EmergencyService saved = repository.save(entity);
+        System.out.println("ID salvato = " + saved.getId());
         return toDTO(saved);
     }
 
-    private ServiceInstanceDTO toDTO(EmergencyService s) {
-        return new ServiceInstanceDTO(
-                s.getId(),
+    // =========================
+    // MAPPER DTO -> ENTITY
+    // =========================
+    private EmergencyService toEntity(EmergencyServiceDTO dto) {
+
+        EmergencyService entity = new EmergencyService();
+
+        entity.setEndpoint(dto.endpoint());
+        entity.setType(dto.type());
+        entity.setStatus(dto.status());
+        entity.setAvgLatency(dto.avgLatency());
+        entity.setCurrentLoad(dto.currentLoad());
+        entity.setLatitude(dto.latitude());
+        entity.setLongitude(dto.longitude());
+
+        Set<Capability> capabilities = dto.capabilities() == null
+                ? Set.of()
+                : dto.capabilities()
+                    .stream()
+                    .map(this::resolveCapability)
+                    .collect(Collectors.toSet());
+
+        entity.setCapabilities(capabilities);
+
+        return entity;
+    }
+
+    // =========================
+    // MAPPER ENTITY -> DTO
+    // =========================
+    private EmergencyServiceDTO toDTO(EmergencyService s) {
+        return new EmergencyServiceDTO(
                 s.getEndpoint(),
-                s.getType().name(),
+                s.getType(),
+                s.getStatus(),
                 s.getAvgLatency(),
                 s.getCurrentLoad(),
                 s.getLatitude(),
                 s.getLongitude(),
                 s.getCapabilities()
                         .stream()
-                        .map(c -> c.getName())
+                        .map(cap -> cap.getName())
                         .toList()
         );
+    }
+
+    // =========================
+    // CAPABILITY RESOLUTION
+    // =========================
+    private Capability resolveCapability(String capabilityName) {
+        return capabilityRepository.findByName(capabilityName)
+                .orElseThrow(() ->
+                        new RuntimeException("Capability not found: " + capabilityName));
     }
 }

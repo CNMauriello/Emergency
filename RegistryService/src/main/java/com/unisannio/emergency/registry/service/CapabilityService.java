@@ -2,6 +2,7 @@ package com.unisannio.emergency.registry.service;
 
 import org.springframework.stereotype.Service;
 
+import com.unisannio.emergency.registry.model.CapabilityDTO;
 import com.unisannio.emergency.registry.persistance.Capability;
 import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
 
@@ -14,9 +15,11 @@ public class CapabilityService {
         this.repository = repository;
     }
 
-    public Capability createCapability(String name) {
+    public CapabilityDTO createCapability(CapabilityDTO request) {
         Capability capability = new Capability();
-        capability.setName(name);
-        return repository.save(capability);
+        capability.setName(request.name());
+
+        Capability saved = repository.save(capability);
+        return new CapabilityDTO(saved.getName());
     }
 }
