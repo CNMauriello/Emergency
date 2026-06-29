@@ -1,6 +1,8 @@
 package com.unisannio.emergency.registry.persistance;
 
 
+import java.util.Set;
+
 import jakarta.persistence.*;
 
 @Entity // SQL: CREATE TABLE service_instance (...
@@ -62,7 +64,7 @@ public class ServiceInstance {
         // capability_id BIGINT
         // FOREIGN KEY -> capability(id)
     )
-    private Set<Capability> capabilities;
+    private Set<Capability> capabilities; // Lato owner
 }
 
 
