@@ -1,4 +1,4 @@
-package com.unisannio.emergency.registry.persistance;
+package com.unisannio.emergency.registry.model;
 
 public enum ServiceType {
     FIRE_STATION,

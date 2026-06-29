@@ -21,7 +21,7 @@ public class Capability {
     private String name;
 
     @ManyToMany(mappedBy = "capabilities")
-    private Set<ServiceInstance> serviceInstances = new HashSet<>();
+    private Set<EmergencyService> serviceInstances = new HashSet<>();
 
     // getter e setter (IMPORTANTI)
     public Long getId() {
@@ -40,11 +40,11 @@ public class Capability {
         this.name = name;
     }
 
-    public Set<ServiceInstance> getServiceInstances() {
+    public Set<EmergencyService> getServiceInstances() {
         return serviceInstances;
     }
 
-    public void setServiceInstances(Set<ServiceInstance> serviceInstances) {
+    public void setServiceInstances(Set<EmergencyService> serviceInstances) {
         this.serviceInstances = serviceInstances;
     }
 }

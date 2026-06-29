@@ -3,10 +3,13 @@ package com.unisannio.emergency.registry.persistance;
 
 import java.util.Set;
 
+import com.unisannio.emergency.registry.model.ServiceStatus;
+import com.unisannio.emergency.registry.model.ServiceType;
+
 import jakarta.persistence.*;
 
 @Entity // SQL: CREATE TABLE service_instance (...
-public class ServiceInstance {
+public class EmergencyService {
 	
 	@Id // SQL: PRIMARY KEY
 	@GeneratedValue (strategy = GenerationType.IDENTITY) // SQL: id BIGINT AUTO_INCREMENT

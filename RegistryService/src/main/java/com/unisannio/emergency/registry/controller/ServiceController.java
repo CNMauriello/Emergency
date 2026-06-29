@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import com.unisannio.emergency.registry.model.ServiceInstanceDTO;
-import com.unisannio.emergency.registry.persistance.ServiceInstance;
+import com.unisannio.emergency.registry.persistance.EmergencyService;
 import com.unisannio.emergency.registry.service.RegistrySpringService;
 
 @RestController
@@ -29,7 +29,7 @@ public class ServiceController {
     }
 
     @PostMapping
-    public ServiceInstanceDTO createService(@RequestBody ServiceInstance serviceInstance) {
+    public ServiceInstanceDTO createService(@RequestBody EmergencyService serviceInstance) {
         return service.createService(serviceInstance);
     }
 

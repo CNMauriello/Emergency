@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.unisannio.emergency.registry.model.ServiceInstanceDTO;
 import com.unisannio.emergency.registry.persistance.Capability;
-import com.unisannio.emergency.registry.persistance.ServiceInstance;
+import com.unisannio.emergency.registry.persistance.EmergencyService;
 import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
 import com.unisannio.emergency.registry.persistance.repository.ServiceInstanceRepository;
 
@@ -34,7 +34,7 @@ public class RegistrySpringService {
     }
 
     @Transactional
-    public ServiceInstanceDTO createService(ServiceInstance serviceInstance) {
+    public ServiceInstanceDTO createService(EmergencyService serviceInstance) {
         System.out.println("CREATE SERVICE");
         if (serviceInstance.getCapabilities() != null) {
 
@@ -48,12 +48,12 @@ public class RegistrySpringService {
             serviceInstance.setCapabilities(resolved);
         }
 
-        ServiceInstance saved = repository.save(serviceInstance);
+        EmergencyService saved = repository.save(serviceInstance);
 
         return toDTO(saved);
     }
 
-    private ServiceInstanceDTO toDTO(ServiceInstance s) {
+    private ServiceInstanceDTO toDTO(EmergencyService s) {
         return new ServiceInstanceDTO(
                 s.getId(),
                 s.getEndpoint(),
