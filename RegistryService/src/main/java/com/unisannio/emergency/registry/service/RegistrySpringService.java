@@ -11,15 +11,15 @@ import com.unisannio.emergency.registry.model.EmergencyServiceDTO;
 import com.unisannio.emergency.registry.persistance.Capability;
 import com.unisannio.emergency.registry.persistance.EmergencyService;
 import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
-import com.unisannio.emergency.registry.persistance.repository.ServiceInstanceRepository;
+import com.unisannio.emergency.registry.persistance.repository.EmergencyServiceRepository;
 
 @Service
 public class RegistrySpringService {
 
-    private final ServiceInstanceRepository repository;
+    private final EmergencyServiceRepository repository;
     private final CapabilityRepository capabilityRepository;
 
-    public RegistrySpringService(ServiceInstanceRepository repository,
+    public RegistrySpringService(EmergencyServiceRepository repository,
                                  CapabilityRepository capabilityRepository) {
         this.repository = repository;
         this.capabilityRepository = capabilityRepository;
