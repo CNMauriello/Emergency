@@ -2,6 +2,7 @@ package com.unisannio.emergency.orchestrator.emergency_orchestrator.service;
 
 
 
+import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.Capability;
 import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.EmergencyEvent;
 import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.EmergencyService;
 import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.ServiceResolution;
@@ -33,29 +34,39 @@ public class WorkflowResolver {
 */
     public ServiceResolution resolve(EmergencyEvent event) {
        Workflow workflow = workflowRetrive(event);
+
        return retrieveServices(workflow.getCapabilities());
 
 
     }
 
-    private  Workflow workflowRetrive(EmergencyEvent event) {
+    private Workflow workflowRetrive(EmergencyEvent event) {
         // Implement the logic to resolve the workflow based on the event
         String workflowType = event.getAssociatedWorkflow();
-        workflowClient.get()
+        Workflow wkf = workflowClient.get()
                 .uri("/workflows/{type}", workflowType)
                 .retrieve()
                 .body(new ParameterizedTypeReference<
-                        List<EmergencyService>>() {});
-    
+                        Workflow>() {});
+        return wkf;         
     }
 
-    private retrieveServices(List<String> capabilities) {
+    private ServiceResolution retrieveServices(List<Capability> capabilities) {
         // Implement the logic to retrieve services based on the capabilities
-        serviceClient.get()
+         serviceClient.get()
                 .uri("/services")
                 .retrieve()
                 .body(new ParameterizedTypeReference<
                         List<EmergencyService>>() {});
+    
+        return null; // Replace with actual implementation
     }
 }
 
+// Devo istanziare obbligatoriamente il workflow per mantenerne le interdipendenza? per ora pare di si
+// Risolvo il workflow mantenendo le interdipendenze tra i servizi, poi passo al successivo
+// 
+// Ho un elemento estratto della coda, lo risolvo e passo al successivo.
+// Quale struttura dati mi facilita il lavoro? Coda
+
+// 
