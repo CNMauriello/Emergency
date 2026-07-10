@@ -1,6 +1,5 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.controller;
 
-import java.util.List;
 
 import org.springframework.stereotype.Controller;
 

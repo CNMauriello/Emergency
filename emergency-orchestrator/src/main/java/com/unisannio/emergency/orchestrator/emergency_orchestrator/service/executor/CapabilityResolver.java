@@ -3,7 +3,9 @@ package com.unisannio.emergency.orchestrator.emergency_orchestrator.service.exec
 import java.util.List;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.Capability;
 import com.unisannio.emergency.orchestrator.emergency_orchestrator.model.EmergencyService;
@@ -19,13 +21,13 @@ public class CapabilityResolver {
         this.serviceClient = serviceClient;
 
         //@TODO: RIMUOVERE è PER "TESTING"
-        this.serviceClient = RestClient.builder()
+      /*   this.serviceClient = RestClient.builder()
                 .baseUrl("http://service-registry")
-                .build();
-        //chiama il registro
-        //riceve tutti gli endpoint e metadati per la data caability
-        //le ordina in base ad uno strategy
-        //passa la lista all'executor{
+                .build();*/
+        // chiama il registro
+        // riceve tutti gli endpoint e metadati per la data caability
+        // le ordina in base ad uno strategy
+        // passa la lista all'executor{
     }
     
 
@@ -41,7 +43,7 @@ public class CapabilityResolver {
 
     private List<EmergencyService> getServices(String capabilityName) {
         return emergencyServices = registryClient.get()
-                .uri("/services")
+                .uri("/services?capability={capabilityName}", capabilityName)
                 .retrieve()
                 .body(new ParameterizedTypeReference<
                         List<EmergencyService>>() {});
@@ -49,18 +51,35 @@ public class CapabilityResolver {
     }
 
     private boolean executor(List<EmergencyService> services) {
-        for(EmergencyService emergencyService : services) {
-            serviceClient.invoke(emergencyService.endpoint());
+        for (EmergencyService emergencyService : services) {
+            try {
+                ResponseEntity<Void> response = serviceClient.get()
+                    .uri(emergencyService.endpoint())
+                    .retrieve()
+                    .toBodilessEntity();
+
+            System.out.println("Status: " + response.getStatusCode());
+            if (response.getStatusCode().is2xxSuccessful()) 
+                return true; // Successfully called the service, exit the loop
+
+        } catch (RestClientResponseException e) {
+            System.out.println("Errore HTTP: " + e.getStatusCode());
+            continue;
         }
-        return true;
+        }   
+
+        return false;
     }
-    
+
+
     private List<EmergencyService> fakeSorter(List<EmergencyService> services) {
         //sort the list itself
         return services;
     }
 
     public static void main(String[] args) {
+       
+        
         Capability capability = new Capability("FakeCapability");
         Capability fire = new Capability("FIRE_STATION");
         Capability accident = new Capability("ACCIDENT_RESPONSE");
@@ -73,6 +92,7 @@ public class CapabilityResolver {
         resolver.resolveCapability(suppression);
     }
 
-    
+    // Dobbiamo aggiungere dall'altro lato i codici di risposta
+    // 
 
 }
