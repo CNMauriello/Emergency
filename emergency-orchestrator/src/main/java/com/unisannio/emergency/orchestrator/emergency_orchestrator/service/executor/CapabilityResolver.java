@@ -52,6 +52,7 @@ public class CapabilityResolver {
 
     private boolean executor(List<EmergencyService> services) {
         for (EmergencyService emergencyService : services) {
+            System.out.println("Calling service at endpoint: " + emergencyService.endpoint());
             try {
                 ResponseEntity<Void> response = serviceClient.get()
                     .uri(emergencyService.endpoint())

@@ -20,7 +20,7 @@ class CapabilityResolverTest {
     void testCapabilityResolverWithFakeServers() {
 
         // Registry client
-        RestClient.Builder registryBuilder = RestClient.builder();
+        RestClient.Builder registryBuilder = RestClient.builder().baseUrl("http://fake-registry");
         MockRestServiceServer registryMock = MockRestServiceServer.bindTo(registryBuilder).build();
         RestClient registryClient = registryBuilder.build();
 
@@ -32,6 +32,7 @@ class CapabilityResolverTest {
 
 
         // Il registry risponde con un servizio disponibile
+        mettere json corrispondente a EmergencyService
         registryMock.expect(
                 requestTo("http://fake-registry/services?capability=FIRE_STATION"))
                 .andRespond(
