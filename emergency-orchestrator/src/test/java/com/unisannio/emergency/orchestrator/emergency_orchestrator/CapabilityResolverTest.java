@@ -32,14 +32,21 @@ class CapabilityResolverTest {
 
 
         // Il registry risponde con un servizio disponibile
-        mettere json corrispondente a EmergencyService
+        //mettere json corrispondente a EmergencyService
         registryMock.expect(
                 requestTo("http://fake-registry/services?capability=FIRE_STATION"))
                 .andRespond(
                 withSuccess("""
                     [
                       {
-                        "endpoint": "http://fake-service/fire"
+                        "id": "fire-1",
+                        "type": "FIRE_STATION",
+                        "capabilities": [{"capabilityName": "FIRE_STATION"}],
+                        "endpoint": "http://fake-service/fire",
+                        "status": "UP",
+                        "avgLatency": 50.0,
+                        "currentLoad": 0.3,
+                        "position": {"latitude": 41.0, "longitude": 14.0}
                       }
                     ]
                     """,
