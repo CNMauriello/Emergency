@@ -14,6 +14,8 @@ public interface EmergencyServiceRepository
 
     List<EmergencyService> findDistinctByCapabilities_Name(String name);
 
+    List<EmergencyService> id(long id);
+
     //Oppure si può usare @Query per scrivere la query manualmente, se si vuole più controllo
   /*
     @Query("""
