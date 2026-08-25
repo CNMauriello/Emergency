@@ -64,8 +64,33 @@
 		<dependency>
     		<groupId>org.springframework</groupId>
     		<artifactId>spring-test</artifactId>
-    	<scope>test</scope>
-</dependency>
+    		<scope>test</scope>
+		</dependency>
+		<!-- Aggiunge il supporto JDBC e auto-configura il TransactionManager per Camunda -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+		<!-- Motore Camunda 7 embedded -->
+		<dependency>
+			<groupId>org.camunda.bpm.springboot</groupId>
+			<artifactId>camunda-bpm-spring-boot-starter-rest</artifactId>
+			<version>7.21.0</version>
+		</dependency>
+
+		<!-- Webapp Camunda (Cockpit, Tasklist, Admin) -->
+		<dependency>
+			<groupId>org.camunda.bpm.springboot</groupId>
+			<artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
+			<version>7.21.0</version>
+		</dependency>
+
+		<!-- Database H2 per test in memoria (sostituibile con mysql-connector-j in produzione) -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
