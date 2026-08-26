@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0">
+  <bpmn:process id="Process_0t95rly" name="Find Capability Provider" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Start Find Capability Search">
+      <bpmn:outgoing>Flow_0aapk5y</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0aapk5y" sourceRef="StartEvent_1" targetRef="Activity_0xyalng" />
+    <bpmn:sequenceFlow id="Flow_0tahtn8" sourceRef="Activity_0xyalng" targetRef="Activity_0x5wpcz" />
+    <bpmn:sequenceFlow id="Flow_0nmjdur" sourceRef="Activity_0x5wpcz" targetRef="Activity_1olkcdo" />
+    <bpmn:exclusiveGateway id="Gateway_0gpny0h" name="Capability Available?">
+      <bpmn:incoming>Flow_03lbcuc</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wuspa1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_15fvnl3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_03lbcuc" sourceRef="Activity_1olkcdo" targetRef="Gateway_0gpny0h" />
+    <bpmn:sequenceFlow id="Flow_0wuspa1" name="Capability not available" sourceRef="Gateway_0gpny0h" targetRef="Activity_0x5wpcz">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_1klxxze" name="End Capability Search">
+      <bpmn:incoming>Flow_15fvnl3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_15fvnl3" name="Capability Available" sourceRef="Gateway_0gpny0h" targetRef="Event_1klxxze">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_0xyalng" name="Find capability providers" camunda:delegateExpression="${findCapabilityProvidersDelegate}">
+      <bpmn:incoming>Flow_0aapk5y</bpmn:incoming>
+      <bpmn:outgoing>Flow_0tahtn8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_0x5wpcz" name="Pop a capability provider" camunda:delegateExpression="${popCapabilityProviderDelegate}">
+      <bpmn:incoming>Flow_0tahtn8</bpmn:incoming>
+      <bpmn:incoming>Flow_0wuspa1</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nmjdur</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1olkcdo" name="Invoke Capability" camunda:delegateExpression="${invokeCapabilityDelegate}">
+      <bpmn:incoming>Flow_0nmjdur</bpmn:incoming>
+      <bpmn:outgoing>Flow_03lbcuc</bpmn:outgoing>
+    </bpmn:serviceTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0t95rly">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="150" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="125" y="143" width="87" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0gpny0h_di" bpmnElement="Gateway_0gpny0h" isMarkerVisible="true">
+        <dc:Bounds x="725" y="93" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="725" y="63" width="51" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1klxxze_di" bpmnElement="Event_1klxxze">
+        <dc:Bounds x="862" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="845" y="143" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1x24j47_di" bpmnElement="Activity_0xyalng">
+        <dc:Bounds x="240" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0a8txs1_di" bpmnElement="Activity_0x5wpcz">
+        <dc:Bounds x="400" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0z569p0_di" bpmnElement="Activity_1olkcdo">
+        <dc:Bounds x="560" y="78" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0aapk5y_di" bpmnElement="Flow_0aapk5y">
+        <di:waypoint x="186" y="118" />
+        <di:waypoint x="240" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tahtn8_di" bpmnElement="Flow_0tahtn8">
+        <di:waypoint x="340" y="118" />
+        <di:waypoint x="400" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nmjdur_di" bpmnElement="Flow_0nmjdur">
+        <di:waypoint x="500" y="118" />
+        <di:waypoint x="560" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03lbcuc_di" bpmnElement="Flow_03lbcuc">
+        <di:waypoint x="660" y="118" />
+        <di:waypoint x="725" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wuspa1_di" bpmnElement="Flow_0wuspa1">
+        <di:waypoint x="750" y="143" />
+        <di:waypoint x="750" y="300" />
+        <di:waypoint x="450" y="300" />
+        <di:waypoint x="450" y="158" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="567" y="266" width="67" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_15fvnl3_di" bpmnElement="Flow_15fvnl3">
+        <di:waypoint x="775" y="118" />
+        <di:waypoint x="862" y="118" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="794" y="86" width="49" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

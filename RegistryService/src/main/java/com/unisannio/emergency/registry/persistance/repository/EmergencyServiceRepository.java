@@ -9,18 +9,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.unisannio.emergency.registry.persistance.EmergencyService;
 
 //Spring Data Repository - Repository Pattern
-public interface ServiceInstanceRepository 
+public interface EmergencyServiceRepository 
         extends JpaRepository<EmergencyService, Long> {
 
     List<EmergencyService> findDistinctByCapabilities_Name(String name);
+
+    List<EmergencyService> id(long id);
 
     //Oppure si può usare @Query per scrivere la query manualmente, se si vuole più controllo
   /*
     @Query("""
     SELECT DISTINCT si
-    FROM ServiceInstance si
+    FROM EmergencyService si
     JOIN si.capabilities c
     WHERE c.name = :name
     """)
-    List<ServiceInstance> findByCapability(@Param("name") String name);*/
+    List<EmergencyService> findByCapability(@Param("name") String name);*/
 }

@@ -1,28 +1,35 @@
 package com.unisannio.emergency.registry.service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
+import com.unisannio.emergency.registry.model.ServiceUpdateRequestDTO;
+import com.unisannio.emergency.registry.model.ServiceUpdateResponseDTO;
+import com.unisannio.emergency.registry.utility.HeartbeatManager;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.unisannio.emergency.registry.model.EmergencyServiceDTO;
-import com.unisannio.emergency.registry.persistance.Capability;
 import com.unisannio.emergency.registry.persistance.EmergencyService;
-import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
-import com.unisannio.emergency.registry.persistance.repository.ServiceInstanceRepository;
+import com.unisannio.emergency.registry.persistance.repository.EmergencyServiceRepository;
+import com.unisannio.emergency.registry.utility.EmergencyServiceMapper;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RegistrySpringService {
 
-    private final ServiceInstanceRepository repository;
-    private final CapabilityRepository capabilityRepository;
+    private final EmergencyServiceRepository repository;
+    private final EmergencyServiceMapper mapper;
+    private final HeartbeatManager heartbeatManager;
 
-    public RegistrySpringService(ServiceInstanceRepository repository,
-                                 CapabilityRepository capabilityRepository) {
+
+    // Iniettiamo il repository e il nuovo mapper
+
+    public RegistrySpringService(EmergencyServiceRepository repository,
+                                 EmergencyServiceMapper mapper, HeartbeatManager heartbeatManager) {
         this.repository = repository;
-        this.capabilityRepository = capabilityRepository;
+        this.mapper = mapper;
+        this.heartbeatManager = heartbeatManager;
     }
 
     // =========================
@@ -32,7 +39,7 @@ public class RegistrySpringService {
     public List<EmergencyServiceDTO> getServiceByCapability(String name) {
         return repository.findDistinctByCapabilities_Name(name)
                 .stream()
-                .map(this::toDTO)
+                .map(mapper::toDTO) // Uso della method reference col nuovo mapper
                 .toList();
     }
 
@@ -42,64 +49,45 @@ public class RegistrySpringService {
     @Transactional
     public EmergencyServiceDTO createService(EmergencyServiceDTO request) {
 
-        EmergencyService entity = toEntity(request);
+        EmergencyService entity = mapper.toEntity(request);
         EmergencyService saved = repository.save(entity);
+
         System.out.println("ID salvato = " + saved.getId());
-        return toDTO(saved);
+
+        return mapper.toDTO(saved);
     }
 
     // =========================
-    // MAPPER DTO -> ENTITY
+    // UPDATE METRICS & HEARTBEAT
     // =========================
-    private EmergencyService toEntity(EmergencyServiceDTO dto) {
+    @Transactional
+    public ServiceUpdateResponseDTO updateServiceMetrics(Long id, ServiceUpdateRequestDTO request) {
+        // 1. Recupero l'entità (lancia 404 se non trovata)
+        EmergencyService entity = repository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Servizio non trovato"));
 
-        EmergencyService entity = new EmergencyService();
+        // 2. Aggiorno solo i campi DB previsti
+        if (request.status() != null) {
+            entity.setStatus(request.status());
+        }
+        if (request.avgLatency() != null) {
+            entity.setAvgLatency(request.avgLatency());
+        }
+        if (request.currentLoad() != null) {
+            entity.setCurrentLoad(request.currentLoad());
+        }
 
-        entity.setEndpoint(dto.endpoint());
-        entity.setType(dto.type());
-        entity.setStatus(dto.status());
-        entity.setAvgLatency(dto.avgLatency());
-        entity.setCurrentLoad(dto.currentLoad());
-        entity.setLatitude(dto.latitude());
-        entity.setLongitude(dto.longitude());
+        // 3. Salvo nel DB le metriche aggiornate
+        repository.save(entity);
 
-        Set<Capability> capabilities = dto.capabilities() == null
-                ? Set.of()
-                : dto.capabilities()
-                    .stream()
-                    .map(this::resolveCapability)
-                    .collect(Collectors.toSet());
+        // 4. Aggiorno l'heartbeat IN MEMORIA, senza toccare l'entità o il DB
+        heartbeatManager.updateHeartbeat(id);
 
-        entity.setCapabilities(capabilities);
-
-        return entity;
-    }
-
-    // =========================
-    // MAPPER ENTITY -> DTO
-    // =========================
-    private EmergencyServiceDTO toDTO(EmergencyService s) {
-        return new EmergencyServiceDTO(
-                s.getEndpoint(),
-                s.getType(),
-                s.getStatus(),
-                s.getAvgLatency(),
-                s.getCurrentLoad(),
-                s.getLatitude(),
-                s.getLongitude(),
-                s.getCapabilities()
-                        .stream()
-                        .map(cap -> cap.getName())
-                        .toList()
+        return new ServiceUpdateResponseDTO(
+                entity.getId(),
+                entity.getStatus(),
+                entity.getAvgLatency(),
+                entity.getCurrentLoad()
         );
-    }
-
-    // =========================
-    // CAPABILITY RESOLUTION
-    // =========================
-    private Capability resolveCapability(String capabilityName) {
-        return capabilityRepository.findByName(capabilityName)
-                .orElseThrow(() ->
-                        new RuntimeException("Capability not found: " + capabilityName));
     }
 }

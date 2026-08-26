@@ -2,12 +2,11 @@ package com.unisannio.emergency.registry.controller;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import com.unisannio.emergency.registry.model.ServiceUpdateRequestDTO;
+import com.unisannio.emergency.registry.model.ServiceUpdateResponseDTO;
+import jakarta.websocket.server.PathParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.unisannio.emergency.registry.model.EmergencyServiceDTO;
 import com.unisannio.emergency.registry.service.RegistrySpringService;
@@ -33,7 +32,14 @@ public class ServiceController {
         return service.createService(request);
     }
 
-    
+    @PatchMapping("/{id}")
+    public ResponseEntity<ServiceUpdateResponseDTO> updateServiceMetrics(
+            @PathVariable("id") Long id,
+            @RequestBody ServiceUpdateRequestDTO request) {
+
+        ServiceUpdateResponseDTO response = service.updateServiceMetrics(id, request);
+        return ResponseEntity.ok(response);
+    }
 }
 
 //GET /services?capability=fire-alert
