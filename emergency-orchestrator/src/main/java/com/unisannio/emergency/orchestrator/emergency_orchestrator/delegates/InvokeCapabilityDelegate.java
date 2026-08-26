@@ -13,13 +13,16 @@ public class InvokeCapabilityDelegate implements JavaDelegate {
 
     private final RestClient restClient;
 
-    public InvokeCapabilityDelegate(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    // Costruttore modificato: rimosso RestClient.Builder
+    public InvokeCapabilityDelegate() {
+        this.restClient = RestClient.create();
     }
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         String endpoint = (String) execution.getVariable("currentCandidateEndpoint");
+
+        @SuppressWarnings("unchecked")
         Map<String, Object> event = (Map<String, Object>) execution.getVariable("event");
 
         if (endpoint == null) return;

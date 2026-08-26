@@ -5,6 +5,10 @@ import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,35 +17,54 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
 
     private final RestClient restClient;
 
-    public FindCapabilityProvidersDelegate(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    public FindCapabilityProvidersDelegate() {
+        this.restClient = RestClient.create();
     }
 
     @Override
     public void execute(DelegateExecution execution) throws Exception {
         String requiredCapability = (String) execution.getVariable("requiredCapability");
+
+        @SuppressWarnings("unchecked")
         Map<String, Object> event = (Map<String, Object>) execution.getVariable("event");
 
-        // Prepariamo il payload per il Binder
-        Map<String, Object> binderRequest = Map.of(
-                "requiredCapability", requiredCapability,
-                "latitude", event.get("latitude"),
-                "longitude", event.get("longitude")
-        );
+        // FIX 1: Utilizzo di HashMap invece di Map.of() per tollerare valori null
+        Map<String, Object> binderRequest = new HashMap<>();
+        binderRequest.put("requiredCapability", requiredCapability);
 
-        // Chiamata HTTP REALE al Binder per ottenere la coda già filtrata e ordinata
-        List<Map<String, Object>> sortedCandidates = restClient.post()
-                .uri("http://binder-service:8080/api/binder/candidates")
-                .body(binderRequest)
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+        if (event != null) {
+            binderRequest.put("latitude", event.get("latitude"));
+            binderRequest.put("longitude", event.get("longitude"));
+        }
 
-        if (sortedCandidates == null) {
-            sortedCandidates = List.of();
+        List<Map<String, Object>> sortedCandidates = new ArrayList<>();
+
+        try {
+            // FIX 2: Attenzione all'URL se stai eseguendo il run da IntelliJ e non da Docker!
+            // Se "binder-service" non è nel file /etc/hosts, usa "localhost" per il test locale.
+            String binderUrl = "http://localhost:8080/api/binder/candidates";
+
+            // Per la produzione su Docker usa invece:
+            // String binderUrl = "http://binder-service:8080/api/binder/candidates";
+
+            List<Map<String, Object>> response = restClient.post()
+                    .uri(binderUrl)
+                    .body(binderRequest)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+
+            if (response != null) {
+                sortedCandidates = response;
+            }
+
+        } catch (RestClientException e) {
+            // FIX 3: Gestione dell'eccezione HTTP
+            System.err.println("Errore di comunicazione con il Binder Service: " + e.getMessage());
+            // In caso di errore, sortedCandidates resta vuoto, permettendo al processo
+            // di passare al ramo di fallback (isCapabilityAvailable = false) senza andare in crash.
         }
 
         // Memorizziamo la lista ordinata reale all'interno dell'istanza del workflow
-        // per permettere al PopCapabilityProviderDelegate di estrarre i candidati
         execution.setVariable("capabilityCandidates", sortedCandidates);
     }
 }
