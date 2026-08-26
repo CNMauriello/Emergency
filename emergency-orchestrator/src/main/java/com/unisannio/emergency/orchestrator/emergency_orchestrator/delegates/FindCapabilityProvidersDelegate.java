@@ -14,7 +14,6 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
     private final RestClient restClient;
 
     public FindCapabilityProvidersDelegate(RestClient.Builder restClientBuilder) {
-        // Il RestClient viene costruito senza base url fisso per poter contattare microservizi diversi
         this.restClient = restClientBuilder.build();
     }
 
@@ -23,32 +22,26 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
         String requiredCapability = (String) execution.getVariable("requiredCapability");
         Map<String, Object> event = (Map<String, Object>) execution.getVariable("event");
 
-        // 1. Chiamata HTTP REALE al Gestore Servizi per ottenere tutti gli endpoint che offrono la capability
-        List<Map<String, Object>> rawCandidates = restClient.get()
-                .uri("http://registry-service:8080/api/services?capability={cap}", requiredCapability)
-                .retrieve()
-                .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
-
-        if (rawCandidates == null || rawCandidates.isEmpty()) {
-            execution.setVariable("capabilityCandidates", List.of());
-            return;
-        }
-
-        // 2. Chiamata HTTP REALE al Sottosistema Gestione Risorse per ordinare i candidati
-        // Viene passato l'epicentro dell'evento e la lista grezza
-        Map<String, Object> sortingPayload = Map.of(
-                "emergencyLatitude", event.get("latitude"),
-                "emergencyLongitude", event.get("longitude"),
-                "candidates", rawCandidates
+        // Prepariamo il payload per il Binder
+        Map<String, Object> binderRequest = Map.of(
+                "requiredCapability", requiredCapability,
+                "latitude", event.get("latitude"),
+                "longitude", event.get("longitude")
         );
 
+        // Chiamata HTTP REALE al Binder per ottenere la coda già filtrata e ordinata
         List<Map<String, Object>> sortedCandidates = restClient.post()
-                .uri("http://resource-manager:8080/api/resources/sort")
-                .body(sortingPayload)
+                .uri("http://binder-service:8080/api/binder/candidates")
+                .body(binderRequest)
                 .retrieve()
                 .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
 
-        // 3. Memorizziamo la lista ordinata reale all'interno dell'istanza del workflow
+        if (sortedCandidates == null) {
+            sortedCandidates = List.of();
+        }
+
+        // Memorizziamo la lista ordinata reale all'interno dell'istanza del workflow
+        // per permettere al PopCapabilityProviderDelegate di estrarre i candidati
         execution.setVariable("capabilityCandidates", sortedCandidates);
     }
 }
