@@ -38,8 +38,6 @@ public class BinderService {
             return List.of();
         }
 
-        System.out.println("rawCandidates: " + rawCandidates);
-
         // 2. Pre-filtraggio: manteniamo solo i servizi pienamente operativi (UP)
         List<EmergencyServiceDTO> availableCandidates = rawCandidates.stream()
                 .filter(s -> "UP".equalsIgnoreCase(s.status()))
