@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import com.unisannio.emergency.registry.model.CapabilityDTO;
 import com.unisannio.emergency.registry.service.CapabilityService;
 
+//@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/capabilities")
 public class CapabilityController {

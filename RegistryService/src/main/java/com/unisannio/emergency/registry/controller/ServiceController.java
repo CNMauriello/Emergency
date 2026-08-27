@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.unisannio.emergency.registry.model.ServiceUpdateRequestDTO;
 import com.unisannio.emergency.registry.model.ServiceUpdateResponseDTO;
-import jakarta.websocket.server.PathParam;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +20,16 @@ public class ServiceController {
         this.service = service;
     }
 
+      
+    // GET /services
     @GetMapping
+    public List<EmergencyServiceDTO> getAllServices() {
+        return service.getAllServices();
+    }
+    
+    
+    // GET /services?capability=fire-alert
+    @GetMapping(params = "capability")
     public List<EmergencyServiceDTO> getByCapability(
         @RequestParam("capability") String capability) {
     return service.getServiceByCapability(capability);
@@ -42,4 +50,4 @@ public class ServiceController {
     }
 }
 
-//GET /services?capability=fire-alert
+

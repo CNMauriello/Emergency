@@ -31,9 +31,20 @@ public class RegistrySpringService {
         this.mapper = mapper;
         this.heartbeatManager = heartbeatManager;
     }
+    
+    // =========================
+    // QUERY - TUTTI I SERVIZI
+    // =========================
+    @Transactional(readOnly = true)
+    public List<EmergencyServiceDTO> getAllServices() {
+        return repository.findAll()
+                .stream()
+                .map(mapper::toDTO)
+                .toList();
+    }
 
     // =========================
-    // QUERY
+    // QUERY - SERVIZI PER CAPABILITY
     // =========================
     @Transactional(readOnly = true)
     public List<EmergencyServiceDTO> getServiceByCapability(String name) {
