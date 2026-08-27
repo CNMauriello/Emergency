@@ -1,6 +1,7 @@
 package com.unisannio.emergency.registry.controller;
 
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 import com.unisannio.emergency.registry.model.CapabilityDTO;
 import com.unisannio.emergency.registry.service.CapabilityService;
@@ -14,6 +15,12 @@ public class CapabilityController {
 
     public CapabilityController(CapabilityService service) {
         this.service = service;
+    }
+
+    
+    @GetMapping
+    public List<CapabilityDTO> getAllCapabilities() {
+        return service.getAllCapabilities();
     }
 
     // CREATE capability

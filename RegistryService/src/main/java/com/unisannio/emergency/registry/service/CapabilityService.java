@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.unisannio.emergency.registry.model.CapabilityDTO;
 import com.unisannio.emergency.registry.persistance.Capability;
 import com.unisannio.emergency.registry.persistance.repository.CapabilityRepository;
+import java.util.List;
 
 @Service
 public class CapabilityService {
@@ -21,5 +22,12 @@ public class CapabilityService {
 
         Capability saved = repository.save(capability);
         return new CapabilityDTO(saved.getName());
+    }
+
+    public List<CapabilityDTO> getAllCapabilities() {
+        return repository.findAll()
+                .stream()
+                .map(capability -> new CapabilityDTO(capability.getName()))
+                .toList();
     }
 }
