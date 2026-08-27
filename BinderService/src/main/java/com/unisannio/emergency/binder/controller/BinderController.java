@@ -24,7 +24,7 @@ public class BinderController {
     public ResponseEntity<List<String>> getCandidates(@RequestBody BinderRequest request) {
         List<String> candidates = binderService.getSortedCandidates(request);
         if (candidates.isEmpty()) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(candidates);
     }
