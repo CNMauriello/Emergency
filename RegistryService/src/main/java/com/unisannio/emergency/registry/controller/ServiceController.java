@@ -40,6 +40,14 @@ public class ServiceController {
         return service.createService(request);
     }
 
+    //DELETE /services?endpoint=http://localhost:9000/fire
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteService(@PathVariable("id") Long id) {
+        service.deleteService(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @PatchMapping("/{id}")
     public ResponseEntity<ServiceUpdateResponseDTO> updateServiceMetrics(
             @PathVariable("id") Long id,
@@ -48,6 +56,8 @@ public class ServiceController {
         ServiceUpdateResponseDTO response = service.updateServiceMetrics(id, request);
         return ResponseEntity.ok(response);
     }
+
+    
 }
 
 

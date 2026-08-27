@@ -3,6 +3,7 @@ package com.unisannio.emergency.registry.model;
 import java.util.List;
 
 public record EmergencyServiceDTO(
+    Long id,
     String endpoint,
     ServiceType type,
     ServiceStatus status,

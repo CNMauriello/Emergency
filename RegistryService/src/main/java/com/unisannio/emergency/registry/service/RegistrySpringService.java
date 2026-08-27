@@ -69,6 +69,21 @@ public class RegistrySpringService {
     }
 
     // =========================
+    // DELETE
+    // =========================
+    @Transactional
+    public void deleteService(Long id) {
+        if (!repository.existsById(id)) {
+        throw new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Servizio non trovato"
+        );
+    }
+
+    repository.deleteById(id);
+}
+
+    // =========================
     // UPDATE METRICS & HEARTBEAT
     // =========================
     @Transactional

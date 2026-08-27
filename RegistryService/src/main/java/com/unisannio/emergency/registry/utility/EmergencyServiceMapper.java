@@ -45,6 +45,7 @@ public class EmergencyServiceMapper {
 
     public EmergencyServiceDTO toDTO(EmergencyService s) {
         return new EmergencyServiceDTO(
+                s.getId(),
                 s.getEndpoint(),
                 s.getType(),
                 s.getStatus(),
