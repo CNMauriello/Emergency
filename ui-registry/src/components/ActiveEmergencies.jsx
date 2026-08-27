@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets } from 'lucide-react';
+import { API_BASE_URL } from '../config.js';
 
 const ActiveEmergencies = ({ onViewDetail }) => {
     const [emergencies, setEmergencies] = useState([]);
@@ -40,7 +41,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
     const fetchEmergencies = async () => {
         try {
             // Sostituisci con il vero endpoint del Gestore Operatori di Sala
-            const response = await fetch('/api/emergencies', {
+            const response = await fetch(`${API_BASE_URL}/emergencies`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('faro_token')}`
                 }
@@ -55,6 +56,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
             setEmergencies(data);
             setError(null);
         } catch (err) {
+            /********* FALLBACK TEMPORANEO
             // In un caso reale, mostra l'errore. Qui usiamo dati finti di fallback per permetterti di vedere la UI se l'API non è attiva.
             console.warn("Backend non raggiungibile, utilizzo dati di mock temporanei:", err.message);
             setEmergencies([
@@ -81,8 +83,11 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                     address: "Via Cristoforo Colombo, Roma (RM)",
                     timestamp: '14:15 (17m ago)',
                     workflowInstanceId: 'WF-FLOOD-002'
-                }
-            ]);
+                }]);*********/
+            console.error("Impossibile recuperare le emergenze:", err);
+            setError(err.message); // Salva il VERO messaggio di errore
+            setEmergencies([]);    // Assicurati che la lista sia vuota
+
         } finally {
             setLoading(false);
         }
@@ -99,6 +104,17 @@ const ActiveEmergencies = ({ onViewDetail }) => {
         return (
             <div className="flex-1 flex items-center justify-center min-h-screen bg-gray-50">
                 <Loader2 className="animate-spin w-10 h-10 text-blue-600" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-gray-50 p-8">
+                <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+                <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile connettersi al Server</h2>
+                <p className="text-red-600 font-mono text-sm">{error}</p>
+                <p className="text-gray-500 mt-4 text-sm">Assicurati che il Gestore Operatori di Sala sia in esecuzione.</p>
             </div>
         );
     }

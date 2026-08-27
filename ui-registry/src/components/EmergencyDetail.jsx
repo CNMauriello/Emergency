@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle } from 'lucide-react';
+import { API_BASE_URL } from '../config.js'; // Importa la tua costante
 
-const EmergencyDetail = ({ emergencyId = 48 }) => {
+const EmergencyDetail = ({ emergencyId = 48, onBack }) => {
     const [emergency, setEmergency] = useState(null);
     const [services, setServices] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState('');
+
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
 
     useEffect(() => {
@@ -13,27 +16,31 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
             try {
                 const headers = { 'Authorization': `Bearer ${localStorage.getItem('faro_token')}` };
 
-                // 1. Consultazione stato emergenza (FR15)
-                const emRes = await fetch(`/api/emergencies/${emergencyId}`, { headers });
-                if (!emRes.ok) throw new Error('Emergenza non trovata');
+                // 1. Chiamata REALE per lo stato dell'emergenza
+                const emRes = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}`, { headers });
+                if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
 
-                // 2. Discovery dei servizi per capability (FR14) - es. FireSuppression
-                const srvRes = await fetch(`/api/services?capability=FireSuppression`, { headers });
+                // 2. Chiamata REALE per la discovery dei servizi (es. FireSuppression)
+                const srvRes = await fetch(`${API_BASE_URL}/services?capability=FireSuppression`, { headers });
                 if (srvRes.ok) {
                     const srvData = await srvRes.json();
                     setServices(srvData);
                 }
+
+                setError(null);
             } catch (err) {
                 console.error(err);
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchData();
-        const interval = setInterval(fetchData, 5000); // Polling per aggiornamenti di stato
+        // Polling per aggiornamenti di stato
+        const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, [emergencyId]);
 
@@ -42,9 +49,8 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
         if (!selectedUnit) return;
         setDispatching(true);
         try {
-            // Chiamata di override verso il Gestore Operatori di Sala
-            // Acquisisce il lock pessimistico e scrive sul log immutabile
-            await fetch(`/api/emergencies/${emergencyId}/override-dispatch`, {
+            // Chiamata REALE per l'ingaggio
+            const response = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}/override-dispatch`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,19 +58,42 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
                 },
                 body: JSON.stringify({ serviceId: selectedUnit })
             });
-            // Il polling successivo aggiornerà la UI
+
+            if (!response.ok) throw new Error('Errore durante il dispaccio');
+
+            // Il polling successivo aggiornerà la UI, ma per reattività possiamo svuotare la selezione
+            setSelectedUnit('');
         } catch (err) {
             console.error("Errore durante l'ingaggio", err);
+            alert("Impossibile confermare il dispaccio: " + err.message);
         } finally {
             setDispatching(false);
         }
     };
 
-    if (loading || !emergency) return <div className="p-8"><Loader2 className="animate-spin w-8 h-8" /></div>;
+    // 1. STATO: Caricamento
+    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>;
 
+    // 2. STATO: Errore di connessione
+    if (error || !emergency) {
+        return (
+            <div className="p-8 bg-gray-50 min-h-screen">
+                <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
+                    <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
+                </button>
+                <div className="flex flex-col items-center justify-center py-20">
+                    <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile caricare i dettagli</h2>
+                    <p className="text-red-600 font-mono text-sm">{error || "Dati non disponibili"}</p>
+                </div>
+            </div>
+        );
+    }
+
+    // 3. STATO: Dati caricati correttamente
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
-            <button className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm">
+            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm font-bold">
                 <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
             </button>
 
@@ -112,7 +141,7 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
                     <div className="relative pl-4 border-l-2 border-gray-200 space-y-8 ml-2">
 
                         {/* Controllo Storico Transizioni (History) */}
-                        {emergency.history.map((step, index) => (
+                        {emergency.history && emergency.history.map((step, index) => (
                             <div key={index} className="relative">
                                 <CheckCircle2 className="w-6 h-6 text-green-500 absolute -left-[1.65rem] bg-white" />
                                 <h3 className="font-bold text-gray-800">Transizione: {step}</h3>
@@ -120,7 +149,7 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
                             </div>
                         ))}
 
-                        {/* Step Ingaggio Manuale */}
+                        {/* Step Ingaggio Manuale (Visibile solo se IN_PROGRESS) */}
                         {emergency.status === 'IN_PROGRESS' && (
                             <div className="relative">
                                 <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
@@ -145,7 +174,7 @@ const EmergencyDetail = ({ emergencyId = 48 }) => {
                                     <button
                                         onClick={handleManualDispatch}
                                         disabled={!selectedUnit || dispatching}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold disabled:bg-blue-300"
+                                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold disabled:bg-blue-300 transition-colors"
                                     >
                                         {dispatching ? 'Acquisizione Lock in corso...' : 'Conferma Dispaccio'}
                                     </button>
