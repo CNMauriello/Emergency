@@ -1,6 +1,7 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
 
-import org.camunda.bpm.engine.RuntimeService;
+import io.camunda.client.CamundaClient;
+import io.camunda.client.annotation.Deployment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -10,10 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootApplication
+@Deployment(resources = "classpath:Find Capability Provider.bpmn")
 public class EmergencyOrchestratorApplication implements CommandLineRunner {
 
     @Autowired
-    private RuntimeService runtimeService;
+    private CamundaClient camundaClient;
 
     public static void main(String[] args) {
         SpringApplication.run(EmergencyOrchestratorApplication.class, args);
@@ -36,7 +38,12 @@ public class EmergencyOrchestratorApplication implements CommandLineRunner {
 
         try {
             // 3. Avvio del processo tramite l'ID definito nel file Find Capability Provider.bpmn
-            runtimeService.startProcessInstanceByKey("Process_0t95rly", variables);
+                camundaClient.newCreateInstanceCommand()
+                    .bpmnProcessId("Process_0t95rly")
+                    .latestVersion()
+                    .variables(variables)
+                    .send()
+                    .join();
 
             System.out.println("=== Test Avviato con Successo! Controlla i log dei delegate ===");
         } catch (Exception e) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0">
   <bpmn:process id="Process_0t95rly" name="Find Capability Provider" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Start Find Capability Search">
       <bpmn:outgoing>Flow_0aapk5y</bpmn:outgoing>
@@ -15,30 +15,33 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_03lbcuc" sourceRef="Activity_1olkcdo" targetRef="Gateway_0gpny0h" />
     <bpmn:sequenceFlow id="Flow_0wuspa1" name="Capability not available" sourceRef="Gateway_0gpny0h" targetRef="Activity_0x5wpcz">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false and capabilityCandidatesExhausted != true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isCapabilityAvailable = false and capabilityCandidatesExhausted != true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_1klxxze" name="End Capability Search">
       <bpmn:incoming>Flow_15fvnl3</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_15fvnl3" name="Capability Available" sourceRef="Gateway_0gpny0h" targetRef="Event_1klxxze">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isCapabilityAvailable = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_Capability_Exhausted" name="No Capability Available">
       <bpmn:incoming>Flow_Capability_Exhausted</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_Capability_Exhausted" name="No candidates left" sourceRef="Gateway_0gpny0h" targetRef="Event_Capability_Exhausted">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false and capabilityCandidatesExhausted == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isCapabilityAvailable = false and capabilityCandidatesExhausted = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:serviceTask id="Activity_0xyalng" name="Find capability providers" camunda:delegateExpression="${findCapabilityProvidersDelegate}">
+    <bpmn:serviceTask id="Activity_0xyalng" name="Find capability providers">
+      <bpmn:extensionElements><zeebe:taskDefinition type="find-capability-providers" /></bpmn:extensionElements>
       <bpmn:incoming>Flow_0aapk5y</bpmn:incoming>
       <bpmn:outgoing>Flow_0tahtn8</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_0x5wpcz" name="Pop a capability provider" camunda:delegateExpression="${popCapabilityProviderDelegate}">
+    <bpmn:serviceTask id="Activity_0x5wpcz" name="Pop a capability provider">
+      <bpmn:extensionElements><zeebe:taskDefinition type="pop-capability-provider" /></bpmn:extensionElements>
       <bpmn:incoming>Flow_0tahtn8</bpmn:incoming>
       <bpmn:incoming>Flow_0wuspa1</bpmn:incoming>
       <bpmn:outgoing>Flow_0nmjdur</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_1olkcdo" name="Invoke Capability" camunda:delegateExpression="${invokeCapabilityDelegate}">
+    <bpmn:serviceTask id="Activity_1olkcdo" name="Invoke Capability">
+      <bpmn:extensionElements><zeebe:taskDefinition type="invoke-capability" /></bpmn:extensionElements>
       <bpmn:incoming>Flow_0nmjdur</bpmn:incoming>
       <bpmn:outgoing>Flow_03lbcuc</bpmn:outgoing>
     </bpmn:serviceTask>

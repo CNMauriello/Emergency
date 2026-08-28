@@ -9,15 +9,10 @@ spring:
       enabled: true
 
 server:
-  port: 8082
+  port: 8083
 
-camunda.bpm:
-  generic-properties:
-    properties:
-      historyTimeToLive: P30D
-  admin-user:
-    id: admin
-    password: admin
-    firstName: Admin
-  filter:
-    create: All tasks
+camunda:
+  client:
+    mode: self-managed
+    grpc-address: http://localhost:26500
+    rest-address: http://localhost:8080

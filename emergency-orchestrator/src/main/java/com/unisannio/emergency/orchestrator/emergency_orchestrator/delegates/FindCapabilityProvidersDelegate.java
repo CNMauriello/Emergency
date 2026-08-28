@@ -1,7 +1,7 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
+import io.camunda.client.annotation.JobWorker;
+import io.camunda.client.api.response.ActivatedJob;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -13,26 +13,27 @@ import java.util.List;
 import java.util.Map;
 
 @Component("findCapabilityProvidersDelegate")
-public class FindCapabilityProvidersDelegate implements JavaDelegate {
+public class FindCapabilityProvidersDelegate {
 
     private final RestClient restClient;
     
     // FIX 2: Attenzione all'URL se stai eseguendo il run da IntelliJ e non da Docker!
     // Se "binder-service" non è nel file /etc/hosts, usa "localhost" per il test locale.
     // Per la produzione su Docker usa invece:
-    // String binderUrl = "http://binder-service:8080/api/binder/candidates";
-    private final String binderUrl = "http://localhost:8081/api/binder/candidates";
+    // String binderUrl = "http://binder-service:8082/api/binder/candidates";
+    private final String binderUrl = "http://localhost:8082/api/binder/candidates";
 
     public FindCapabilityProvidersDelegate() {
         this.restClient = RestClient.create();
     }
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        String requiredCapability = (String) execution.getVariable("requiredCapability");
+    @JobWorker(type = "find-capability-providers", autoComplete = true)
+    public Map<String, Object> execute(ActivatedJob job) {
+        Map<String, Object> variables = job.getVariablesAsMap();
+        String requiredCapability = (String) variables.get("requiredCapability");
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> event = (Map<String, Object>) execution.getVariable("event");
+        Map<String, Object> event = (Map<String, Object>) variables.get("event");
 
         // FIX 1: Utilizzo di HashMap invece di Map.of() per tollerare valori null
         Map<String, Object> binderRequest = new HashMap<>();
@@ -79,6 +80,6 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
         }
 
         // Memorizziamo la lista ordinata reale all'interno dell'istanza del workflow
-        execution.setVariable("capabilityCandidates", sortedCandidates);
+        return Map.of("capabilityCandidates", sortedCandidates);
     }
 }

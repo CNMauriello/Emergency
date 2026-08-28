@@ -21,7 +21,7 @@ public class BinderService {
     public BinderService(RankingStrategy rankingStrategy) {
         // Costruzione diretta del RestClient
         this.registryClient = RestClient.builder()
-                .baseUrl("http://localhost:8080") // URL del RegistryService
+                .baseUrl("http://localhost:8081") // URL del RegistryService
                 .build();
 
         this.rankingStrategy = rankingStrategy;

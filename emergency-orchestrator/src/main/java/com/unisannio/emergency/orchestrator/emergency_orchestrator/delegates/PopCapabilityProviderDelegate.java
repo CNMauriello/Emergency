@@ -1,31 +1,30 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
+import io.camunda.client.annotation.JobWorker;
+import io.camunda.client.api.response.ActivatedJob;
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
 @Component("popCapabilityProviderDelegate")
-public class PopCapabilityProviderDelegate implements JavaDelegate {
+public class PopCapabilityProviderDelegate {
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        List<Map<String, Object>> candidates = (List<Map<String, Object>>) execution.getVariable("capabilityCandidates");
+    @JobWorker(type = "pop-capability-provider", autoComplete = true)
+    public Map<String, Object> execute(ActivatedJob job) {
+        List<Map<String, Object>> candidates = (List<Map<String, Object>>) job.getVariable("capabilityCandidates");
 
         if (candidates == null || candidates.isEmpty()) {
-            // Esaurimento delle risorse: il fallback intercetterà il false e devierà sulla gestione umana
-            execution.setVariable("isCapabilityAvailable", false);
-            execution.setVariable("capabilityCandidatesExhausted", true);
-            execution.setVariable("currentCandidateEndpoint", null);
+            return Map.of(
+                    "isCapabilityAvailable", false,
+                    "capabilityCandidatesExhausted", true,
+                    "currentCandidateEndpoint", "");
         } else {
-            // Rimuove il primo elemento (il migliore in quel momento)
             Map<String, Object> chosenCandidate = candidates.remove(0);
 
-            // Salva la coda rimanente e l'endpoint da colpire
-            execution.setVariable("capabilityCandidates", candidates);
-            execution.setVariable("capabilityCandidatesExhausted", false);
-            execution.setVariable("currentCandidateEndpoint", chosenCandidate.get("endpoint"));
+            return Map.of(
+                    "capabilityCandidates", candidates,
+                    "capabilityCandidatesExhausted", false,
+                    "currentCandidateEndpoint", chosenCandidate.get("endpoint"));
         }
     }
 }

@@ -1,7 +1,7 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
+import io.camunda.client.annotation.JobWorker;
+import io.camunda.client.api.response.ActivatedJob;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -9,7 +9,7 @@ import org.springframework.web.client.RestClientResponseException;
 import java.util.Map;
 
 @Component("invokeCapabilityDelegate")
-public class InvokeCapabilityDelegate implements JavaDelegate {
+public class InvokeCapabilityDelegate {
 
     private final RestClient restClient;
 
@@ -18,14 +18,15 @@ public class InvokeCapabilityDelegate implements JavaDelegate {
         this.restClient = RestClient.create();
     }
 
-    @Override
-    public void execute(DelegateExecution execution) throws Exception {
-        String endpoint = (String) execution.getVariable("currentCandidateEndpoint");
+    @JobWorker(type = "invoke-capability", autoComplete = true)
+    public Map<String, Object> execute(ActivatedJob job) {
+        Map<String, Object> variables = job.getVariablesAsMap();
+        String endpoint = (String) variables.get("currentCandidateEndpoint");
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> event = (Map<String, Object>) execution.getVariable("event");
+        Map<String, Object> event = (Map<String, Object>) variables.get("event");
 
-        if (endpoint == null) return;
+        if (endpoint == null) return Map.of("isCapabilityAvailable", false);
 
         try {
             // Inoltro della richiesta di ingaggio reale al servizio del territorio
@@ -37,17 +38,19 @@ public class InvokeCapabilityDelegate implements JavaDelegate {
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 // Ingaggio confermato dal servizio
-                execution.setVariable("isCapabilityAvailable", true);
+                return Map.of("isCapabilityAvailable", true);
             }
 
         } catch (RestClientResponseException e) {
             // Il servizio ha risposto con 503 (Unavailable) o 409 (Conflict)
             // L'istanza camunda valuterà false e richiamerà "Pop a capability provider"
-            execution.setVariable("isCapabilityAvailable", false);
+            return Map.of("isCapabilityAvailable", false);
 
         } catch (Exception e) {
             // Errore di timeout o host irraggiungibile. Si passa al prossimo candidato
-            execution.setVariable("isCapabilityAvailable", false);
+            return Map.of("isCapabilityAvailable", false);
         }
+
+        return Map.of("isCapabilityAvailable", false);
     }
 }

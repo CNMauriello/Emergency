@@ -30,6 +30,7 @@
 		<java.version>25</java.version>
 		<maven.compiler.source>25</maven.compiler.source>
 		<maven.compiler.target>25</maven.compiler.target>
+		<camunda.version>8.9.12</camunda.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -68,13 +69,14 @@
 			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 
-		<!-- Webapp Camunda (Cockpit, Tasklist, Admin) -->
+		<!--  Camunda 8 -->
 		<dependency>
-			<groupId>org.camunda.bpm.springboot</groupId>
-			<artifactId>camunda-bpm-spring-boot-starter-webapp</artifactId>
-			<version>7.21.0</version>
+    		<groupId>io.camunda</groupId>
+    		<artifactId>camunda-spring-boot-starter</artifactId>
+    		<version>${camunda.version}</version>
 		</dependency>
 
+		
 		<!-- Database H2 per test in memoria (sostituibile con mysql-connector-j in produzione) -->
 		<dependency>
 			<groupId>com.h2database</groupId>
