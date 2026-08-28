@@ -48,19 +48,32 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
         try {
 
 
-            List<Map<String, Object>> response = restClient.post()
+            System.out.println("[FindCapabilityProviders] POST " + binderUrl);
+            System.out.println("[FindCapabilityProviders] Request: " + binderRequest);
+
+            List<String> response = restClient.post()
                     .uri(binderUrl)
                     .body(binderRequest)
                     .retrieve()
-                    .body(new ParameterizedTypeReference<List<Map<String, Object>>>() {});
+                    .body(new ParameterizedTypeReference<List<String>>() {});
+
+            System.out.println("[FindCapabilityProviders] Binder response: " + response);
 
             if (response != null) {
-                sortedCandidates = response;
+                for (String endpoint : response) {
+                    Map<String, Object> candidate = new HashMap<>();
+                    candidate.put("endpoint", endpoint);
+                    sortedCandidates.add(candidate);
+                }
             }
+
+            System.out.println("[FindCapabilityProviders] Workflow candidates: " + sortedCandidates);
 
         } catch (RestClientException e) {
             // FIX 3: Gestione dell'eccezione HTTP
             System.err.println("Errore di comunicazione con il Binder Service: " + e.getMessage());
+            System.err.println("[FindCapabilityProviders] Request that failed: " + binderRequest);
+            e.printStackTrace();
             // In caso di errore, sortedCandidates resta vuoto, permettendo al processo
             // di passare al ramo di fallback (isCapabilityAvailable = false) senza andare in crash.
         }

@@ -32,7 +32,7 @@ public class EmergencyOrchestratorApplication implements CommandLineRunner {
         // 2. Prepariamo le variabili di processo
         Map<String, Object> variables = new HashMap<>();
         variables.put("event", event);
-        variables.put("requiredCapability", "ACCIDENT_RESPONSE");
+        variables.put("requiredCapability", "Ambulance");
 
         try {
             // 3. Avvio del processo tramite l'ID definito nel file Find Capability Provider.bpmn
