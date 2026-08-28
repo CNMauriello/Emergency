@@ -7,6 +7,7 @@ export default function ServicesTable({
   loading,
   error,
   onRefresh,
+  compactMode,
 }) {
   const [editingService, setEditingService] = useState(null)
   const [expandedService, setExpandedService] = useState(null)
@@ -103,50 +104,60 @@ export default function ServicesTable({
 
   return (
     <>
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 rounded-t-lg">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <i className="fas fa-network-wired text-gray-500"></i>
+      <div className="flex-1 bg-white border border-gray-200 rounded shadow-sm flex flex-col h-fit">
+        <div className="px-6 py-4 flex justify-between items-center">
+          <h2 className="text-[15px] font-semibold text-[#0B1B32] flex items-center gap-3">
+            <i className="fas fa-project-diagram text-gray-400"></i>
             Registered Endpoints
           </h2>
 
-          <button
-            onClick={onRefresh}
-            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-          >
-            <i className="fas fa-sync-alt"></i> Aggiorna
-          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onRefresh}
+              className="text-gray-400 hover:text-[#0B1B32] transition-colors"
+              title="Aggiorna"
+            >
+              <i className="fas fa-sync-alt"></i>
+            </button>
+            <span className="bg-[#e2e8f0] text-[#0B1B32] text-xs font-bold px-3 py-1 rounded-full">
+              Total: {services.length}
+            </span>
+          </div>
         </div>
 
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 text-gray-500 text-xs uppercase">
-              <th className="p-4 border-b font-medium">
+            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-y border-gray-200 bg-white">
+              <th className="px-6 py-4 font-bold">
                 ID
               </th>
 
-              <th className="p-4 border-b font-medium">
-                Endpoint
+              <th className="px-6 py-4 font-bold">
+                ENDPOINT
               </th>
 
-              <th className="p-4 border-b font-medium">
-                Category
+              <th className="px-6 py-4 font-bold">
+                CATEGORY
               </th>
 
-              <th className="p-4 border-b font-medium">
-                Status
+              <th className="px-6 py-4 font-bold">
+                STATUS
               </th>
 
-              <th className="p-4 border-b font-medium">
-                Latency
-              </th>
+              {!compactMode && (
+                <>
+                  <th className="px-6 py-4 font-bold">
+                    LATENCY
+                  </th>
 
-              <th className="p-4 border-b font-medium">
-                Load
-              </th>
+                  <th className="px-6 py-4 font-bold">
+                    LOAD
+                  </th>
+                </>
+              )}
 
-              <th className="p-4 border-b font-medium text-right">
-                Actions
+              <th className="px-6 py-4 font-bold text-right">
+                ACTIONS
               </th>
             </tr>
           </thead>
@@ -156,7 +167,7 @@ export default function ServicesTable({
             {loading && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={compactMode ? 5 : 7}
                   className="p-4 text-center text-gray-500"
                 >
                   Caricamento servizi in corso...
@@ -168,7 +179,7 @@ export default function ServicesTable({
             {!loading && error && (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={compactMode ? 5 : 7}
                   className="p-4 text-center text-red-500 bg-red-50"
                 >
                   <i className="fas fa-exclamation-triangle mr-2"></i>
@@ -185,7 +196,7 @@ export default function ServicesTable({
               services.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={compactMode ? 5 : 7}
                     className="p-4 text-center text-gray-500"
                   >
                     Nessun servizio registrato.
@@ -215,56 +226,56 @@ export default function ServicesTable({
                       }`}
                     >
                       {/* ID */}
-                      <td className="p-4 text-sm font-medium text-gray-500">
+                      <td className="px-6 py-5 text-[13px] font-mono text-gray-500">
                         {s.id}
                       </td>
 
                       {/* ENDPOINT */}
-                      <td className="p-4 text-sm font-semibold">
+                      <td className="px-6 py-5 text-[13px] font-bold text-[#0B1B32] max-w-[200px] leading-tight break-all">
                         {s.endpoint}
                       </td>
 
                       {/* CATEGORY */}
-                      <td className="p-4">
+                      <td className="px-6 py-5">
                         <CategoryBadge category={s.type} />
                       </td>
 
                       {/* STATUS */}
-                      <td className="p-4">
+                      <td className="px-6 py-5">
                         <StatusBadge status={s.status} />
                       </td>
 
-                      {/* LATENCY */}
-                      <td className="p-4 text-sm">
-                        <span className="font-medium text-gray-700">
-                          {s.avgLatency}
-                        </span>
-
-                        <span className="text-gray-400 ml-1">
-                          ms
-                        </span>
-                      </td>
-
-                      {/* LOAD */}
-                      <td className="p-4 text-sm">
-                        <span className="font-medium text-gray-700">
-                          {s.currentLoad}
-                        </span>
-
-                        <span className="text-gray-400 ml-1">
-                          %
-                        </span>
-                      </td>
+                      {/* COMPACT MODE OFF (LATENCY/LOAD) */}
+                      {!compactMode && (
+                        <>
+                          <td className="px-6 py-5 text-sm">
+                            <span className="font-bold text-[#0B1B32]">
+                              {s.avgLatency}
+                            </span>
+                            <span className="text-gray-400 ml-1">
+                              ms
+                            </span>
+                          </td>
+                          <td className="px-6 py-5 text-sm">
+                            <span className="font-bold text-[#0B1B32]">
+                              {s.currentLoad}
+                            </span>
+                            <span className="text-gray-400 ml-1">
+                              %
+                            </span>
+                          </td>
+                        </>
+                      )}
 
                       {/* ACTIONS */}
                       <td
-                        className="p-4 text-right space-x-2 text-gray-400"
+                        className="px-6 py-5 text-right space-x-4 text-gray-500 text-sm"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {/* EDIT */}
                         <button
                           onClick={() => handleEdit(s)}
-                          className="hover:text-blue-600"
+                          className="hover:text-[#0B1B32] transition-colors"
                           title="Modifica servizio"
                         >
                           <i className="fas fa-pen"></i>
@@ -273,7 +284,7 @@ export default function ServicesTable({
                         {/* DELETE */}
                         <button
                           onClick={() => handleDelete(s.id)}
-                          className="hover:text-red-600"
+                          className="hover:text-red-600 transition-colors"
                           title="Elimina servizio"
                         >
                           <i className="fas fa-trash"></i>
@@ -287,7 +298,7 @@ export default function ServicesTable({
                     {isExpanded && (
                       <tr key={`${s.id}-details`}>
                         <td
-                          colSpan={7}
+                          colSpan={compactMode ? 5 : 7}
                           className="bg-blue-50 border-b border-blue-100"
                         >
                           <div className="p-5">
@@ -306,9 +317,9 @@ export default function ServicesTable({
                                   Average Latency
                                 </p>
 
-                                <p className="text-xl font-semibold text-gray-800">
+                                <p className={`${compactMode ? 'text-base' : 'text-xl'} font-semibold text-gray-800 truncate`} title={`${s.avgLatency} ms`}>
                                   {s.avgLatency}
-                                  <span className="text-sm text-gray-400 ml-1">
+                                  <span className={`${compactMode ? 'text-xs' : 'text-sm'} text-gray-400 ml-1`}>
                                     ms
                                   </span>
                                 </p>
@@ -320,59 +331,52 @@ export default function ServicesTable({
                                   Current Load
                                 </p>
 
-                                <p className="text-xl font-semibold text-gray-800">
+                                <p className={`${compactMode ? 'text-base' : 'text-xl'} font-semibold text-gray-800 truncate`} title={`${s.currentLoad} %`}>
                                   {s.currentLoad}
-                                  <span className="text-sm text-gray-400 ml-1">
+                                  <span className={`${compactMode ? 'text-xs' : 'text-sm'} text-gray-400 ml-1`}>
                                     %
                                   </span>
                                 </p>
                               </div>
 
-                              {/* CAPABILITIES */}
+                              {/* POSIZIONE */}
                               <div className="bg-white border border-gray-200 rounded-lg p-4">
-                                <p className="text-xs text-gray-500 uppercase mb-2">
-                                  Capabilities offerte
+                                <p className="text-xs text-gray-500 uppercase mb-1">
+                                  Posizione
                                 </p>
 
-                                {s.capabilities &&
-                                s.capabilities.length > 0 ? (
-                                  <div className="flex flex-wrap gap-2">
-                                    {s.capabilities.map(
-                                      (capability) => (
-                                        <span
-                                          key={capability}
-                                          className="inline-flex items-center bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-medium"
-                                        >
-                                          {capability}
-                                        </span>
-                                      )
-                                    )}
-                                  </div>
-                                ) : (
-                                  <p className="text-sm text-gray-400">
-                                    Nessuna capability
-                                  </p>
-                                )}
+                                <div className={`${compactMode ? 'text-sm' : 'text-xl'} font-semibold text-gray-800 flex flex-col gap-1 break-all`}>
+                                  <div><span className="text-xs text-gray-500 font-normal">Lat:</span> {s.latitude}</div>
+                                  <div><span className="text-xs text-gray-500 font-normal">Lon:</span> {s.longitude}</div>
+                                </div>
                               </div>
                             </div>
 
-                            {/* POSIZIONE */}
+                            {/* CAPABILITIES */}
                             <div className="mt-4 bg-white border border-gray-200 rounded-lg p-4">
-                              <p className="text-xs text-gray-500 uppercase mb-2">
-                                Posizione
+                              <p className="text-xs text-gray-500 uppercase mb-3">
+                                Capabilities offerte
                               </p>
 
-                              <div className="flex gap-6 text-sm text-gray-700">
-                                <span>
-                                  <strong>Lat:</strong>{' '}
-                                  {s.latitude}
-                                </span>
-
-                                <span>
-                                  <strong>Lon:</strong>{' '}
-                                  {s.longitude}
-                                </span>
-                              </div>
+                              {s.capabilities &&
+                              s.capabilities.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {s.capabilities.map(
+                                    (capability) => (
+                                      <span
+                                        key={capability}
+                                        className="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1.5 rounded text-[11px] font-bold tracking-wider"
+                                      >
+                                        {capability}
+                                      </span>
+                                    )
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-sm text-gray-400">
+                                  Nessuna capability
+                                </p>
+                              )}
                             </div>
                           </div>
                         </td>
