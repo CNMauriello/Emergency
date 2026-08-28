@@ -10,7 +10,7 @@ const INITIAL_FORM = {
   capabilities: [],
 }
 
-export default function ServiceForm({ onServiceRegistered }) {
+export default function ServiceForm({ onServiceRegistered, onClose }) {
   const [form, setForm] = useState(INITIAL_FORM)
   const [capabilities, setCapabilities] = useState([])
   const [loadingCapabilities, setLoadingCapabilities] = useState(true)
@@ -146,275 +146,232 @@ export default function ServiceForm({ onServiceRegistered }) {
       : `${form.capabilities.length} capability selezionate`
 
   return (
-    <div className="w-1/3 bg-white border border-gray-200 rounded-lg shadow-sm h-fit">
+    <div className="w-full bg-white border border-gray-200 rounded shadow-sm h-fit">
       
       {/* HEADER */}
-      <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg flex justify-between items-center">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
+      <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="text-[14px] font-semibold text-[#0B1B32] flex items-center gap-2">
           <i className="fas fa-sliders-h text-gray-500"></i>
           Configurazione Servizio
         </h2>
 
-        <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded">
-          MODO: NEW
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">
+            MODO: NEW
+          </span>
+          {onClose && (
+            <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
+              <i className="fas fa-times"></i>
+            </button>
+          )}
+        </div>
       </div>
 
       <form
         onSubmit={handleSubmit}
         className="p-4 space-y-4"
       >
-
-        {/* =========================
-            TIPO + STATO
-        ========================= */}
+        {/* ROW 1: Tipo Servizio + Stato Operativo */}
         <div className="flex gap-4">
-
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
               Tipo Servizio
             </label>
-
-            <select
-              value={form.type}
-              onChange={handleChange('type')}
-              className="w-full border border-gray-300 rounded p-2 text-sm"
-              required
-            >
-              <option value="FIRE_STATION">
-                FIRE_STATION
-              </option>
-
-              <option value="HOSPITAL">
-                HOSPITAL
-              </option>
-
-              <option value="POLICE">
-                POLICE
-              </option>
-            </select>
+            <div className="relative">
+              <select
+                value={form.type}
+                onChange={handleChange('type')}
+                className="w-full bg-white border border-gray-300 rounded p-2 text-[13px] appearance-none outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800"
+                required
+              >
+                <option value="FIRE_STATION">FIRE_STATION</option>
+                <option value="HOSPITAL">HOSPITAL</option>
+                <option value="POLICE">POLICE</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-2.5 top-2.5 text-gray-500 text-[10px] pointer-events-none"></i>
+            </div>
           </div>
 
           <div className="flex-1">
-            <label className="block text-xs font-medium text-gray-500 mb-1">
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">
               Stato Operativo
             </label>
-
-            <select
-              value={form.status}
-              onChange={handleChange('status')}
-              className="w-full border border-gray-300 rounded p-2 text-sm"
-              required
-            >
-              <option value="UP">
-                UP (Active)
-              </option>
-
-              <option value="DOWN">
-                DOWN (Offline)
-              </option>
-
-              <option value="DEGRADED">
-                DEGRADED (Degraded)
-              </option>
-            </select>
+            <div className="relative">
+              <select
+                value={form.status}
+                onChange={handleChange('status')}
+                className="w-full bg-white border border-gray-300 rounded p-2 text-[13px] appearance-none outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800"
+                required
+              >
+                <option value="UP">UP (Active)</option>
+                <option value="DOWN">DOWN (Offline)</option>
+                <option value="DEGRADED">DEGRADED (Degraded)</option>
+              </select>
+              <i className="fas fa-chevron-down absolute right-2.5 top-2.5 text-gray-500 text-[10px] pointer-events-none"></i>
+            </div>
           </div>
-
         </div>
 
-        {/* =========================
-            ENDPOINT
-        ========================= */}
+        {/* ROW 2: REST Endpoint URL */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-[11px] font-medium text-gray-600 mb-1">
             REST Endpoint URL
           </label>
-
           <input
             type="url"
             value={form.endpoint}
             onChange={handleChange('endpoint')}
             placeholder="es. http://caserma-01.local/engage"
-            className="w-full border border-gray-300 rounded p-2 text-sm"
+            className="w-full bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
             required
           />
         </div>
 
-        {/* =========================
-            POSIZIONE
-        ========================= */}
+        {/* ROW 3: Posizione Geografica */}
         <div>
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+          <label className="block text-[11px] font-medium text-gray-600 mb-1">
             Posizione Geografica
           </label>
-
           <div className="flex gap-4">
-
             <input
               type="number"
               step="any"
               value={form.latitude}
               onChange={handleChange('latitude')}
               placeholder="Latitudine"
-              className="w-full border border-gray-300 rounded p-2 text-sm"
+              className="flex-1 bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
               required
             />
-
             <input
               type="number"
               step="any"
               value={form.longitude}
               onChange={handleChange('longitude')}
               placeholder="Longitudine"
-              className="w-full border border-gray-300 rounded p-2 text-sm"
+              className="flex-1 bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
               required
             />
-
           </div>
+          
+          {/* MAP DISPLAY */}
+          {(() => {
+            const lat = parseFloat(form.latitude);
+            const lon = parseFloat(form.longitude);
+            const isValidCoordinates = !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 
-          <div className="mt-2 w-full h-24 bg-blue-50 border border-blue-100 rounded flex items-center justify-center text-blue-300">
-            <i className="fas fa-map-marker-alt text-2xl"></i>
-          </div>
+            if (isValidCoordinates) {
+              return (
+                <a 
+                  href={`https://www.google.com/maps?q=${lat},${lon}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1.5 block w-full h-40 bg-gray-100 rounded overflow-hidden shadow-inner border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer relative"
+                  title="Apri su Google Maps"
+                >
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    frameBorder="0" 
+                    scrolling="no" 
+                    marginHeight="0" 
+                    marginWidth="0" 
+                    className="pointer-events-none"
+                    src={`https://maps.google.com/maps?q=${lat},${lon}&z=14&output=embed`}
+                    title="Mappa Posizione"
+                  ></iframe>
+                  <div className="absolute inset-0"></div>
+                </a>
+              );
+            }
+
+            return (
+              <div className="mt-1.5 w-full h-20 bg-[#f2f7fd] border border-blue-100 rounded flex flex-col items-center justify-center relative overflow-hidden">
+                <i className="fas fa-map-marker-alt text-xl text-[#8eb6f8]"></i>
+                <button
+                  type="button"
+                  className="absolute bottom-2 right-2 bg-white text-[9px] font-bold px-2 py-1.5 rounded shadow-sm text-gray-700 tracking-wider hover:bg-gray-50"
+                >
+                  EXPAND MAP
+                </button>
+              </div>
+            );
+          })()}
         </div>
 
-        {/* =========================
-            CAPABILITY DROPDOWN
-        ========================= */}
-        <div className="relative">
-
-          <label className="block text-xs font-medium text-gray-500 mb-1">
+        {/* ROW 4: Capability Offerte */}
+        <div>
+          <label className="block text-[11px] font-medium text-gray-600 mb-1">
             Capability Offerte
           </label>
 
           {loadingCapabilities ? (
-            <div className="w-full border border-gray-300 rounded p-2 text-sm text-gray-400">
+            <div className="text-sm text-gray-400">
               Caricamento capability...
             </div>
           ) : capabilityError ? (
-            <div className="w-full border border-red-300 bg-red-50 rounded p-2 text-sm text-red-500">
-              Errore nel caricamento delle capability.
+            <div className="text-sm text-red-500">
+              Errore.
             </div>
           ) : (
-            <>
-              {/* CAMPO DROPDOWN */}
+            <div className="relative">
               <button
                 type="button"
-                onClick={() =>
-                  setShowCapabilities((prev) => !prev)
-                }
-                className="w-full border border-gray-300 rounded p-2 text-sm bg-white text-left flex items-center justify-between hover:border-blue-400"
+                onClick={() => setShowCapabilities((prev) => !prev)}
+                className="w-full bg-white border border-gray-300 rounded p-2 text-[13px] flex items-center justify-between text-gray-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               >
-                <span
-                  className={
-                    form.capabilities.length === 0
-                      ? 'text-gray-400'
-                      : 'text-gray-800'
-                  }
-                >
+                <span className={form.capabilities.length === 0 ? 'text-gray-400' : 'text-gray-800'}>
                   {capabilityLabel}
                 </span>
-
-                <i
-                  className={`fas ${
-                    showCapabilities
-                      ? 'fa-chevron-up'
-                      : 'fa-chevron-down'
-                  } text-gray-400`}
-                ></i>
+                <i className={`fas ${showCapabilities ? 'fa-chevron-up' : 'fa-chevron-down'} text-gray-500 text-[10px]`}></i>
               </button>
 
-              {/* MENU */}
               {showCapabilities && (
-                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto">
-
+                <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
                   {capabilities.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
                       Nessuna capability disponibile.
                     </div>
                   ) : (
-                    capabilities.map((capability) => {
-
-                      const selected =
-                        form.capabilities.includes(
-                          capability.name
+                    <div className="p-2 space-y-1">
+                      {capabilities.map((cap) => {
+                        const isSelected = form.capabilities.includes(cap.name)
+                        return (
+                          <label
+                            key={cap.name}
+                            className={`flex items-center gap-2 p-1.5 rounded cursor-pointer transition-colors ${
+                              isSelected
+                                ? 'bg-blue-50'
+                                : 'hover:bg-gray-50'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                              checked={isSelected}
+                              onChange={() => toggleCapability(cap.name)}
+                            />
+                            <span className="text-[13px] text-gray-700 truncate">
+                              {cap.name}
+                            </span>
+                          </label>
                         )
-
-                      return (
-                        <button
-                          type="button"
-                          key={capability.name}
-                          onClick={() =>
-                            toggleCapability(
-                              capability.name
-                            )
-                          }
-                          className={`w-full px-3 py-2 text-sm text-left flex items-center justify-between hover:bg-blue-50 ${
-                            selected
-                              ? 'bg-blue-50 text-blue-700'
-                              : 'text-gray-700'
-                          }`}
-                        >
-                          <span>
-                            {capability.name}
-                          </span>
-
-                          {selected && (
-                            <i className="fas fa-check text-blue-600"></i>
-                          )}
-                        </button>
-                      )
-                    })
+                      })}
+                    </div>
                   )}
-
                 </div>
               )}
-
-              {/* CAPABILITY SELEZIONATE */}
-              {form.capabilities.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-
-                  {form.capabilities.map((capability) => (
-                    <span
-                      key={capability}
-                      className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs"
-                    >
-                      {capability}
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleCapability(capability)
-                        }
-                        className="text-blue-500 hover:text-red-500"
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </span>
-                  ))}
-
-                </div>
-              )}
-            </>
+            </div>
           )}
         </div>
 
-        {/* =========================
-            SUBMIT
-        ========================= */}
+        {/* SUBMIT BUTTON */}
         <button
           type="submit"
-          disabled={
-            submitting ||
-            loadingCapabilities ||
-            capabilityError
-          }
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded transition shadow-sm disabled:opacity-50"
+          disabled={submitting || loadingCapabilities || capabilityError}
+          className="w-full bg-[#0B1B32] hover:bg-slate-800 text-white font-medium py-2.5 rounded transition disabled:opacity-50 text-[14px]"
         >
-          {submitting
-            ? 'Registrazione in corso...'
-            : 'Registra Servizio'}
+          {submitting ? 'Registrazione...' : 'Registra Servizio'}
         </button>
-
       </form>
     </div>
   )
