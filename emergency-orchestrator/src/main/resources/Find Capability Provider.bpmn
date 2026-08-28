@@ -11,16 +11,23 @@
       <bpmn:incoming>Flow_03lbcuc</bpmn:incoming>
       <bpmn:outgoing>Flow_0wuspa1</bpmn:outgoing>
       <bpmn:outgoing>Flow_15fvnl3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Capability_Exhausted</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_03lbcuc" sourceRef="Activity_1olkcdo" targetRef="Gateway_0gpny0h" />
     <bpmn:sequenceFlow id="Flow_0wuspa1" name="Capability not available" sourceRef="Gateway_0gpny0h" targetRef="Activity_0x5wpcz">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false and capabilityCandidatesExhausted != true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_1klxxze" name="End Capability Search">
       <bpmn:incoming>Flow_15fvnl3</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_15fvnl3" name="Capability Available" sourceRef="Gateway_0gpny0h" targetRef="Event_1klxxze">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == true}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_Capability_Exhausted" name="No Capability Available">
+      <bpmn:incoming>Flow_Capability_Exhausted</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Capability_Exhausted" name="No candidates left" sourceRef="Gateway_0gpny0h" targetRef="Event_Capability_Exhausted">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isCapabilityAvailable == false and capabilityCandidatesExhausted == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:serviceTask id="Activity_0xyalng" name="Find capability providers" camunda:delegateExpression="${findCapabilityProvidersDelegate}">
       <bpmn:incoming>Flow_0aapk5y</bpmn:incoming>

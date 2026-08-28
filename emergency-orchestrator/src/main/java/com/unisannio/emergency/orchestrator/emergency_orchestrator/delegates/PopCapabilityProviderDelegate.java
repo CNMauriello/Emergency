@@ -16,6 +16,7 @@ public class PopCapabilityProviderDelegate implements JavaDelegate {
         if (candidates == null || candidates.isEmpty()) {
             // Esaurimento delle risorse: il fallback intercetterà il false e devierà sulla gestione umana
             execution.setVariable("isCapabilityAvailable", false);
+            execution.setVariable("capabilityCandidatesExhausted", true);
             execution.setVariable("currentCandidateEndpoint", null);
         } else {
             // Rimuove il primo elemento (il migliore in quel momento)
@@ -23,6 +24,7 @@ public class PopCapabilityProviderDelegate implements JavaDelegate {
 
             // Salva la coda rimanente e l'endpoint da colpire
             execution.setVariable("capabilityCandidates", candidates);
+            execution.setVariable("capabilityCandidatesExhausted", false);
             execution.setVariable("currentCandidateEndpoint", chosenCandidate.get("endpoint"));
         }
     }

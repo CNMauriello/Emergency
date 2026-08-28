@@ -16,6 +16,12 @@ import java.util.Map;
 public class FindCapabilityProvidersDelegate implements JavaDelegate {
 
     private final RestClient restClient;
+    
+    // FIX 2: Attenzione all'URL se stai eseguendo il run da IntelliJ e non da Docker!
+    // Se "binder-service" non è nel file /etc/hosts, usa "localhost" per il test locale.
+    // Per la produzione su Docker usa invece:
+    // String binderUrl = "http://binder-service:8080/api/binder/candidates";
+    private final String binderUrl = "http://localhost:8081/api/binder/candidates";
 
     public FindCapabilityProvidersDelegate() {
         this.restClient = RestClient.create();
@@ -40,12 +46,7 @@ public class FindCapabilityProvidersDelegate implements JavaDelegate {
         List<Map<String, Object>> sortedCandidates = new ArrayList<>();
 
         try {
-            // FIX 2: Attenzione all'URL se stai eseguendo il run da IntelliJ e non da Docker!
-            // Se "binder-service" non è nel file /etc/hosts, usa "localhost" per il test locale.
-            String binderUrl = "http://localhost:8081/api/binder/candidates";
 
-            // Per la produzione su Docker usa invece:
-            // String binderUrl = "http://binder-service:8080/api/binder/candidates";
 
             List<Map<String, Object>> response = restClient.post()
                     .uri(binderUrl)
