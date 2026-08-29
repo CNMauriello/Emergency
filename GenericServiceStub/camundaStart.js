@@ -8,9 +8,9 @@ const payload = {
   emergency_category: "FIRE",
   severity: "HIGH",
   incident_context: {
-    has_injured: true,
+    has_injured: false,
     has_unconscious: false,
-    has_trapped: false,
+    has_trapped: true,
     has_special_vehicle_involved: false,
   },
   coordinates: {
