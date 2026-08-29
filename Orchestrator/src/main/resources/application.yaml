@@ -16,3 +16,8 @@ camunda:
     mode: self-managed
     grpc-address: http://localhost:26500
     rest-address: http://localhost:8080
+
+logging:
+  level:
+    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
