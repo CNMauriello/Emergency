@@ -39,9 +39,10 @@
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="End_Emergency_Response" name="Emergency Response Completed">
       <bpmn:incoming>Flow_1l5tvwy</bpmn:incoming>
-      <bpmn:incoming>Flow_1jpogrh</bpmn:incoming>
       <bpmn:incoming>Flow_1hmjz6t</bpmn:incoming>
       <bpmn:incoming>Flow_1ehizdk</bpmn:incoming>
+      <bpmn:incoming>Flow_1mnkpqa</bpmn:incoming>
+      <bpmn:incoming>Flow_1m9xjr1</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_Start_Analysis" sourceRef="Start_Emergency_Report" targetRef="Task_Event_Analysis" />
     <bpmn:sequenceFlow id="Flow_Analysis_Capability" sourceRef="Task_Event_Analysis" targetRef="Gateway_Plan_Selection" />
@@ -79,7 +80,7 @@
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_trapper_people</bpmn:incoming>
-      <bpmn:outgoing>Flow_1jpogrh</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0guodik</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_0cfauu3" name="Injured Peple" sourceRef="Gateway_Emergency_Context" targetRef="Gateway_1g5fgct">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured</bpmn:conditionExpression>
@@ -145,8 +146,35 @@ or emergency_plan = "FIRE_CRITICAL"
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_055sexm" sourceRef="Gateway_1n38nz2" targetRef="Gateway_Emergency_Context" />
     <bpmn:sequenceFlow id="Flow_1l5tvwy" sourceRef="Call_Flood_Response" targetRef="End_Emergency_Response" />
-    <bpmn:sequenceFlow id="Flow_1jpogrh" sourceRef="Task_Request_Evacuation" targetRef="End_Emergency_Response" />
     <bpmn:sequenceFlow id="Flow_1hmjz6t" sourceRef="Gateway_1xp32nv" targetRef="End_Emergency_Response" />
+    <bpmn:serviceTask id="Activity_1cv18w6" name="Check If People Fully Evacuated">
+      <bpmn:incoming>Flow_0i2g68c</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wart89</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_1k5cnqn" name="People Fully Evacuated?">
+      <bpmn:incoming>Flow_0wart89</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ib6a25</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1mnkpqa</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:serviceTask id="Activity_0tls8ar" name="Alert Firefighters for trapped people">
+      <bpmn:incoming>Flow_0ib6a25</bpmn:incoming>
+      <bpmn:outgoing>Flow_1m9xjr1</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:intermediateCatchEvent id="Event_1mjfqd7" name="Wait 15 Minutes">
+      <bpmn:incoming>Flow_0guodik</bpmn:incoming>
+      <bpmn:outgoing>Flow_0i2g68c</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0hh6pdj">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_0i2g68c" sourceRef="Event_1mjfqd7" targetRef="Activity_1cv18w6" />
+    <bpmn:sequenceFlow id="Flow_0wart89" sourceRef="Activity_1cv18w6" targetRef="Gateway_1k5cnqn" />
+    <bpmn:sequenceFlow id="Flow_0ib6a25" name="Not Fully Evacuated" sourceRef="Gateway_1k5cnqn" targetRef="Activity_0tls8ar">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${flowProgress.peopleEvacuated == false}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0guodik" sourceRef="Task_Request_Evacuation" targetRef="Event_1mjfqd7" />
+    <bpmn:sequenceFlow id="Flow_1mnkpqa" sourceRef="Gateway_1k5cnqn" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_1m9xjr1" sourceRef="Activity_0tls8ar" targetRef="End_Emergency_Response" />
     <bpmn:textAnnotation id="TextAnnotation_145kkxq">
       <bpmn:text>Qua questo è un esempio ma puoi togliere il gateway parallelo e far partire un TASK/Delegate che chiama il gestore workflow, scarica il BPMN adatto (siamo già su una condiziona valutata) e lo carica via codice su camunda</bpmn:text>
     </bpmn:textAnnotation>
@@ -165,13 +193,12 @@ Prima passavo come input mapping anche latitudine e longitudine leggendole dal J
     </bpmn:textAnnotation>
     <bpmn:association id="Association_1ir5umd" associationDirection="None" sourceRef="Call_ALS_Ambulance" targetRef="TextAnnotation_1j63ipv" />
     <bpmn:textAnnotation id="TextAnnotation_1skfl33">
-      <bpmn:text>Bisogna avvisare il gestore emergenze tramite task che l'emergenza è terminata oppure andando a sfrecliare l'api/metadati di camunda</bpmn:text>
+      <bpmn:text>Bisogna avvisare il gestore emergenze tramite task che l'emergenza è terminata oppure andando a sprecficare l'api/metadati di camunda</bpmn:text>
     </bpmn:textAnnotation>
     <bpmn:association id="Association_1dhh0x2" associationDirection="None" sourceRef="End_Emergency_Response" targetRef="TextAnnotation_1skfl33" />
     <bpmn:textAnnotation id="TextAnnotation_0f3s0bi">
       <bpmn:text>Qua bisogna implementare un task di risposta. Uno stub che risponde sempre OK e camunda attende la risposta per poi andare avanti</bpmn:text>
     </bpmn:textAnnotation>
-    <bpmn:association id="Association_0y2k7uq" associationDirection="None" sourceRef="Flow_1jpogrh" targetRef="TextAnnotation_0f3s0bi" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_Emergency">
     <bpmndi:BPMNPlane id="BPMNPlane_Emergency" bpmnElement="Emergency_Response_Plan_Orchestrator">
@@ -234,34 +261,65 @@ Prima passavo come input mapping anche latitudine e longitudine leggendole dal J
       <bpmndi:BPMNShape id="BPMNShape_1lg5rgu" bpmnElement="Call_BLS_Ambulance">
         <dc:Bounds x="1945" y="430" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Association_1dhh0x2_di" bpmnElement="Association_1dhh0x2">
-        <di:waypoint x="2628" y="629" />
-        <di:waypoint x="2905" y="642" />
+      <bpmndi:BPMNShape id="Activity_12o105k_di" bpmnElement="Activity_1cv18w6">
+        <dc:Bounds x="2020" y="828" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1k5cnqn_di" bpmnElement="Gateway_1k5cnqn" isMarkerVisible="true">
+        <dc:Bounds x="2245" y="843" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2239.5" y="796.5" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1txklhf_di" bpmnElement="Activity_0tls8ar">
+        <dc:Bounds x="2220" y="950" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_17jpxis_di" bpmnElement="Event_1mjfqd7">
+        <dc:Bounds x="1822" y="850" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1801" y="893" width="79" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_1v3h2ml_di" bpmnElement="Association_1v3h2ml">
+        <di:waypoint x="1432" y="635" />
+        <di:waypoint x="1327" y="680" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0y2k7uq_di" bpmnElement="Association_0y2k7uq">
-        <di:waypoint x="2226" y="869" />
-        <di:waypoint x="2120" y="837" />
+      <bpmndi:BPMNEdge id="Association_1vcfbwk_di" bpmnElement="Association_1vcfbwk">
+        <di:waypoint x="734" y="619" />
+        <di:waypoint x="627" y="562" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Association_1ir5umd_di" bpmnElement="Association_1ir5umd">
         <di:waypoint x="2010" y="220" />
         <di:waypoint x="1986" y="123" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0za0txh_di" bpmnElement="Association_0za0txh">
+        <di:waypoint x="903" y="468" />
+        <di:waypoint x="771" y="366" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_1dhh0x2_di" bpmnElement="Association_1dhh0x2">
+        <di:waypoint x="2625" y="618" />
+        <di:waypoint x="2760" y="530" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="TextAnnotation_145kkxq_di" bpmnElement="TextAnnotation_145kkxq">
         <dc:Bounds x="300" y="490" width="339" height="72" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_0m6rs9a_di" bpmnElement="TextAnnotation_0m6rs9a">
-        <dc:Bounds x="650" y="130" width="639" height="86" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_1o7zaug_di" bpmnElement="TextAnnotation_1o7zaug">
         <dc:Bounds x="1230" y="680" width="105" height="100" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1skfl33_di" bpmnElement="TextAnnotation_1skfl33">
-        <dc:Bounds x="2750" y="711" width="310" height="57" />
+      <bpmndi:BPMNShape id="TextAnnotation_1j63ipv_di" bpmnElement="TextAnnotation_1j63ipv">
+        <dc:Bounds x="1930" y="80" width="280" height="43" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Analysis_di" bpmnElement="Flow_Start_Analysis">
+        <di:waypoint x="196" y="868" />
+        <di:waypoint x="330" y="868" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Analysis_Capability_di" bpmnElement="Flow_Analysis_Capability">
+        <di:waypoint x="450" y="868" />
+        <di:waypoint x="580" y="868" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Flood_Plan_di" bpmnElement="Flow_Flood_Plan">
         <di:waypoint x="605" y="893" />
         <di:waypoint x="605" y="1090" />
@@ -270,13 +328,22 @@ Prima passavo come input mapping anche latitudine e longitudine leggendole dal J
           <dc:Bounds x="606" y="982" width="28" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Start_Analysis_di" bpmnElement="Flow_Start_Analysis">
-        <di:waypoint x="196" y="868" />
-        <di:waypoint x="330" y="868" />
+      <bpmndi:BPMNEdge id="Flow_07g9sto_di" bpmnElement="Flow_City_Fire">
+        <di:waypoint x="605" y="843" />
+        <di:waypoint x="605" y="628" />
+        <di:waypoint x="725" y="628" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="629" y="733" width="41" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Analysis_Capability_di" bpmnElement="Flow_Analysis_Capability">
-        <di:waypoint x="450" y="868" />
-        <di:waypoint x="580" y="868" />
+      <bpmndi:BPMNEdge id="Flow_1l5tvwy_di" bpmnElement="Flow_1l5tvwy">
+        <di:waypoint x="1715" y="1090" />
+        <di:waypoint x="2610" y="1090" />
+        <di:waypoint x="2610" y="646" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_055sexm_di" bpmnElement="Flow_055sexm">
+        <di:waypoint x="1195" y="628" />
+        <di:waypoint x="1425" y="628" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0cfauu3_di" bpmnElement="Flow_0cfauu3">
         <di:waypoint x="1450" y="603" />
@@ -318,53 +385,11 @@ Prima passavo come input mapping anche latitudine e longitudine leggendole dal J
         <di:waypoint x="1170" y="505" />
         <di:waypoint x="1170" y="603" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_07g9sto_di" bpmnElement="Flow_City_Fire">
-        <di:waypoint x="605" y="843" />
-        <di:waypoint x="605" y="628" />
-        <di:waypoint x="725" y="628" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="629" y="733" width="41" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_055sexm_di" bpmnElement="Flow_055sexm">
-        <di:waypoint x="1195" y="628" />
-        <di:waypoint x="1425" y="628" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1l5tvwy_di" bpmnElement="Flow_1l5tvwy">
-        <di:waypoint x="1715" y="1090" />
-        <di:waypoint x="2610" y="1090" />
-        <di:waypoint x="2610" y="646" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1jpogrh_di" bpmnElement="Flow_1jpogrh">
-        <di:waypoint x="1670" y="868" />
-        <di:waypoint x="2610" y="870" />
-        <di:waypoint x="2610" y="646" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1hmjz6t_di" bpmnElement="Flow_1hmjz6t">
         <di:waypoint x="2255" y="369" />
         <di:waypoint x="2610" y="369" />
         <di:waypoint x="2610" y="610" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1vcfbwk_di" bpmnElement="Association_1vcfbwk">
-        <di:waypoint x="734" y="619" />
-        <di:waypoint x="627" y="562" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_0za0txh_di" bpmnElement="Association_0za0txh">
-        <di:waypoint x="922" y="465" />
-        <di:waypoint x="746" y="216" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Association_1v3h2ml_di" bpmnElement="Association_1v3h2ml">
-        <di:waypoint x="1432" y="635" />
-        <di:waypoint x="1327" y="680" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="TextAnnotation_0f3s0bi_di" bpmnElement="TextAnnotation_0f3s0bi">
-        <dc:Bounds x="1970" y="780" width="270" height="57" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="TextAnnotation_1j63ipv_di" bpmnElement="TextAnnotation_1j63ipv">
-        <dc:Bounds x="1930" y="80" width="280" height="43" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1exb4cw_di" bpmnElement="Flow_1exb4cw">
         <di:waypoint x="1810" y="344" />
         <di:waypoint x="1810" y="260" />
@@ -384,6 +409,47 @@ Prima passavo come input mapping anche latitudine e longitudine leggendole dal J
         <di:waypoint x="2095" y="470" />
         <di:waypoint x="2230" y="470" />
         <di:waypoint x="2230" y="394" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="TextAnnotation_0m6rs9a_di" bpmnElement="TextAnnotation_0m6rs9a">
+        <dc:Bounds x="650" y="280" width="639" height="86" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_1skfl33_di" bpmnElement="TextAnnotation_1skfl33">
+        <dc:Bounds x="2760" y="497" width="312" height="57" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0f3s0bi_di" bpmnElement="TextAnnotation_0f3s0bi">
+        <dc:Bounds x="1620" y="711" width="270" height="57" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0i2g68c_di" bpmnElement="Flow_0i2g68c">
+        <di:waypoint x="1858" y="868" />
+        <di:waypoint x="2020" y="868" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wart89_di" bpmnElement="Flow_0wart89">
+        <di:waypoint x="2120" y="868" />
+        <di:waypoint x="2245" y="868" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ib6a25_di" bpmnElement="Flow_0ib6a25">
+        <di:waypoint x="2270" y="893" />
+        <di:waypoint x="2270" y="950" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2284" y="906" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0guodik_di" bpmnElement="Flow_0guodik">
+        <di:waypoint x="1670" y="868" />
+        <di:waypoint x="1822" y="868" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mnkpqa_di" bpmnElement="Flow_1mnkpqa">
+        <di:waypoint x="2295" y="868" />
+        <di:waypoint x="2610" y="870" />
+        <di:waypoint x="2610" y="646" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m9xjr1_di" bpmnElement="Flow_1m9xjr1">
+        <di:waypoint x="2320" y="990" />
+        <di:waypoint x="2610" y="990" />
+        <di:waypoint x="2610" y="646" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
