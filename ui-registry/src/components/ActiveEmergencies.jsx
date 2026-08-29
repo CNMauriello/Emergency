@@ -38,6 +38,43 @@ const ActiveEmergencies = ({ onViewDetail }) => {
         return { steps, currentStep };
     };
 
+    /*
+    // FAKE Funzione per recuperare le emergenze dal backend
+    const fetchEmergencies = async () => {
+        try {
+            // MOCK TEMPORANEO: Il backend emergenze è spento, usiamo dati finti
+            setEmergencies([
+                {
+                    id: 101,
+                    eventId: 'EVT-2026-8901',
+                    eventType: 'FIRE',
+                    severity: 'CRITICA',
+                    status: 'IN_PROGRESS',
+                    latitude: 41.9028,
+                    longitude: 12.4964,
+                    timestamp: '14:28 (4m ago)'
+                },
+                {
+                    id: 102,
+                    eventId: 'EVT-2026-8902',
+                    eventType: 'CAR_CRASH',
+                    severity: 'ALTA',
+                    status: 'OPEN',
+                    latitude: 45.4642,
+                    longitude: 9.1900,
+                    timestamp: '14:15 (17m ago)'
+                }
+            ]);
+            setError(null);
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+    */
+
     const fetchEmergencies = async () => {
         try {
             // Sostituisci con il vero endpoint del Gestore Operatori di Sala
@@ -56,34 +93,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
             setEmergencies(data);
             setError(null);
         } catch (err) {
-            /********* FALLBACK TEMPORANEO
-            // In un caso reale, mostra l'errore. Qui usiamo dati finti di fallback per permetterti di vedere la UI se l'API non è attiva.
-            console.warn("Backend non raggiungibile, utilizzo dati di mock temporanei:", err.message);
-            setEmergencies([
-                {
-                    id: 48,
-                    eventId: 'EVT-2023-8901',
-                    eventType: 'FIRE',
-                    severity: 'CRITICA',
-                    status: 'IN_PROGRESS',
-                    latitude: 41.9028,
-                    longitude: 12.4964,
-                    address: "Valle dell'Aniene, Roma (RM)",
-                    timestamp: '14:28 (4m ago)',
-                    workflowInstanceId: 'WF-FIRE-001'
-                },
-                {
-                    id: 49,
-                    eventId: 'EVT-2023-8902',
-                    eventType: 'FLOOD',
-                    severity: 'ALTA',
-                    status: 'OPEN',
-                    latitude: 41.8532,
-                    longitude: 12.4821,
-                    address: "Via Cristoforo Colombo, Roma (RM)",
-                    timestamp: '14:15 (17m ago)',
-                    workflowInstanceId: 'WF-FLOOD-002'
-                }]);*********/
+
             console.error("Impossibile recuperare le emergenze:", err);
             setError(err.message); // Salva il VERO messaggio di errore
             setEmergencies([]);    // Assicurati che la lista sia vuota
@@ -92,6 +102,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
             setLoading(false);
         }
     };
+
 
     useEffect(() => {
         fetchEmergencies();

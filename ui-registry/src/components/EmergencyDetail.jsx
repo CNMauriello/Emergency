@@ -36,6 +36,75 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
         loadCapabilities();
     }, [emergencyId]);
 
+    /*
+// FAKE - Polling: Mock per l'emergenza, Chiamate REALI per i Servizi
+useEffect(() => {
+    if (!emergencyId) return;
+
+    const fetchData = async () => {
+        try {
+            const headers = {
+                'Authorization': `Bearer ${localStorage.getItem('faro_token')}`,
+                'Content-Type': 'application/json'
+            };
+
+            // --- MOCK DELL'EMERGENZA (Backend spento) ---
+            const emData = {
+                id: emergencyId,
+                eventId: `EVT-2026-TEST-${emergencyId}`,
+                eventType: emergencyId === 101 ? 'FIRE' : 'CAR_CRASH',
+                severity: 'CRITICA',
+                status: 'IN_PROGRESS', // Mettiamo IN_PROGRESS per mostrare il form di ingaggio
+                latitude: 41.9028,
+                longitude: 12.4964,
+                workflowInstanceId: `WF-TEST-${emergencyId}`,
+                history: ['OPEN', 'IN_PROGRESS']
+            };
+            setEmergency(emData);
+
+            // --- CHIAMATA REALE AL REGISTRY SERVICE ---
+            // Selezioniamo l'URL in base al filtro scelto dall'operatore
+            const serviceUrl = selectedCapability
+                ? `${API_BASE_URL}/services?capability=${selectedCapability}`
+                : `${API_BASE_URL}/services`;
+
+            const srvRes = await fetch(serviceUrl, { headers });
+            if (srvRes.ok) {
+                const srvData = await srvRes.json();
+                setServices(srvData);
+            } else {
+                console.warn("Il RegistryService ha risposto con errore:", srvRes.status);
+            }
+
+            setError(null);
+        } catch (err) {
+            console.error("Errore di connessione (il RegistryService è acceso?)", err);
+            // Evitiamo di mostrare la schermata d'errore rossa per poter testare la UI
+            // setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+}, [emergencyId, selectedCapability]);
+
+// Gestione dell'override (Mockata, poiché il server non c'è)
+const handleManualDispatch = async () => {
+    if (!selectedUnit) return;
+    setDispatching(true);
+
+    // Simuliamo il tempo di rete (1 secondo)
+    setTimeout(() => {
+        alert(`SUCCESSO (SIMULATO): Hai ingaggiato il servizio con ID: ${selectedUnit} per l'emergenza ${emergencyId}`);
+        setSelectedUnit('');
+        setDispatching(false);
+    }, 1000);
+};
+ */
+
     // 2. Polling per lo stato dell'emergenza e l'elenco dei servizi (filtrati)
     useEffect(() => {
         if (!emergencyId) return;
@@ -101,6 +170,7 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
             setDispatching(false);
         }
     };
+
 
     // VISTE DI RENDER
     if (!emergencyId) return <div className="p-8 text-gray-500">Nessuna emergenza selezionata.</div>;
