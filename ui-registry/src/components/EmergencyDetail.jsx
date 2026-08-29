@@ -1,18 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter } from 'lucide-react';
 import { API_BASE_URL } from '../config.js';
 
 const EmergencyDetail = ({ emergencyId, onBack }) => {
     const [emergency, setEmergency] = useState(null);
     const [services, setServices] = useState([]);
+    const [capabilities, setCapabilities] = useState([]);
+
+    const [selectedCapability, setSelectedCapability] = useState('');
     const [selectedUnit, setSelectedUnit] = useState('');
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
 
+    // 1. Carica le capability dal database all'avvio
     useEffect(() => {
-        // Se non c'è ID, non fare nulla (evita errori)
+        if (!emergencyId) {
+            return <div className="p-8 text-red-500">Nessuna emergenza selezionata.</div>;
+        }
+
+        const loadCapabilities = async () => {
+            try {
+                const headers = { 'Authorization': `Bearer ${localStorage.getItem('faro_token')}` };
+                const res = await fetch(`${API_BASE_URL}/capabilities`, { headers });
+                if (res.ok) {
+                    const data = await res.json();
+                    setCapabilities(data);
+                }
+            } catch (err) {
+                console.error("Errore durante il recupero delle capability", err);
+            }
+        };
+
+        loadCapabilities();
+    }, [emergencyId]);
+
+    // 2. Polling per lo stato dell'emergenza e l'elenco dei servizi (filtrati)
+    useEffect(() => {
         if (!emergencyId) return;
 
         const fetchData = async () => {
@@ -22,36 +47,15 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
                     'Content-Type': 'application/json'
                 };
 
-                // 1. Chiamata REALE per lo stato dell'emergenza
+                // Aggiorna lo stato dell'emergenza
                 const emRes = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}`, { headers });
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
 
-                // 2. Mappatura dinamica: deduciamo la capability dal tipo di evento
-                let requiredCapability = '';
-                switch(emData.eventType) {
-                    case 'FIRE':
-                        requiredCapability = 'FireSuppression';
-                        break;
-                    case 'HEALTH_CRISIS':
-                        requiredCapability = 'MedicalAssistance';
-                        break;
-                    case 'CAR_CRASH':
-                        requiredCapability = 'TrafficControl'; // o MedicalAssistance
-                        break;
-                    case 'FLOOD':
-                    case 'ALLAGAMENTO SOTTOPASSO':
-                        requiredCapability = 'WaterRescue';
-                        break;
-                    // Se l'eventType non corrisponde a nulla di noto, la stringa resta vuota
-                    default:
-                        requiredCapability = '';
-                }
-
-                // 3. Discovery dinamica: accodiamo la capability se esiste, altrimenti prendiamo tutti i servizi
-                const serviceUrl = requiredCapability
-                    ? `${API_BASE_URL}/services?capability=${requiredCapability}`
+                // Discovery dei servizi: applica il filtro capability se selezionato dall'operatore
+                const serviceUrl = selectedCapability
+                    ? `${API_BASE_URL}/services?capability=${selectedCapability}`
                     : `${API_BASE_URL}/services`;
 
                 const srvRes = await fetch(serviceUrl, { headers });
@@ -72,7 +76,7 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
         fetchData();
         const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
-    }, [emergencyId]);
+    }, [emergencyId, selectedCapability]); // Ri-esegue se cambia l'ID o il filtro capability
 
     const handleManualDispatch = async () => {
         if (!selectedUnit) return;
@@ -179,8 +183,31 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
                                 <h3 className="font-bold text-gray-900 text-lg">Ingaggio Manuale Risorsa</h3>
 
                                 <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-5 mt-4">
+
+                                    {/* FILTRO DINAMICO CAPABILITY */}
+                                    <div className="mb-4 border-b border-blue-200 pb-4">
+                                        <label className="block text-xs font-bold text-blue-800 uppercase mb-2 flex items-center">
+                                            <Filter className="w-3 h-3 mr-1" /> Filtra risorse per Capability
+                                        </label>
+                                        <select
+                                            className="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm bg-white border focus:ring-blue-500 focus:border-blue-500"
+                                            value={selectedCapability}
+                                            onChange={(e) => {
+                                                setSelectedCapability(e.target.value);
+                                                setSelectedUnit(''); // Se cambia il filtro, resetta l'unità selezionata
+                                            }}
+                                        >
+                                            <option value="">Mostra tutte le unità (Nessun filtro)</option>
+                                            {capabilities.map(cap => (
+                                                <option key={cap.id || cap.name} value={cap.name}>
+                                                    {cap.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Seleziona Unità d'Intervento (Discovery)
+                                        Seleziona Unità d'Intervento
                                     </label>
                                     <select
                                         className="w-full border-gray-300 rounded-md shadow-sm p-2 mb-3 bg-white border"
