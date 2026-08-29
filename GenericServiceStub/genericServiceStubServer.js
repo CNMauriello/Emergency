@@ -19,8 +19,16 @@ const server = http.createServer((req, res) => {
         console.log("=============================\n");
 
         if (req.method === "GET" && req.url === "/api/stub_service") {
-            res.writeHead(200);
-            res.end();
+
+            const response = {
+                areEvacuated: true
+            };
+
+            res.writeHead(200, {
+                "Content-Type": "application/json"
+            });
+
+            res.end(JSON.stringify(response));
             return;
         }
 
@@ -32,5 +40,3 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
     console.log(`Stub server running on http://localhost:${PORT}`);
 });
-
-// node genericServiceStubServer.js
