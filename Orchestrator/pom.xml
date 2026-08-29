@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.unisannio.emergency.orchestrator</groupId>
-	<artifactId>emergency-orchestrator</artifactId>
+	<artifactId>Orchestrator</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name/>
 	<description/>
