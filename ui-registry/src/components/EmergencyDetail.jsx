@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle } from 'lucide-react';
 import { API_BASE_URL } from '../config.js'; // Importa la tua costante
 
-const EmergencyDetail = ({ emergencyId = 48, onBack }) => {
+const EmergencyDetail = ({ emergencyId, onBack }) => {
+    if (!emergencyId) {
+        return <div className="p-8 text-red-500">Nessuna emergenza selezionata.</div>;
+    }
     const [emergency, setEmergency] = useState(null);
     const [services, setServices] = useState([]);
     const [selectedUnit, setSelectedUnit] = useState('');
