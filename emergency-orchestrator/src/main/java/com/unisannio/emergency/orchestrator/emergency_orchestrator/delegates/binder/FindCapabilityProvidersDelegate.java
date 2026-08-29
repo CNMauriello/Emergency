@@ -1,4 +1,4 @@
-package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
+package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates.binder;
 
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;
@@ -16,12 +16,9 @@ import java.util.Map;
 public class FindCapabilityProvidersDelegate {
 
     private final RestClient restClient;
-    
-    // FIX 2: Attenzione all'URL se stai eseguendo il run da IntelliJ e non da Docker!
-    // Se "binder-service" non è nel file /etc/hosts, usa "localhost" per il test locale.
-    // Per la produzione su Docker usa invece:
-    // String binderUrl = "http://binder-service:8082/api/binder/candidates";
-    private final String binderUrl = "http://localhost:8082/api/binder/candidates";
+
+    private final String binderUrl =
+            "http://localhost:8082/api/binder/candidates";
 
     public FindCapabilityProvidersDelegate() {
         this.restClient = RestClient.create();
@@ -29,28 +26,49 @@ public class FindCapabilityProvidersDelegate {
 
     @JobWorker(type = "find-capability-providers", autoComplete = true)
     public Map<String, Object> execute(ActivatedJob job) {
+
         Map<String, Object> variables = job.getVariablesAsMap();
-        String requiredCapability = (String) variables.get("requiredCapability");
 
+        String requiredCapability =
+                (String) variables.get("requiredCapability");
+
+        // Recupera le coordinate dal JSON dell'emergenza
         @SuppressWarnings("unchecked")
-        Map<String, Object> event = (Map<String, Object>) variables.get("event");
+        Map<String, Object> coordinates =
+                (Map<String, Object>) variables.get("coordinates");
 
-        // FIX 1: Utilizzo di HashMap invece di Map.of() per tollerare valori null
+        if (coordinates == null) {
+            throw new IllegalStateException(
+                    "Variabile 'coordinates' assente dal processo"
+            );
+        }
+
+        Object latitude = coordinates.get("latitude");
+        Object longitude = coordinates.get("longitude");
+
+        if (latitude == null || longitude == null) {
+            throw new IllegalStateException(
+                    "Latitude/longitude mancanti nelle coordinate dell'emergenza"
+            );
+        }
+
+        // Costruisce la richiesta per il Binder
         Map<String, Object> binderRequest = new HashMap<>();
         binderRequest.put("requiredCapability", requiredCapability);
-
-        if (event != null) {
-            binderRequest.put("latitude", event.get("latitude"));
-            binderRequest.put("longitude", event.get("longitude"));
-        }
+        binderRequest.put("latitude", latitude);
+        binderRequest.put("longitude", longitude);
 
         List<Map<String, Object>> sortedCandidates = new ArrayList<>();
 
         try {
 
+            System.out.println(
+                    "[FindCapabilityProviders] POST " + binderUrl
+            );
 
-            System.out.println("[FindCapabilityProviders] POST " + binderUrl);
-            System.out.println("[FindCapabilityProviders] Request: " + binderRequest);
+            System.out.println(
+                    "[FindCapabilityProviders] Request: " + binderRequest
+            );
 
             List<String> response = restClient.post()
                     .uri(binderUrl)
@@ -58,7 +76,9 @@ public class FindCapabilityProvidersDelegate {
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<String>>() {});
 
-            System.out.println("[FindCapabilityProviders] Binder response: " + response);
+            System.out.println(
+                    "[FindCapabilityProviders] Binder response: " + response
+            );
 
             if (response != null) {
                 for (String endpoint : response) {
@@ -68,18 +88,41 @@ public class FindCapabilityProvidersDelegate {
                 }
             }
 
-            System.out.println("[FindCapabilityProviders] Workflow candidates: " + sortedCandidates);
+            System.out.println(
+                    "[FindCapabilityProviders] Variables: " + variables
+            );
+
+            System.out.println(
+                    "[FindCapabilityProviders] Coordinates: " + coordinates
+            );
+
+            System.out.println(
+                    "[FindCapabilityProviders] Binder request: " + binderRequest
+            );
+
+            System.out.println(
+                    "[FindCapabilityProviders] Workflow candidates: "
+                            + sortedCandidates
+            );
 
         } catch (RestClientException e) {
-            // FIX 3: Gestione dell'eccezione HTTP
-            System.err.println("Errore di comunicazione con il Binder Service: " + e.getMessage());
-            System.err.println("[FindCapabilityProviders] Request that failed: " + binderRequest);
+
+            System.err.println(
+                    "Errore di comunicazione con il Binder Service: "
+                            + e.getMessage()
+            );
+
+            System.err.println(
+                    "[FindCapabilityProviders] Request that failed: "
+                            + binderRequest
+            );
+
             e.printStackTrace();
-            // In caso di errore, sortedCandidates resta vuoto, permettendo al processo
-            // di passare al ramo di fallback (isCapabilityAvailable = false) senza andare in crash.
         }
 
-        // Memorizziamo la lista ordinata reale all'interno dell'istanza del workflow
-        return Map.of("capabilityCandidates", sortedCandidates);
+        return Map.of(
+                "capabilityCandidates",
+                sortedCandidates
+        );
     }
 }

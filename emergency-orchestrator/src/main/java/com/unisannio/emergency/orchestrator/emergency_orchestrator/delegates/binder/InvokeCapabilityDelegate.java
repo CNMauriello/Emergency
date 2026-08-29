@@ -1,4 +1,4 @@
-package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates;
+package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates.binder;
 
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;

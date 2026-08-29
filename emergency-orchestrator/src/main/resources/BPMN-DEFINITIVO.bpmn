@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.48.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.49.0">
   <bpmn:process id="GestioneIncendioCloud" name="Fire Emergency Management (Composition Subsystem)" isExecutable="true">
     <bpmn:startEvent id="StartEvent_Allarme" name="Emergency message">
+      <bpmn:extensionElements />
       <bpmn:outgoing>Flow_Start_Analisi</bpmn:outgoing>
-      <bpmn:messageEventDefinition messageRef="Message_Allarme" />
+      <bpmn:messageEventDefinition messageRef="Message_26vbhs0" />
     </bpmn:startEvent>
-    <bpmn:serviceTask id="Task_Analisi_Contesto" name="Event Analysis" camunda:delegateExpression="${analisiContestoDelegate}">
+    <bpmn:serviceTask id="Task_Analisi_Contesto" name="Event Analysis" camunda:class="${analisiContestoDelegate}">
       <bpmn:incoming>Flow_Start_Analisi</bpmn:incoming>
       <bpmn:outgoing>Flow_Analisi_Capacita</bpmn:outgoing>
     </bpmn:serviceTask>
@@ -80,13 +81,16 @@
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Archiviazione_End" sourceRef="Task_Archiviazione" targetRef="EndEvent_Chiusura" />
     <bpmn:inclusiveGateway id="Gateway_0pdbpjx" name="Emergency Flags">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="" event="start" />
+      </bpmn:extensionElements>
       <bpmn:incoming>Flow_1mhe9ro</bpmn:incoming>
       <bpmn:outgoing>Flow_0w072j4</bpmn:outgoing>
       <bpmn:outgoing>Flow_0cfauu3</bpmn:outgoing>
       <bpmn:outgoing>Flow_1yf6v3g</bpmn:outgoing>
     </bpmn:inclusiveGateway>
     <bpmn:intermediateCatchEvent id="Event_1mjfqd7" name="Wait 15 Minutes">
-      <bpmn:incoming>Flow_0pdnddi</bpmn:incoming>
+      <bpmn:incoming>Flow_0yt186w</bpmn:incoming>
       <bpmn:outgoing>Flow_0i2g68c</bpmn:outgoing>
       <bpmn:timerEventDefinition id="TimerEventDefinition_0hh6pdj">
         <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT15S</bpmn:timeDuration>
@@ -97,14 +101,6 @@
       <bpmn:outgoing>Flow_02twjp8</bpmn:outgoing>
       <bpmn:outgoing>Flow_0ib6a25</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_03qwv3a" name="Ask For Evacuation" camunda:delegateExpression="${askForEvacuationDelegate}">
-      <bpmn:incoming>Flow_1yf6v3g</bpmn:incoming>
-      <bpmn:outgoing>Flow_0pdnddi</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:serviceTask id="Activity_1cv18w6" name="Check If People Fully Evacuated" camunda:delegateExpression="${checkEvacuationDelegate}">
-      <bpmn:incoming>Flow_0i2g68c</bpmn:incoming>
-      <bpmn:outgoing>Flow_0wart89</bpmn:outgoing>
-    </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_0tls8ar" name="Alert Firefighters for trapped people" camunda:delegateExpression="${alertFirefightersDelegate}">
       <bpmn:incoming>Flow_0w072j4</bpmn:incoming>
       <bpmn:incoming>Flow_0ib6a25</bpmn:incoming>
@@ -119,9 +115,6 @@
     <bpmn:sequenceFlow id="Flow_0w072j4" name="People trapped" sourceRef="Gateway_0pdbpjx" targetRef="Activity_0tls8ar">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.areThereAnyTrapped == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0pdnddi" sourceRef="Activity_03qwv3a" targetRef="Event_1mjfqd7" />
-    <bpmn:sequenceFlow id="Flow_0i2g68c" sourceRef="Event_1mjfqd7" targetRef="Activity_1cv18w6" />
-    <bpmn:sequenceFlow id="Flow_0wart89" sourceRef="Activity_1cv18w6" targetRef="Gateway_1k5cnqn" />
     <bpmn:sequenceFlow id="Flow_02twjp8" name="Fully Evacuated" sourceRef="Gateway_1k5cnqn" targetRef="Gateway_1lj2itr">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${flowProgress.peopleEvacuated == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -148,32 +141,26 @@
       <bpmn:outgoing>Flow_Sanita_Grave</bpmn:outgoing>
       <bpmn:outgoing>Flow_Sanita_Lieve</bpmn:outgoing>
       <bpmn:outgoing>Flow_Sanita_Nessuno</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0hfj96l</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0zuqw71</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Task_Sanita_Grave" name="Request ALS Ambulance" camunda:delegateExpression="${requestAlsAmbulanceDelegate}">
-      <bpmn:incoming>Flow_Sanita_Grave</bpmn:incoming>
-      <bpmn:outgoing>Flow_Sanita_Grave_Merge</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:serviceTask id="Task_Sanita_Lieve" name="Request BLS Ambulance" camunda:delegateExpression="${requestBlsAmbulanceDelegate}">
-      <bpmn:incoming>Flow_Sanita_Lieve</bpmn:incoming>
-      <bpmn:outgoing>Flow_Sanita_Lieve_Merge</bpmn:outgoing>
-    </bpmn:serviceTask>
     <bpmn:exclusiveGateway id="Gateway_Feriti_Merge">
       <bpmn:incoming>Flow_Sanita_Nessuno</bpmn:incoming>
-      <bpmn:incoming>Flow_Sanita_Grave_Merge</bpmn:incoming>
-      <bpmn:incoming>Flow_Sanita_Lieve_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_Sanita_Grave</bpmn:incoming>
+      <bpmn:incoming>Flow_Sanita_Lieve</bpmn:incoming>
+      <bpmn:incoming>Flow_1rqihq6</bpmn:incoming>
+      <bpmn:incoming>Flow_1kabyr8</bpmn:incoming>
       <bpmn:outgoing>Flow_1okp3ok</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_Sanita_Grave" name="Heavily injured" sourceRef="Gateway_Feriti" targetRef="Task_Sanita_Grave">
+    <bpmn:sequenceFlow id="Flow_Sanita_Grave" name="Heavily injured" sourceRef="Gateway_Feriti" targetRef="Gateway_Feriti_Merge">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.injuredLevel == 'heavy'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Sanita_Lieve" name="Slightly injured" sourceRef="Gateway_Feriti" targetRef="Task_Sanita_Lieve">
+    <bpmn:sequenceFlow id="Flow_Sanita_Lieve" name="Slightly injured" sourceRef="Gateway_Feriti" targetRef="Gateway_Feriti_Merge">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.injuredLevel == 'slight'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Sanita_Nessuno" sourceRef="Gateway_Feriti" targetRef="Gateway_Feriti_Merge">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.injuredLevel == 'none'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_Sanita_Grave_Merge" sourceRef="Task_Sanita_Grave" targetRef="Gateway_Feriti_Merge" />
-    <bpmn:sequenceFlow id="Flow_Sanita_Lieve_Merge" sourceRef="Task_Sanita_Lieve" targetRef="Gateway_Feriti_Merge" />
     <bpmn:sequenceFlow id="Flow_0cfauu3" sourceRef="Gateway_0pdbpjx" targetRef="Gateway_Feriti">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.areThereInjured == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
@@ -188,7 +175,7 @@
       <bpmn:outgoing>Flow_1mhe9ro</bpmn:outgoing>
     </bpmn:parallelGateway>
     <bpmn:sequenceFlow id="Flow_00hpd0c" sourceRef="Activity_177gvd5" targetRef="Gateway_1xp32nv" />
-    <bpmn:sequenceFlow id="Flow_1yf6v3g" name="People in the building" sourceRef="Gateway_0pdbpjx" targetRef="Activity_03qwv3a">
+    <bpmn:sequenceFlow id="Flow_1yf6v3g" name="People in the building" sourceRef="Gateway_0pdbpjx" targetRef="Activity_0kq3lo4">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${event.peopleInBuilding == true}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1mhe9ro" sourceRef="Gateway_1xp32nv" targetRef="Gateway_0pdbpjx" />
@@ -264,9 +251,33 @@
     <bpmn:sequenceFlow id="Flow_0mwufvn" name="Stable Situation" sourceRef="Gateway_Valutazione_Stato" targetRef="Task_Monitoraggio">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${status == 'stable'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:callActivity id="Activity_0kq3lo4" name="Ask For Evacuation" calledElement="Process_0t95rly">
+      <bpmn:incoming>Flow_1yf6v3g</bpmn:incoming>
+      <bpmn:outgoing>Flow_0yt186w</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_0yt186w" sourceRef="Activity_0kq3lo4" targetRef="Event_1mjfqd7" />
+    <bpmn:sequenceFlow id="Flow_0i2g68c" sourceRef="Event_1mjfqd7" targetRef="Activity_1cv18w6" />
+    <bpmn:serviceTask id="Activity_1cv18w6" name="Check If People Fully Evacuated" camunda:delegateExpression="${checkEvacuationDelegate}">
+      <bpmn:incoming>Flow_0i2g68c</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wart89</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0wart89" sourceRef="Activity_1cv18w6" targetRef="Gateway_1k5cnqn" />
+    <bpmn:callActivity id="Activity_1sv9dsv" name="Request ALS Ambulance" calledElement="Process_0t95rly">
+      <bpmn:incoming>Flow_0zuqw71</bpmn:incoming>
+      <bpmn:outgoing>Flow_1kabyr8</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:callActivity id="Activity_07ybpyk" name="Request BLS Ambulance" calledElement="Process_0t95rly">
+      <bpmn:incoming>Flow_0hfj96l</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rqihq6</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_0hfj96l" sourceRef="Gateway_Feriti" targetRef="Activity_07ybpyk" />
+    <bpmn:sequenceFlow id="Flow_1rqihq6" sourceRef="Activity_07ybpyk" targetRef="Gateway_Feriti_Merge" />
+    <bpmn:sequenceFlow id="Flow_0zuqw71" sourceRef="Gateway_Feriti" targetRef="Activity_1sv9dsv" />
+    <bpmn:sequenceFlow id="Flow_1kabyr8" sourceRef="Activity_1sv9dsv" targetRef="Gateway_Feriti_Merge" />
   </bpmn:process>
-  <bpmn:message id="Message_Allarme" name="Message_Allarme" />
-  <bpmn:message id="Message_Aggiornamento" name="Message_Aggiornamento" />
+  <bpmn:message id="Message_Allarme" />
+  <bpmn:message id="Message_Aggiornamento" />
+  <bpmn:message id="Message_26vbhs0" name="Emergency_Report" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="GestioneIncendioCloud">
       <bpmndi:BPMNShape id="StartEvent_Allarme_di" bpmnElement="StartEvent_Allarme">
@@ -354,9 +365,6 @@
           <dc:Bounds x="2369" y="376" width="61" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_05hhrcr_di" bpmnElement="Activity_03qwv3a">
-        <dc:Bounds x="1850" y="410" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_12o105k_di" bpmnElement="Activity_1cv18w6">
         <dc:Bounds x="2150" y="410" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -380,12 +388,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1785" y="213" width="71" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0pbe5cw" bpmnElement="Task_Sanita_Grave">
-        <dc:Bounds x="2120" y="77" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="BPMNShape_0qvaqpq" bpmnElement="Task_Sanita_Lieve">
-        <dc:Bounds x="2120" y="287" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_01nvya8" bpmnElement="Gateway_Feriti_Merge" isMarkerVisible="true">
         <dc:Bounds x="2315" y="202" width="50" height="50" />
@@ -426,6 +428,18 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="BPMNShape_005eyhq" bpmnElement="Activity_05fbro2" isExpanded="true">
         <dc:Bounds x="1210" y="287" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_17lj8zr" bpmnElement="Activity_0kq3lo4" isExpanded="true">
+        <dc:Bounds x="1820" y="410" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_05vyfji" bpmnElement="Activity_07ybpyk" isExpanded="true">
+        <dc:Bounds x="2130" y="270" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_11k0ww1" bpmnElement="Activity_1sv9dsv" isExpanded="true">
+        <dc:Bounds x="2130" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_Execution_End_di" bpmnElement="Flow_Execution_End">
         <di:waypoint x="2750" y="638" />
@@ -498,10 +512,6 @@
           <dc:Bounds x="1682" y="551" width="75" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0pdnddi_di" bpmnElement="Flow_0pdnddi">
-        <di:waypoint x="1950" y="450" />
-        <di:waypoint x="2012" y="450" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0i2g68c_di" bpmnElement="Flow_0i2g68c">
         <di:waypoint x="2048" y="450" />
         <di:waypoint x="2150" y="450" />
@@ -530,34 +540,22 @@
         <di:waypoint x="2550" y="475" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_043sj57" bpmnElement="Flow_Sanita_Grave">
-        <di:waypoint x="2025" y="202" />
-        <di:waypoint x="2025" y="117" />
-        <di:waypoint x="2120" y="117" />
+        <di:waypoint x="2050" y="227" />
+        <di:waypoint x="2315" y="227" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2004" y="150" width="73" height="14" />
+          <dc:Bounds x="2026" y="150" width="73" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_1p6tjje" bpmnElement="Flow_Sanita_Lieve">
-        <di:waypoint x="2025" y="252" />
-        <di:waypoint x="2025" y="327" />
-        <di:waypoint x="2120" y="327" />
+        <di:waypoint x="2050" y="227" />
+        <di:waypoint x="2315" y="227" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="2004" y="280" width="72" height="14" />
+          <dc:Bounds x="2027" y="280" width="72" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="BPMNEdge_1ywivz7" bpmnElement="Flow_Sanita_Nessuno">
         <di:waypoint x="2050" y="227" />
         <di:waypoint x="2315" y="227" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_0nfgjsk" bpmnElement="Flow_Sanita_Grave_Merge">
-        <di:waypoint x="2220" y="117" />
-        <di:waypoint x="2340" y="117" />
-        <di:waypoint x="2340" y="202" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="BPMNEdge_0yl6ikf" bpmnElement="Flow_Sanita_Lieve_Merge">
-        <di:waypoint x="2220" y="327" />
-        <di:waypoint x="2340" y="327" />
-        <di:waypoint x="2340" y="252" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0cfauu3_di" bpmnElement="Flow_0cfauu3">
         <di:waypoint x="1670" y="425" />
@@ -589,9 +587,9 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1yf6v3g_di" bpmnElement="Flow_1yf6v3g">
         <di:waypoint x="1695" y="450" />
-        <di:waypoint x="1850" y="450" />
+        <di:waypoint x="1820" y="450" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1740" y="425" width="65" height="27" />
+          <dc:Bounds x="1698" y="425" width="65" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1mhe9ro_di" bpmnElement="Flow_1mhe9ro">
@@ -697,6 +695,30 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1169" y="1592" width="78" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0yt186w_di" bpmnElement="Flow_0yt186w">
+        <di:waypoint x="1920" y="450" />
+        <di:waypoint x="2012" y="450" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0hfj96l_di" bpmnElement="Flow_0hfj96l">
+        <di:waypoint x="2025" y="252" />
+        <di:waypoint x="2025" y="310" />
+        <di:waypoint x="2130" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rqihq6_di" bpmnElement="Flow_1rqihq6">
+        <di:waypoint x="2230" y="310" />
+        <di:waypoint x="2340" y="310" />
+        <di:waypoint x="2340" y="252" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zuqw71_di" bpmnElement="Flow_0zuqw71">
+        <di:waypoint x="2025" y="202" />
+        <di:waypoint x="2025" y="120" />
+        <di:waypoint x="2130" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1kabyr8_di" bpmnElement="Flow_1kabyr8">
+        <di:waypoint x="2230" y="120" />
+        <di:waypoint x="2340" y="120" />
+        <di:waypoint x="2340" y="202" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

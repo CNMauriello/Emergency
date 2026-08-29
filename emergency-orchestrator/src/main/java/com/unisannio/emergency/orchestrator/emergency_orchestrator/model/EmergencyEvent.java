@@ -1,16 +1,12 @@
 package com.unisannio.emergency.orchestrator.emergency_orchestrator.model;
 
 public record EmergencyEvent(
-        String eventType,
-        TriageLevel triageLevel
-) {
-    public String getAssociatedWorkflow() {
-        return eventType + "_" + triageLevel.name();
-    }
-
-    private enum TriageLevel {
-        RED, YELLOW, GREEN
-    }
-
-}
-
+        String event_id,
+        String timestamp,
+        String emergency_category,
+        String severity,
+        IncidentContext incident_context,
+        GeoPoint coordinates,
+        String address,
+        double global_confidence
+) {}

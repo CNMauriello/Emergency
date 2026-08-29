@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_Emergency" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:message id="Message_Emergency_Report" name="Emergency_Report" />
+  <bpmn:message id="Message_Firefighter_Response" name="Firefighter_Response" />
+  <bpmn:message id="Message_Evacuation_Response" name="Evacuation_Response" />
+  <bpmn:process id="Emergency_Response_Plan_Orchestrator" name="Emergency Response Plan Orchestrator" isExecutable="true">
+    <bpmn:startEvent id="Start_Emergency_Report" name="Emergency Report">
+      <bpmn:outgoing>Flow_Start_Analysis</bpmn:outgoing>
+      <bpmn:messageEventDefinition messageRef="Message_Emergency_Report" />
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Task_Event_Analysis" name="Event Analysis">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="event-analysis" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Start_Analysis</bpmn:incoming>
+      <bpmn:outgoing>Flow_Analysis_Capability</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_Plan_Selection" name="Plan Selection">
+      <bpmn:extensionElements />
+      <bpmn:incoming>Flow_Analysis_Capability</bpmn:incoming>
+      <bpmn:outgoing>Flow_Flood_Plan</bpmn:outgoing>
+      <bpmn:outgoing>Flow_City_Fire</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:callActivity id="Call_ALS_Ambulance" name="Request ALS Ambulance">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;MedicalEmergency&#34;" target="requiredCapability" />
+          <zeebe:input source="=coordinates.latitude" target="latitude" />
+          <zeebe:input source="=coordinates.longitude" target="longitude" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1exb4cw</bpmn:incoming>
+      <bpmn:outgoing>Flow_0q6lk1n</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Flood_Plan" name="Flood" sourceRef="Gateway_Plan_Selection" targetRef="Call_Flood_Response">
+      <bpmn:documentation>event.emergency_category = "FLOOD"</bpmn:documentation>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=startsWith(emergency_plan, "FLOOD_")</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="End_Emergency_Response" name="Emergency Response Completed">
+      <bpmn:incoming>Flow_1l5tvwy</bpmn:incoming>
+      <bpmn:incoming>Flow_1jpogrh</bpmn:incoming>
+      <bpmn:incoming>Flow_1hmjz6t</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Start_Analysis" sourceRef="Start_Emergency_Report" targetRef="Task_Event_Analysis" />
+    <bpmn:sequenceFlow id="Flow_Analysis_Capability" sourceRef="Task_Event_Analysis" targetRef="Gateway_Plan_Selection" />
+    <bpmn:callActivity id="Call_Flood_Response" name="Flood Response">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;FLOOD_RESPONSE&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Flood_Plan</bpmn:incoming>
+      <bpmn:outgoing>Flow_1l5tvwy</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Emergency Context Flags">
+      <bpmn:incoming>Flow_055sexm</bpmn:incoming>
+      <bpmn:outgoing>Flow_0cfauu3</bpmn:outgoing>
+      <bpmn:outgoing>Flow_trapper_people</bpmn:outgoing>
+    </bpmn:inclusiveGateway>
+    <bpmn:parallelGateway id="Gateway_1g5fgct">
+      <bpmn:incoming>Flow_0cfauu3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ry1z7s</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1exb4cw</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1ehizdk</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_1xp32nv">
+      <bpmn:incoming>Flow_1j130t0</bpmn:incoming>
+      <bpmn:incoming>Flow_0q6lk1n</bpmn:incoming>
+      <bpmn:incoming>Flow_1ehizdk</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hmjz6t</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:callActivity id="Task_Request_Evacuation" name="Ask For Evacuation" calledElement="Process_0t95rly">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;Evacuation&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_trapper_people</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jpogrh</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_0cfauu3" name="Injured Peple" sourceRef="Gateway_Emergency_Context" targetRef="Gateway_1g5fgct">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_trapper_people" name="People in the building" sourceRef="Gateway_Emergency_Context" targetRef="Task_Request_Evacuation">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1ry1z7s" sourceRef="Gateway_1g5fgct" targetRef="Call_BLS_Ambulance" />
+    <bpmn:sequenceFlow id="Flow_1exb4cw" sourceRef="Gateway_1g5fgct" targetRef="Call_ALS_Ambulance" />
+    <bpmn:callActivity id="Call_BLS_Ambulance" name="Request BLS Ambulance">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;MedicalEmergency&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1ry1z7s</bpmn:incoming>
+      <bpmn:outgoing>Flow_1j130t0</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_1j130t0" sourceRef="Call_BLS_Ambulance" targetRef="Gateway_1xp32nv" />
+    <bpmn:sequenceFlow id="Flow_0q6lk1n" sourceRef="Call_ALS_Ambulance" targetRef="Gateway_1xp32nv" />
+    <bpmn:sequenceFlow id="Flow_1ehizdk" sourceRef="Gateway_1g5fgct" targetRef="Gateway_1xp32nv" />
+    <bpmn:callActivity id="Activity_Fire_Handling_Providers" name="Call fire handling providers" calledElement="Process_0t95rly">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;FireSuppression&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_18zitaf</bpmn:incoming>
+      <bpmn:outgoing>Flow_00hpd0c</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:parallelGateway id="Gateway_1t52wen">
+      <bpmn:incoming>Flow_City_Fire</bpmn:incoming>
+      <bpmn:outgoing>Flow_18zitaf</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0oo3j48</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:parallelGateway id="Gateway_1n38nz2">
+      <bpmn:incoming>Flow_00hpd0c</bpmn:incoming>
+      <bpmn:incoming>Flow_1eeeug8</bpmn:incoming>
+      <bpmn:outgoing>Flow_055sexm</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:callActivity id="Activity_Traffic_Delimitation" name="Ask for traffic delimitation" calledElement="Process_0t95rly">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;CrowdControl&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0oo3j48</bpmn:incoming>
+      <bpmn:outgoing>Flow_1eeeug8</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_18zitaf" sourceRef="Gateway_1t52wen" targetRef="Activity_Fire_Handling_Providers" />
+    <bpmn:sequenceFlow id="Flow_00hpd0c" sourceRef="Activity_Fire_Handling_Providers" targetRef="Gateway_1n38nz2" />
+    <bpmn:sequenceFlow id="Flow_0oo3j48" sourceRef="Gateway_1t52wen" targetRef="Activity_Traffic_Delimitation" />
+    <bpmn:sequenceFlow id="Flow_1eeeug8" sourceRef="Activity_Traffic_Delimitation" targetRef="Gateway_1n38nz2" />
+    <bpmn:sequenceFlow id="Flow_City_Fire" name="City Fire" sourceRef="Gateway_Plan_Selection" targetRef="Gateway_1t52wen">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=emergency_plan = "FIRE_LOW"
+or emergency_plan = "FIRE_STANDARD"
+or emergency_plan = "FIRE_HIGH"
+or emergency_plan = "FIRE_CRITICAL"
+</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_055sexm" sourceRef="Gateway_1n38nz2" targetRef="Gateway_Emergency_Context" />
+    <bpmn:sequenceFlow id="Flow_1l5tvwy" sourceRef="Call_Flood_Response" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_1jpogrh" sourceRef="Task_Request_Evacuation" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_1hmjz6t" sourceRef="Gateway_1xp32nv" targetRef="End_Emergency_Response" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Emergency">
+    <bpmndi:BPMNPlane id="BPMNPlane_Emergency" bpmnElement="Emergency_Response_Plan_Orchestrator">
+      <bpmndi:BPMNShape id="Start_Emergency_Report_di" bpmnElement="Start_Emergency_Report">
+        <dc:Bounds x="160" y="510" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="150" y="546" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Plan_Selection_di" bpmnElement="Gateway_Plan_Selection" isMarkerVisible="true">
+        <dc:Bounds x="580" y="503" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="624" y="493" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1g5fgct_di" bpmnElement="Gateway_1g5fgct">
+        <dc:Bounds x="1635" y="204" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_0sp9hma" bpmnElement="Gateway_1xp32nv">
+        <dc:Bounds x="2055" y="204" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0p2lqsq_di" bpmnElement="Activity_Fire_Handling_Providers" isExpanded="true">
+        <dc:Bounds x="900" y="360" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_14nijje" bpmnElement="Gateway_1t52wen">
+        <dc:Bounds x="725" y="263" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1fvp9yg" bpmnElement="Gateway_1n38nz2">
+        <dc:Bounds x="1145" y="263" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_005eyhq" bpmnElement="Activity_Traffic_Delimitation" isExpanded="true">
+        <dc:Bounds x="900" y="125" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0xkzoin_di" bpmnElement="Gateway_Emergency_Context">
+        <dc:Bounds x="1425" y="263" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1356" y="253" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_Flood_Response_di" bpmnElement="Call_Flood_Response">
+        <dc:Bounds x="1565" y="710" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_1lg5rgu" bpmnElement="Call_BLS_Ambulance">
+        <dc:Bounds x="1795" y="290" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_ALS_Ambulance_di" bpmnElement="Call_ALS_Ambulance">
+        <dc:Bounds x="1795" y="80" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
+        <dc:Bounds x="2622" y="510" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2668" y="508" width="56" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_17lj8zr" bpmnElement="Task_Request_Evacuation" isExpanded="true">
+        <dc:Bounds x="1570" y="488" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Task_Event_Analysis_di" bpmnElement="Task_Event_Analysis">
+        <dc:Bounds x="330" y="488" width="120" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Analysis_di" bpmnElement="Flow_Start_Analysis">
+        <di:waypoint x="196" y="528" />
+        <di:waypoint x="330" y="528" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Analysis_Capability_di" bpmnElement="Flow_Analysis_Capability">
+        <di:waypoint x="450" y="528" />
+        <di:waypoint x="580" y="528" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Flood_Plan_di" bpmnElement="Flow_Flood_Plan">
+        <di:waypoint x="605" y="553" />
+        <di:waypoint x="605" y="750" />
+        <di:waypoint x="1565" y="750" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="606" y="642" width="28" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07g9sto_di" bpmnElement="Flow_City_Fire">
+        <di:waypoint x="605" y="503" />
+        <di:waypoint x="605" y="288" />
+        <di:waypoint x="725" y="288" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="629" y="392.5" width="41" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0cfauu3_di" bpmnElement="Flow_0cfauu3">
+        <di:waypoint x="1450" y="263" />
+        <di:waypoint x="1450" y="229" />
+        <di:waypoint x="1635" y="229" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1477" y="193" width="65" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ry1z7s_di" bpmnElement="Flow_1ry1z7s">
+        <di:waypoint x="1660" y="254" />
+        <di:waypoint x="1660" y="330" />
+        <di:waypoint x="1795" y="330" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1exb4cw_di" bpmnElement="Flow_1exb4cw">
+        <di:waypoint x="1660" y="204" />
+        <di:waypoint x="1660" y="120" />
+        <di:waypoint x="1795" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ehizdk_di" bpmnElement="Flow_1ehizdk">
+        <di:waypoint x="1685" y="229" />
+        <di:waypoint x="2055" y="229" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1j130t0_di" bpmnElement="Flow_1j130t0">
+        <di:waypoint x="1945" y="330" />
+        <di:waypoint x="2080" y="330" />
+        <di:waypoint x="2080" y="254" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0q6lk1n_di" bpmnElement="Flow_0q6lk1n">
+        <di:waypoint x="1945" y="120" />
+        <di:waypoint x="2080" y="120" />
+        <di:waypoint x="2080" y="204" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hmjz6t_di" bpmnElement="Flow_1hmjz6t">
+        <di:waypoint x="2105" y="229" />
+        <di:waypoint x="2640" y="229" />
+        <di:waypoint x="2640" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_1uvfjex" bpmnElement="Flow_18zitaf">
+        <di:waypoint x="750" y="313" />
+        <di:waypoint x="750" y="398" />
+        <di:waypoint x="900" y="398" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_00hpd0c_di" bpmnElement="Flow_00hpd0c">
+        <di:waypoint x="1000" y="400" />
+        <di:waypoint x="1170" y="400" />
+        <di:waypoint x="1170" y="313" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_0hp1ide" bpmnElement="Flow_0oo3j48">
+        <di:waypoint x="750" y="263" />
+        <di:waypoint x="750" y="165" />
+        <di:waypoint x="900" y="165" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1eeeug8_di" bpmnElement="Flow_1eeeug8">
+        <di:waypoint x="1000" y="165" />
+        <di:waypoint x="1170" y="165" />
+        <di:waypoint x="1170" y="263" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_055sexm_di" bpmnElement="Flow_055sexm">
+        <di:waypoint x="1195" y="288" />
+        <di:waypoint x="1425" y="288" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yf6v3g_di" bpmnElement="Flow_trapper_people">
+        <di:waypoint x="1450" y="313" />
+        <di:waypoint x="1450" y="528" />
+        <di:waypoint x="1570" y="528" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1475" y="494" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1l5tvwy_di" bpmnElement="Flow_1l5tvwy">
+        <di:waypoint x="1715" y="750" />
+        <di:waypoint x="2640" y="750" />
+        <di:waypoint x="2640" y="546" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jpogrh_di" bpmnElement="Flow_1jpogrh">
+        <di:waypoint x="1670" y="528" />
+        <di:waypoint x="2622" y="528" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

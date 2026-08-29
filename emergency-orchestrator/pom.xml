@@ -76,6 +76,12 @@
     		<version>${camunda.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>com.networknt</groupId>
+			<artifactId>json-schema-validator</artifactId>
+			<version>1.5.6</version>
+		</dependency>
+
 		
 		<!-- Database H2 per test in memoria (sostituibile con mysql-connector-j in produzione) -->
 		<dependency>

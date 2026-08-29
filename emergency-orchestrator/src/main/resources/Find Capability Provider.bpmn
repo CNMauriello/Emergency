@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.20.0">
-  <bpmn:process id="Process_0t95rly" name="Find Capability Provider" isExecutable="true">
+  <bpmn:process id="Capability_Provider" name="Find Capability Provider" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Start Find Capability Search">
       <bpmn:outgoing>Flow_0aapk5y</bpmn:outgoing>
     </bpmn:startEvent>
@@ -47,7 +47,7 @@
     </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_0t95rly">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Capability_Provider">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="150" y="100" width="36" height="36" />
         <bpmndi:BPMNLabel>
