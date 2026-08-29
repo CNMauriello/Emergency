@@ -156,7 +156,7 @@ or emergency_plan = "FIRE_CRITICAL"
           <zeebe:header key="elementTemplateVersion" value="13" />
           <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
           <zeebe:header key="resultVariable" value="rEvacuated" />
-          <zeebe:header key="resultExpression" value="=={&#10;  rEvacuated: response.body.areEvacuated&#10;}&#10;" />
+          <zeebe:header key="resultExpression" value="={&#10;rEvacuated:response.body.areEvacuated&#10;}&#10;" />
           <zeebe:header key="retryBackoff" value="PT0S" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
@@ -178,11 +178,11 @@ or emergency_plan = "FIRE_CRITICAL"
     <bpmn:sequenceFlow id="Flow_0i2g68c" sourceRef="Event_1mjfqd7" targetRef="check_evacuation" />
     <bpmn:sequenceFlow id="Flow_0wart89" sourceRef="check_evacuation" targetRef="check_evacuation_gateway" />
     <bpmn:sequenceFlow id="Flow_Not_Fully_Evacuated" name="Not Fully Evacuated" sourceRef="check_evacuation_gateway" targetRef="Activity_0gc36yu">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=rEvacuated = "false"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=rEvacuated = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0guodik" sourceRef="Activity_16xhkgl" targetRef="Event_1mjfqd7" />
     <bpmn:sequenceFlow id="Flow_Fully_Evcuated" sourceRef="check_evacuation_gateway" targetRef="End_Emergency_Response">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=rEvacuated = "true"</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=rEvacuated = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:callActivity id="Activity_0gc36yu" name="Alert Firefighters for trapped people" calledElement="Process_0t95rly">
       <bpmn:extensionElements>
