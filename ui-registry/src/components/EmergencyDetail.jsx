@@ -18,8 +18,8 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         if (!emergencyId) return;
         const loadCapabilities = async () => {
             try {
-                const headers = {'Authorization': `Bearer ${localStorage.getItem('faro_token')}`};
-                const res = await fetch(`${API_BASE_URL}/capabilities`, {headers});
+                //const headers = {'Authorization': `Bearer ${localStorage.getItem('faro_token')}`};
+                const res = await fetch(`${API_BASE_URL}/capabilities`);//, {headers});
                 if (res.ok) {
                     const data = await res.json();
                     setCapabilities(data);
