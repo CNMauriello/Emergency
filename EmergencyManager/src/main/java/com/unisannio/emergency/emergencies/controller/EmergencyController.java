@@ -25,7 +25,7 @@ public class EmergencyController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmergencyResponseDto> getEmergency(@PathVariable Long id) {
+    public ResponseEntity<EmergencyResponseDto> getEmergency(@PathVariable String id) {
         return emergencyStateService.getEmergencyById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -33,7 +33,7 @@ public class EmergencyController {
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<Void> updateEmergencyStatus(
-            @PathVariable Long id,
+            @PathVariable String id,
             @RequestBody StatusUpdateRequestDto request) {
         emergencyStateService.updateStatus(id, request.getStatus(), request.getWorkflowInstanceId());
         return ResponseEntity.ok().build();

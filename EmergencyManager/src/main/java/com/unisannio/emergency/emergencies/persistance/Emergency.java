@@ -32,6 +32,7 @@ public class Emergency {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private EmergencyStatus status; // OPEN, IN_PROGRESS, CLOSED
 

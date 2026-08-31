@@ -51,10 +51,10 @@ public class EmergencyTriggerService {
         // Se vuoi mantenere la validazione JSON Schema,
         // la facciamo sui dati del record.
 
-        camundaClient
-                .newPublishMessageCommand()
-                .messageName(MESSAGE_NAME)
-                .withoutCorrelationKey()
+        var event = camundaClient
+                .newCreateInstanceCommand()
+                .bpmnProcessId("Emergency_Response_Plan_Orchestrator")
+                .latestVersion()
                 .variables(Map.of(
                         "event_id", payload.event_id(),
                         "timestamp", payload.timestamp(),
@@ -85,6 +85,11 @@ public class EmergencyTriggerService {
                         "global_confidence",
                         payload.global_confidence()
                 ))
+                .send()
+                .join();
+
+        camundaClient.newSetVariablesCommand(event.getProcessInstanceKey())
+                .variables(Map.of("processInstanceKey", String.valueOf(event.getProcessInstanceKey())))
                 .send()
                 .join();
     }

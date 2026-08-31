@@ -28,8 +28,8 @@ public class EmergencyStateService {
         this.emergencyMapper = emergencyMapper;
     }
 
-    public Optional<EmergencyResponseDto> getEmergencyById(Long id) {
-        return emergencyRepository.findById(id)
+    public Optional<EmergencyResponseDto> getEmergencyById(String id) {
+        return emergencyRepository.findByEventId(id)
                 .map(emergencyMapper::toDto);
     }
 
@@ -78,9 +78,11 @@ public class EmergencyStateService {
     }
 
     @Transactional
-    public void updateStatus(Long id, String newStatus, String workflowInstanceId) {
-        emergencyRepository.findById(id).ifPresent(emergency -> {
+    public void updateStatus(String id, String newStatus, String workflowInstanceId) {
+        emergencyRepository.findByEventId(id).ifPresent(emergency -> {
             emergency.setStatus(EmergencyStatus.valueOf(newStatus));
+            System.out.println("WorkflowInstanceId: " + workflowInstanceId);
+            System.out.println("Status: " + newStatus);
             if (workflowInstanceId != null) {
                 emergency.setWorkflowInstanceId(workflowInstanceId);
             }
