@@ -14,7 +14,6 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
     const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
 
-    // 1. Chiamata REALE alle capability all'avvio
     useEffect(() => {
         if (!emergencyId) return;
         const loadCapabilities = async () => {
@@ -32,7 +31,6 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         loadCapabilities();
     }, [emergencyId]);
 
-    // 2. Chiamate REALI in polling per l'emergenza e i servizi filtrati
     useEffect(() => {
         if (!emergencyId) return;
 
@@ -43,13 +41,12 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                     'Content-Type': 'application/json'
                 };
 
-                // Fetch dell'emergenza reale
+                // Usa GET /emergencies/{id}
                 const emRes = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}`, {headers});
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
 
-                // Fetch del registry reale (filtrato per capability se selezionata)
                 const serviceUrl = selectedCapability
                     ? `${API_BASE_URL}/services?capability=${selectedCapability}`
                     : `${API_BASE_URL}/services`;
@@ -74,42 +71,42 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         return () => clearInterval(interval);
     }, [emergencyId, selectedCapability]);
 
-    // 3. POST REALE per l'ingaggio manuale
     const handleManualDispatch = async () => {
         if (!selectedUnit) return;
         setDispatching(true);
         try {
-            const response = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}/override-dispatch`, {
-                method: 'POST',
+            // Usa il nuovo endpoint PATCH /emergencies/{id}/status invece del POST
+            const response = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}/status`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('faro_token')}`
                 },
-                body: JSON.stringify({serviceId: selectedUnit})
+                // Allineato al StatusUpdateRequestDto previsto dal controller
+                body: JSON.stringify({
+                    status: 'MONITORING',
+                    workflowInstanceId: emergency.workflowInstanceId
+                })
             });
 
-            if (!response.ok) throw new Error('Errore durante il dispaccio dal backend');
+            if (!response.ok) throw new Error('Errore durante l\'aggiornamento di stato dal backend');
 
             setSelectedUnit('');
-            // Non facciamo null'altro: sarà il prossimo ciclo di polling a
-            // far avanzare la UI quando riceverà il nuovo stato dal backend!
         } catch (err) {
             console.error("Errore durante l'ingaggio", err);
-            alert("Impossibile confermare il dispaccio: " + err.message);
+            alert("Impossibile confermare l'aggiornamento di stato: " + err.message);
         } finally {
             setDispatching(false);
         }
     };
 
     if (!emergencyId) return <div className="p-8 text-gray-500">Nessuna emergenza selezionata.</div>;
-    if (loading) return <div className="p-8 flex justify-center"><Loader2
-        className="animate-spin w-8 h-8 text-blue-500"/></div>;
+    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500"/></div>;
 
     if (error || !emergency) {
         return (
             <div className="p-8 bg-gray-50 min-h-screen">
-                <button onClick={onBack}
-                        className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
+                <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
                     <ArrowLeft className="w-4 h-4 mr-1"/> Torna alla lista
                 </button>
                 <div className="flex flex-col items-center justify-center py-20">
@@ -121,25 +118,21 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         );
     }
 
-    // Dichiariamo che l'ingaggio manuale è completato solo se il backend ha fatto avanzare lo stato
-    // o se ha registrato un task di ingaggio nello storico.
     const isDispatchCompleted = emergency.status === 'MONITORING' || emergency.status === 'CLOSED' ||
         (emergency.history && emergency.history.some(h => h.includes('INGAGGIATA')));
 
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
-            <button onClick={onBack}
-                    className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm font-bold">
+            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm font-bold">
                 <ArrowLeft className="w-4 h-4 mr-1"/> Torna alla lista
             </button>
 
             <div className="flex items-center space-x-4 mb-8">
                 <h1 className="text-3xl font-bold text-gray-800">Emergenza: {emergency.eventType}</h1>
                 <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">{emergency.severity}</span>
-                <span
-                    className={`px-2 py-1 text-xs font-bold rounded text-white ${emergency.status === 'CLOSED' ? 'bg-gray-500' : 'bg-blue-500'}`}>
-          {emergency.status}
-        </span>
+                <span className={`px-2 py-1 text-xs font-bold rounded text-white ${emergency.status === 'CLOSED' ? 'bg-gray-500' : 'bg-blue-500'}`}>
+                    {emergency.status}
+                </span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,8 +142,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                             <h2 className="text-lg font-bold text-gray-800 flex items-center">
                                 <MapPin className="w-5 h-5 mr-2 text-gray-500"/> Dettagli Operativi
                             </h2>
-                            <span
-                                className="bg-gray-100 text-gray-500 px-2 py-1 text-xs font-mono rounded">ID: {emergency.id}</span>
+                            <span className="bg-gray-100 text-gray-500 px-2 py-1 text-xs font-mono rounded">ID: {emergency.id}</span>
                         </div>
                         <div className="space-y-3 text-sm">
                             <div>
@@ -187,16 +179,14 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
 
                         {emergency.status === 'IN_PROGRESS' && !isDispatchCompleted && (
                             <div className="relative">
-                                <div
-                                    className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
+                                <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
                                     <div className="w-2 h-2 bg-white rounded-full"></div>
                                 </div>
                                 <h3 className="font-bold text-gray-900 text-lg">Ingaggio Manuale Risorsa</h3>
 
                                 <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-5 mt-4">
                                     <div className="mb-4 border-b border-blue-200 pb-4">
-                                        <label
-                                            className="block text-xs font-bold text-blue-800 uppercase mb-2 flex items-center">
+                                        <label className="block text-xs font-bold text-blue-800 uppercase mb-2 flex items-center">
                                             <Filter className="w-3 h-3 mr-1"/> Filtra risorse per Capability
                                         </label>
                                         <select
@@ -228,8 +218,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                                         {services.map(srv => (
                                             <option key={srv.id} value={srv.id}
                                                     disabled={srv.status !== 'ACTIVE' && srv.status !== 'UP'}>
-                                                {srv.type} (Carico: {srv.currentLoad} - Latenza: {srv.avgLatency}ms)
-                                                - {srv.status}
+                                                {srv.type} (Carico: {srv.currentLoad} - Latenza: {srv.avgLatency}ms) - {srv.status}
                                             </option>
                                         ))}
                                     </select>
@@ -238,7 +227,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                                         disabled={!selectedUnit || dispatching}
                                         className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold disabled:bg-blue-300 transition-colors"
                                     >
-                                        {dispatching ? 'Acquisizione Lock in corso...' : 'Conferma Dispaccio'}
+                                        {dispatching ? 'Aggiornamento in corso...' : 'Conferma Dispaccio'}
                                     </button>
                                 </div>
                             </div>
@@ -254,20 +243,17 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
 
                         <div className={`relative ${!isDispatchCompleted ? 'opacity-50' : ''}`}>
                             {isDispatchCompleted && emergency.status !== 'CLOSED' ? (
-                                <div
-                                    className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
+                                <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
                                     <div className="w-2 h-2 bg-white rounded-full"></div>
                                 </div>
                             ) : (
                                 <Circle className="w-6 h-6 text-gray-300 absolute -left-[1.65rem] bg-white"/>
                             )}
-                            <h3 className={`font-bold ${isDispatchCompleted ? 'text-gray-900 text-lg' : 'text-gray-500'}`}>Monitoraggio
-                                e Chiusura</h3>
+                            <h3 className={`font-bold ${isDispatchCompleted ? 'text-gray-900 text-lg' : 'text-gray-500'}`}>Monitoraggio e Chiusura</h3>
                             <p className={`text-sm ${isDispatchCompleted ? 'text-gray-600' : 'text-gray-400'}`}>
                                 {isDispatchCompleted ? 'Il piano operativo sta proseguendo il suo flusso BPMN. In attesa della chiusura.' : 'In attesa del completamento delle fasi precedenti.'}
                             </p>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -276,7 +262,6 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
 };
 
 export default EmergencyDetail;
-
 
 // FAKE
 /*
