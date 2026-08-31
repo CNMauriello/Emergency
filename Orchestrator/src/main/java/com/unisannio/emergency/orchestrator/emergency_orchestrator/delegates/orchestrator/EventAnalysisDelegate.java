@@ -22,13 +22,14 @@ public class EventAnalysisDelegate {
         Map<String, Object> variables = job.getVariablesAsMap();
 
         String eventType = String.valueOf(variables.get(EVENT_TYPE));
-
         String severity = String.valueOf(variables.get(SEVERITY));
 
         String plan = selectPlan(eventType, severity);
 
+        // Restituiamo il piano selezionato e iniettiamo il processInstanceKey
         return Map.of(
-                EMERGENCY_PLAN, plan
+                EMERGENCY_PLAN, plan,
+                "processInstanceKey", String.valueOf(job.getProcessInstanceKey())
         );
     }
 
