@@ -79,11 +79,8 @@ const ActiveEmergencies = ({onViewDetail}) => {
     const fetchEmergencies = async () => {
         try {
             // Sostituisci con il vero endpoint del Gestore Operatori di Sala
-            const response = await fetch(`${API_BASE_URL}/emergencies`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('faro_token')}`
-                }
-            });
+            const response = await fetch(`http://localhost:8084/api/emergencies`);
+            //${API_BASE_URL}/emergencies
 
             // Fallback temporaneo per testare la UI in caso di assenza del backend
             if (!response.ok) {

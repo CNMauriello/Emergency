@@ -37,12 +37,12 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         const fetchData = async () => {
             try {
                 const headers = {
-                    'Authorization': `Bearer ${localStorage.getItem('faro_token')}`,
+                    //'Authorization': `Bearer ${localStorage.getItem('faro_token')}`,
                     'Content-Type': 'application/json'
                 };
 
                 // Usa GET /emergencies/{id}
-                const emRes = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}`, {headers});
+                const emRes = await fetch(`http://localhost:8084/api/emergencies/${emergencyId}`, {headers});
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
@@ -76,11 +76,11 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         setDispatching(true);
         try {
             // Usa il nuovo endpoint PATCH /emergencies/{id}/status invece del POST
-            const response = await fetch(`${API_BASE_URL}/emergencies/${emergencyId}/status`, {
+            const response = await fetch(`http://localhost:8084/api/emergencies/${emergencyId}/status`, {
                 method: 'PATCH',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('faro_token')}`
+                    'Content-Type': 'application/json'
+                    //'Authorization': `Bearer ${localStorage.getItem('faro_token')}`
                 },
                 // Allineato al StatusUpdateRequestDto previsto dal controller
                 body: JSON.stringify({
