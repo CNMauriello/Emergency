@@ -18,7 +18,7 @@ public class FindCapabilityProvidersDelegate {
     private final RestClient restClient;
 
     private final String binderUrl =
-            "http://localhost:8082/api/binder/candidates";
+            "http://localhost:8080/Binder/api/binder/candidates";
 
     public FindCapabilityProvidersDelegate() {
         this.restClient = RestClient.create();

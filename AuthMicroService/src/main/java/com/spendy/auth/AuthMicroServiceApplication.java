@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages = "com.spendy.auth")
-@ApplicationPath("/rest")
+@ApplicationPath("/api")
 public class AuthMicroServiceApplication extends ResourceConfig
 {
     public AuthMicroServiceApplication()

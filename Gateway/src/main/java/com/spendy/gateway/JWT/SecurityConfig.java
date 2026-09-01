@@ -37,6 +37,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET,"/Auth/rest/auth/profile").authenticated()
                         .pathMatchers(HttpMethod.GET,"/Auth/rest/auth/updateProfile").authenticated()
                         .pathMatchers("/Auth/**").permitAll()
+                        .pathMatchers("/Binder/**").permitAll()
                         .pathMatchers("/Emergency/emergencies", "/Emergency/emergencies/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/Orchestrator/api/workflows", "/Orchestrator/api/workflows/**").hasAnyAuthority("ROLE_WORKFLOW_EXPERT", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/Registry/services", "/Registry/services/**").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
