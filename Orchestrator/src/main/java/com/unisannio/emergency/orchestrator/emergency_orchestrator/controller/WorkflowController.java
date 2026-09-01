@@ -22,6 +22,11 @@ public class WorkflowController {
         this.workflowStorageService = workflowStorageService;
     }
 
+    @org.springframework.web.bind.annotation.GetMapping
+    public ResponseEntity<?> getAllWorkflows() {
+        return ResponseEntity.ok(workflowStorageService.getAllWorkflows());
+    }
+
     @PostMapping
     public ResponseEntity<?> uploadWorkflow(
             @RequestParam("file") MultipartFile file,
@@ -34,6 +39,20 @@ public class WorkflowController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing file upload");
+        }
+    }
+
+    @org.springframework.web.bind.annotation.PutMapping("/active-version")
+    public ResponseEntity<?> changeActiveVersion(
+            @RequestParam("processKey") String processKey,
+            @RequestParam("targetVersion") Integer targetVersion) {
+        try {
+            Workflow updatedWorkflow = workflowStorageService.changeActiveVersion(processKey, targetVersion);
+            return ResponseEntity.ok(updatedWorkflow);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error modifying files");
         }
     }
 }

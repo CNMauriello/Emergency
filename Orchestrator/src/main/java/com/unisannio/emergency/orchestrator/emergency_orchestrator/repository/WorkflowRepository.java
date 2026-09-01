@@ -8,5 +8,9 @@ import java.util.Optional;
 
 @Repository
 public interface WorkflowRepository extends JpaRepository<Workflow, Long> {
-    Optional<Workflow> findByEventTypeAndSeverity(String eventType, String severity);
+    Optional<Workflow> findByProcessKeyAndEnabledTrue(String processKey);
+    Optional<Workflow> findByProcessKeyAndVersion(String processKey, Integer version);
+    Optional<Workflow> findTopByProcessKeyOrderByVersionDesc(String processKey);
+    // Optional, if we want all versions of a specific workflow
+    java.util.List<Workflow> findByProcessKey(String processKey);
 }

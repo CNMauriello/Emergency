@@ -31,26 +31,32 @@ public class WorkflowStorageService {
             throw new IllegalArgumentException("Unknown process key for eventType: " + eventType + " and severity: " + severity);
         }
 
-        // Save physical file
-        saveFile(file);
+        Optional<Workflow> latestWorkflowOpt = workflowRepository.findTopByProcessKeyOrderByVersionDesc(processKey);
+        int nextVersion = latestWorkflowOpt.map(w -> w.getVersion() + 1).orElse(1);
 
-        // Save or update workflow metadata
-        Optional<Workflow> existingWorkflowOpt = workflowRepository.findByEventTypeAndSeverity(eventType, severity);
-        Workflow workflow;
-
-        if (existingWorkflowOpt.isPresent()) {
-            workflow = existingWorkflowOpt.get();
-            workflow.setVersion(workflow.getVersion() + 1);
-        } else {
-            workflow = new Workflow();
-            workflow.setEventType(eventType);
-            workflow.setSeverity(severity);
-            workflow.setProcessKey(processKey);
-            workflow.setVersion(1);
-        }
+        Workflow workflow = new Workflow();
+        workflow.setEventType(eventType);
+        workflow.setSeverity(severity);
+        workflow.setProcessKey(processKey);
+        workflow.setVersion(nextVersion);
         
+        // Disattiva il workflow precedentemente attivo se presente
+        workflowRepository.findByProcessKeyAndEnabledTrue(processKey).ifPresent(active -> {
+            active.setEnabled(false);
+            workflowRepository.save(active);
+        });
+
+        // Imposta il nuovo workflow come attivo
         workflow.setEnabled(true);
+        
+        // Save physical file
+        saveFile(file, processKey, workflow.getVersion());
+
         return workflowRepository.save(workflow);
+    }
+
+    public java.util.List<Workflow> getAllWorkflows() {
+        return workflowRepository.findAll();
     }
 
     private String generateProcessKey(String eventType, String severity) {
@@ -88,21 +94,76 @@ public class WorkflowStorageService {
         };
     }
 
-    private void saveFile(MultipartFile file) throws IOException {
-        String currentDir = System.getProperty("user.dir");
-        Path directory = Paths.get(currentDir);
-        
-        // Se il processo è stato avviato dalla root del progetto padre, aggiungiamo "Orchestrator"
-        if (!currentDir.endsWith("Orchestrator")) {
-            directory = directory.resolve("Orchestrator");
+    @Transactional
+    public Workflow changeActiveVersion(String processKey, Integer targetVersion) throws IOException {
+        // Recupera il workflow target
+        Workflow targetWorkflow = workflowRepository.findByProcessKeyAndVersion(processKey, targetVersion)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Target workflow not found for version: " + targetVersion));
+
+        if (targetWorkflow.getEnabled()) {
+            return targetWorkflow; // Already active
         }
-        directory = directory.resolve("src/main/resources/");
+
+        // Recupera il workflow attualmente attivo (se esiste)
+        Optional<Workflow> currentActiveOpt = workflowRepository.findByProcessKeyAndEnabledTrue(processKey);
+        Integer currentVersion = currentActiveOpt.map(Workflow::getVersion).orElse(null);
+
+        Path resourcesDir = getDirectoryPath();
+
+        // 1. Fase di Disattivazione (versione corrente)
+        if (currentVersion != null) {
+            Path currentVersionFile = resourcesDir.resolve(processKey + "_v" + currentVersion + ".bpmn");
+            if (Files.exists(currentVersionFile)) {
+                String currentContent = Files.readString(currentVersionFile);
+                String oldId = processKey;
+                String newId = processKey + "_" + currentVersion;
+                
+                String replacedCurrent = currentContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"", "$1id=\"" + newId + "\"");
+                Files.writeString(currentVersionFile, replacedCurrent);
+            }
+            
+            Workflow currentActive = currentActiveOpt.get();
+            currentActive.setEnabled(false);
+            workflowRepository.save(currentActive);
+        }
+
+        // 2. Fase di Attivazione (versione target)
+        Path targetVersionFile = resourcesDir.resolve(processKey + "_v" + targetVersion + ".bpmn");
+        if (Files.exists(targetVersionFile)) {
+            String targetContent = Files.readString(targetVersionFile);
+            String oldId = processKey + "_" + targetVersion;
+            String newId = processKey;
+
+            String replacedTarget = targetContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"", "$1id=\"" + newId + "\"");
+            Files.writeString(targetVersionFile, replacedTarget);
+        } else {
+            throw new java.io.FileNotFoundException("Target version file not found: " + targetVersionFile.getFileName());
+        }
+
+        // 3. Aggiornamento Database
+        targetWorkflow.setEnabled(true);
+        return workflowRepository.save(targetWorkflow);
+    }
+
+    private void saveFile(MultipartFile file, String processKey, Integer version) throws IOException {
+        Path directory = getDirectoryPath();
         
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
         }
         
-        Path targetPath = directory.resolve(file.getOriginalFilename());
+        String filename = processKey + "_v" + version + ".bpmn";
+        Path targetPath = directory.resolve(filename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    private Path getDirectoryPath() {
+        String currentDir = System.getProperty("user.dir");
+        Path directory = Paths.get(currentDir);
+        
+        if (!currentDir.endsWith("Orchestrator")) {
+            directory = directory.resolve("Orchestrator");
+        }
+        return directory.resolve("src/main/resources/");
     }
 }
