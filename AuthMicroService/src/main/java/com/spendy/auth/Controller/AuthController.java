@@ -1,0 +1,155 @@
+package com.spendy.auth.Controller;
+
+import com.spendy.auth.Data.User;
+import com.spendy.auth.Service.AuthService;
+import com.spendy.auth.Utility.AuthResult;
+import com.spendy.auth.Utility.StatusAuth;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+
+@Path("/auth")
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(EMAIL_REGEX);
+
+    @POST
+    @Path("/login")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response login(User user) {
+        AuthResult result;
+        String password = user.getPassword();
+        String username = user.getUsername();
+        if (username == null) {
+            String email = user.getEmail();
+            result = authService.login(email, password);
+        } else {
+            result = authService.login(username, password);
+        }
+
+        if (result.getStatusAuth() == StatusAuth.SUCCESS) {
+            // Opzionale: ritorna token subito anche qui
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("accessToken", result.getAccessToken());
+            responseMap.put("refreshToken", result.getRefreshToken());
+            return Response.ok(responseMap).build();
+        } else if (result.getStatusAuth() == StatusAuth.USER_NOT_FOUND) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Utente non trovato").build();
+        } else if (result.getStatusAuth() == StatusAuth.INVALID_CREDENTIALS) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Credenziali errate o non valide").build();
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Server error").build();
+    }
+
+    @POST
+    @Path("/register")
+    public Response register(User user) {
+
+        String username = user.getUsername();
+        String password = user.getPassword();
+        String name = user.getName();
+        String surname = user.getSurname();
+        String email = user.getEmail();
+
+        if (!validateEmail(email)) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Email invalido").build();
+        }
+
+        AuthResult result = authService.register(username, name, password, surname, email);
+        if (result.getStatusAuth() == StatusAuth.SUCCESS) {
+            return Response.ok("Registration successful").build();
+        } else if (result.getStatusAuth() == StatusAuth.USER_ALREADY_EXISTS) {
+            return Response.status(Response.Status.CONFLICT).entity("User already exists").build();
+        }
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build();
+    }
+
+    @POST
+    @Path("/refresh")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response refreshToken(Map<String, String> body) {
+        String requestRefreshToken = body.get("refreshToken");
+
+        if (requestRefreshToken == null || requestRefreshToken.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Refresh Token missing").build();
+        }
+
+        AuthResult result = authService.refreshAccessToken(requestRefreshToken);
+
+        if (result.getStatusAuth() == StatusAuth.SUCCESS) {
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("accessToken", result.getAccessToken());
+            responseMap.put("refreshToken", result.getRefreshToken()); // Ritorna il NUOVO token (rotazione)
+            return Response.ok(responseMap).build();
+        } else {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Refresh Token expired or invalid").build();
+        }
+    }
+
+    private static boolean validateEmail(String email) {
+        if (email == null) return false;
+        Matcher matcher = EMAIL_PATTERN.matcher(email);
+        return matcher.matches();
+    }
+
+    @GET
+    @Path("/profile")
+    @Produces("application/json")
+    public Response getProfile(@HeaderParam("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing or invalid Authorization header").build();
+        }
+        String accessToken = authHeader.substring(7);
+        User user = authService.getUserFromToken(accessToken);
+        if (user != null) {
+            Map<String, String> profileMap = new HashMap<>();
+            profileMap.put("username", user.getUsername());
+            profileMap.put("name", user.getName());
+            profileMap.put("surname", user.getSurname());
+            profileMap.put("email", user.getEmail());
+            return Response.ok(profileMap).build();
+        } else {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid access token").build();
+        }
+    }
+
+    @PUT
+    @Path("/updateProfile")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public Response updateProfile(@HeaderParam("Authorization") String authHeader, User updatedUser) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return Response.status(Response.Status.UNAUTHORIZED).entity("Missing or invalid Authorization header").build();
+        }
+        String accessToken = authHeader.substring(7);
+        AuthResult result = authService.updateUserProfile(accessToken, updatedUser);
+
+        if (result.getStatusAuth() == StatusAuth.SUCCESS) {
+            return Response.ok("Profile updated successfully").build();
+        }
+        else if (result.getStatusAuth() == StatusAuth.USER_NOT_FOUND) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+        }
+        else {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred").build();
+        }
+    }
+
+    @GET
+    @Path("/health")
+    public Response healthCheck() {
+        return Response.ok("AuthMicroService is running").build();
+    }
+}
