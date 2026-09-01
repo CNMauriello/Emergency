@@ -1,5 +1,6 @@
 package com.spendy.gateway.JWT;
 
+import com.sun.research.ws.wadl.HTTPMethods;
 import jakarta.ws.rs.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,10 +38,13 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET,"/Auth/rest/auth/profile").authenticated()
                         .pathMatchers(HttpMethod.GET,"/Auth/rest/auth/updateProfile").authenticated()
                         .pathMatchers("/Auth/**").permitAll()
-                        .pathMatchers("/Binder/**").permitAll()
                         .pathMatchers("/Emergency/emergencies", "/Emergency/emergencies/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/Orchestrator/api/workflows", "/Orchestrator/api/workflows/**").hasAnyAuthority("ROLE_WORKFLOW_EXPERT", "ROLE_ROOM_OPERATOR")
-                        .pathMatchers("/Registry/services", "/Registry/services/**").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
+                        //Operatore dei servizi
+                        .pathMatchers(HttpMethod.PATCH, "/Registry/services/{id}").hasAnyAuthority("ROLE_SERVICE_OPERATOR")
+                        .pathMatchers(HttpMethod.POST, "/Registry/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR")
+                        .pathMatchers(HttpMethod.GET, "/Registry/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR")
+                        // Operatore di sala
                         .anyExchange().hasAuthority("ROLE_ROOM_OPERATOR")
                 )
                 .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
