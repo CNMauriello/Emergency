@@ -33,10 +33,10 @@ class GatewayClientControllerTest {
         String token = "generated-token-123";
         GatewayResult result = new GatewayResult(StatusGateway.TOKEN_GENERATION_SUCCESS, token);
 
-        when(gatwayClientService.generateToken(username)).thenReturn(result);
+        when(gatwayClientService.generateToken(username, "ROLE_USER")).thenReturn(result);
 
         // When
-        ResponseEntity<?> response = gatewayClientController.generateToken(Map.of("username", username));
+        ResponseEntity<?> response = gatewayClientController.generateToken(Map.of("username", username, "role", "ROLE_USER"));
 
         // Then
         assertEquals(200, response.getStatusCode().value());
@@ -53,10 +53,10 @@ class GatewayClientControllerTest {
         String username = "testuser";
         GatewayResult result = new GatewayResult(StatusGateway.TOKEN_GENERATION_FAILED, null);
 
-        when(gatwayClientService.generateToken(username)).thenReturn(result);
+        when(gatwayClientService.generateToken(username, "ROLE_USER")).thenReturn(result);
 
         // When
-        ResponseEntity<?> response = gatewayClientController.generateToken(Map.of("username", username));
+        ResponseEntity<?> response = gatewayClientController.generateToken(Map.of("username", username, "role", "ROLE_USER"));
 
         // Then
         assertEquals(500, response.getStatusCode().value());
@@ -103,12 +103,12 @@ class GatewayClientControllerTest {
     @Test
     void testGenerateToken_ThrowsException() {
         // Given
-        when(gatwayClientService.generateToken(anyString()))
+        when(gatwayClientService.generateToken(anyString(), anyString()))
             .thenThrow(new IllegalArgumentException("Username cannot be null or empty"));
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            gatewayClientController.generateToken(Map.of("username", ""));
+            gatewayClientController.generateToken(Map.of("username", "", "role", "ROLE_USER"));
         });
     }
 

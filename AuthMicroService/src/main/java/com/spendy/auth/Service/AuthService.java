@@ -36,7 +36,7 @@ public class AuthService {
         User user = new User(username, name, hashedPassword, surname, email);
         userRepository.save(user);
 
-        String token = generateTokenViaRest(username);
+        String token = generateTokenViaRest(username, user.getRole());
         return new AuthResult(StatusAuth.SUCCESS, token);
     }
 
@@ -49,17 +49,17 @@ public class AuthService {
             return new AuthResult(StatusAuth.USER_NOT_FOUND, null);
         }
         if (BCrypt.checkpw(password, user.getPassword())) {
-            String accessToken = generateTokenViaRest(user.getUsername());
+            String accessToken = generateTokenViaRest(user.getUsername(), user.getRole());
             String refreshToken = createAndSaveRefreshToken(user.getUsername());
             return new AuthResult(StatusAuth.SUCCESS, accessToken, refreshToken);
         }
         return new AuthResult(StatusAuth.INVALID_CREDENTIALS, null);
     }
 
-    private String generateTokenViaRest(String username) {
+    private String generateTokenViaRest(String username, String role) {
         Map responseMap = webClient.post()
                 .uri("http://localhost:8080/gateway/generate-token")
-                .bodyValue(Map.of("username", username))
+                .bodyValue(Map.of("username", username, "role", role))
                 .retrieve()
                 .bodyToMono(Map.class)
                 .block(); // blocca fino a ricevere risposta
@@ -88,8 +88,9 @@ public class AuthService {
         refreshTokenRepository.delete(currentToken);
 
         // Generiamo una nuova coppia pulita
-        String newAccessToken = generateTokenViaRest(currentToken.getUsername());
-        String newRefreshToken = createAndSaveRefreshToken(currentToken.getUsername());
+        User user = userRepository.findByUsername(currentToken.getUsername());
+        String newAccessToken = generateTokenViaRest(user.getUsername(), user.getRole());
+        String newRefreshToken = createAndSaveRefreshToken(user.getUsername());
 
         return new AuthResult(StatusAuth.SUCCESS, newAccessToken, newRefreshToken);
     }

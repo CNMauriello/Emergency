@@ -12,12 +12,12 @@ public class GatwayClientService {
     @Autowired
     private TokenManager tokenManager;
 
-    public GatewayResult generateToken(String username) {
+    public GatewayResult generateToken(String username, String role) {
         if (username == null || username.isEmpty()) {
             throw new IllegalArgumentException("Username cannot be null or empty");
         }
 
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, role);
 
         if (token != null) {
             return new GatewayResult(StatusGateway.TOKEN_GENERATION_SUCCESS, token);
@@ -32,7 +32,8 @@ public class GatwayClientService {
             throw new IllegalArgumentException("Token cannot be null or empty");
         }
 
-        String username = tokenManager.verifyToken(token);
+        io.jsonwebtoken.Claims claims = tokenManager.verifyToken(token);
+        String username = claims != null ? claims.getSubject() : null;
 
         if (username != null) {
             return new GatewayResult(StatusGateway.TOKEN_VERIFICATION_SUCCESS, username);

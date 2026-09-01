@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Component
 public class JWTAuthenticationFilter extends AuthenticationWebFilter {
@@ -23,10 +25,14 @@ public class JWTAuthenticationFilter extends AuthenticationWebFilter {
         String header = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
-            String username = tokenManager.verifyToken(token);
-            if (username != null) {
-                // Passa il token come credentials, non null
-                return Mono.just(new UsernamePasswordAuthenticationToken(username, token, Collections.emptyList()));
+            io.jsonwebtoken.Claims claims = tokenManager.verifyToken(token);
+            if (claims != null && claims.getSubject() != null) {
+                String username = claims.getSubject();
+                String role = claims.get("role", String.class);
+                List<SimpleGrantedAuthority> authorities = (role != null) 
+                        ? Collections.singletonList(new SimpleGrantedAuthority(role)) 
+                        : Collections.emptyList();
+                return Mono.just(new UsernamePasswordAuthenticationToken(username, token, authorities));
             }
         }
         return Mono.empty();

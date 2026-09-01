@@ -21,7 +21,7 @@ public class GatewayClientController {
     public ResponseEntity<?> generateToken(@RequestBody Map<String, String> body) {
         System.out.println(body);
 
-        GatewayResult result = gatwayClientService.generateToken(body.get("username"));
+        GatewayResult result = gatwayClientService.generateToken(body.get("username"), body.get("role"));
 
         if (result.getStatusGateway() == StatusGateway.TOKEN_GENERATION_SUCCESS) {
             return ResponseEntity.ok(Map.of("token", result.getToken()));

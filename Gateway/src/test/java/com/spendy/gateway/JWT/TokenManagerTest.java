@@ -24,7 +24,7 @@ class TokenManagerTest {
     @Test
     void testGenerateToken_Success() {
         String username = "testuser";
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -40,17 +40,18 @@ class TokenManagerTest {
     @Test
     void testVerifyToken_ValidToken() {
         String username = "testuser";
-        String token = tokenManager.generateToken(username);
-        String result = tokenManager.verifyToken(token);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
+        Claims result = tokenManager.verifyToken(token);
 
         assertNotNull(result);
-        assertEquals(username, result);
+        assertEquals(username, result.getSubject());
+        assertEquals("ROLE_USER", result.get("role", String.class));
     }
 
     @Test
     void testVerifyToken_InvalidToken() {
         String invalidToken = "invalid.token.here";
-        String result = tokenManager.verifyToken(invalidToken);
+        Claims result = tokenManager.verifyToken(invalidToken);
 
         assertNull(result);
     }
@@ -62,8 +63,8 @@ class TokenManagerTest {
         ReflectionTestUtils.setField(shortExpirationTokenManager, "EXPIRATION_TIME", -1000L);
 
         String username = "testuser";
-        String expiredToken = shortExpirationTokenManager.generateToken(username);
-        String result = tokenManager.verifyToken(expiredToken);
+        String expiredToken = shortExpirationTokenManager.generateToken(username, "ROLE_USER");
+        Claims result = tokenManager.verifyToken(expiredToken);
 
         assertNull(result);
     }
@@ -73,8 +74,8 @@ class TokenManagerTest {
         String username1 = "user1";
         String username2 = "user2";
 
-        String token1 = tokenManager.generateToken(username1);
-        String token2 = tokenManager.generateToken(username2);
+        String token1 = tokenManager.generateToken(username1, "ROLE_USER");
+        String token2 = tokenManager.generateToken(username2, "ROLE_USER");
 
         assertNotNull(token1);
         assertNotNull(token2);
@@ -84,7 +85,7 @@ class TokenManagerTest {
     @Test
     void testTokenExpiration_IsSet() {
         String username = "testuser";
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
 
         Claims claims = Jwts.parser()
                 .setSigningKey(SECRET_KEY)
@@ -97,51 +98,51 @@ class TokenManagerTest {
 
     @Test
     void testVerifyToken_NullToken() {
-        String result = tokenManager.verifyToken(null);
+        Claims result = tokenManager.verifyToken(null);
         assertNull(result);
     }
 
     @Test
     void testVerifyToken_EmptyToken() {
-        String result = tokenManager.verifyToken("");
+        Claims result = tokenManager.verifyToken("");
         assertNull(result);
     }
 
     @Test
     void testVerifyToken_MalformedToken() {
         String malformedToken = "not.a.valid.jwt.token.at.all";
-        String result = tokenManager.verifyToken(malformedToken);
+        Claims result = tokenManager.verifyToken(malformedToken);
         assertNull(result);
     }
 
     @Test
     void testGenerateToken_SpecialCharactersInUsername() {
         String username = "test@user.com";
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
 
         assertNotNull(token);
-        String result = tokenManager.verifyToken(token);
-        assertEquals(username, result);
+        Claims result = tokenManager.verifyToken(token);
+        assertEquals(username, result.getSubject());
     }
 
     @Test
     void testGenerateToken_LongUsername() {
         String username = "a".repeat(100);
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
 
         assertNotNull(token);
-        String result = tokenManager.verifyToken(token);
-        assertEquals(username, result);
+        Claims result = tokenManager.verifyToken(token);
+        assertEquals(username, result.getSubject());
     }
 
     @Test
     void testVerifyToken_TokenWithWrongSignature() {
         String username = "testuser";
-        String token = tokenManager.generateToken(username);
+        String token = tokenManager.generateToken(username, "ROLE_USER");
 
         // Modifica l'ultimo carattere del token per invalidare la firma
         String tamperedToken = token.substring(0, token.length() - 1) + "X";
-        String result = tokenManager.verifyToken(tamperedToken);
+        Claims result = tokenManager.verifyToken(tamperedToken);
 
         assertNull(result);
     }

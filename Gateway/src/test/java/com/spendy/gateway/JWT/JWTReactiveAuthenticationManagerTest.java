@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 import java.util.Collections;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class JWTReactiveAuthenticationManagerTest {
@@ -33,7 +34,10 @@ class JWTReactiveAuthenticationManagerTest {
         String username = "testuser";
         Authentication inputAuth = new UsernamePasswordAuthenticationToken(null, token, Collections.emptyList());
 
-        when(tokenManager.verifyToken(token)).thenReturn(username);
+        io.jsonwebtoken.Claims mockClaims = mock(io.jsonwebtoken.Claims.class);
+        when(mockClaims.getSubject()).thenReturn(username);
+        when(mockClaims.get("role", String.class)).thenReturn("ROLE_USER");
+        when(tokenManager.verifyToken(token)).thenReturn(mockClaims);
 
         Mono<Authentication> result = authenticationManager.authenticate(inputAuth);
 

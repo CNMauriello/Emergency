@@ -36,6 +36,9 @@ public class User
     @Column(name = "house_user")
     private String houseUser;
 
+    @Column(name = "role")
+    private String role;
+
     public User() { }
 
     public User(String username, String name, String password, String surname, String email)
@@ -47,12 +50,14 @@ public class User
         this.email = email;
         this.profileImage = null;
         this.houseUser=null;
+        this.role = "ROLE_USER";
     }
 
     public User(String username, String pass)
     {
         this.username = username;
         this.password = pass;
+        this.role = "ROLE_USER";
     }
 
     public Long getId_user() {
@@ -125,6 +130,14 @@ public class User
 
     public void setHouseUser(String houseUser) {
         this.houseUser = houseUser;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 

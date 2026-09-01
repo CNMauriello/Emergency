@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 public class JWTReactiveAuthenticationManager implements ReactiveAuthenticationManager {
 
@@ -23,9 +25,14 @@ public class JWTReactiveAuthenticationManager implements ReactiveAuthenticationM
         }
         String token = credentials.toString();
 
-        String username = tokenManager.verifyToken(token);
-        if (username != null) {
-            return Mono.just(new UsernamePasswordAuthenticationToken(username, token, Collections.emptyList()));
+        io.jsonwebtoken.Claims claims = tokenManager.verifyToken(token);
+        if (claims != null && claims.getSubject() != null) {
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
+            List<SimpleGrantedAuthority> authorities = (role != null) 
+                    ? Collections.singletonList(new SimpleGrantedAuthority(role)) 
+                    : Collections.emptyList();
+            return Mono.just(new UsernamePasswordAuthenticationToken(username, token, authorities));
         }
         return Mono.empty();
     }

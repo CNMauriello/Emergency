@@ -43,7 +43,8 @@ class JWTAuthenticationFilterTest {
         String token = "valid-token-123";
         String username = "testuser";
 
-        when(tokenManager.verifyToken(token)).thenReturn(username);
+        io.jsonwebtoken.Claims mockClaims = mock(io.jsonwebtoken.Claims.class);
+        when(tokenManager.verifyToken(token)).thenReturn(mockClaims);
 
         // When
         tokenManager.verifyToken(token);
@@ -60,7 +61,7 @@ class JWTAuthenticationFilterTest {
         when(tokenManager.verifyToken(invalidToken)).thenReturn(null);
 
         // When
-        String result = tokenManager.verifyToken(invalidToken);
+        io.jsonwebtoken.Claims result = tokenManager.verifyToken(invalidToken);
 
         // Then
         assertNull(result);
@@ -106,16 +107,21 @@ class JWTAuthenticationFilterTest {
         String username1 = "user1";
         String username2 = "user2";
 
-        when(tokenManager.verifyToken(token1)).thenReturn(username1);
-        when(tokenManager.verifyToken(token2)).thenReturn(username2);
+        io.jsonwebtoken.Claims mockClaims1 = mock(io.jsonwebtoken.Claims.class);
+        when(mockClaims1.getSubject()).thenReturn(username1);
+        io.jsonwebtoken.Claims mockClaims2 = mock(io.jsonwebtoken.Claims.class);
+        when(mockClaims2.getSubject()).thenReturn(username2);
+
+        when(tokenManager.verifyToken(token1)).thenReturn(mockClaims1);
+        when(tokenManager.verifyToken(token2)).thenReturn(mockClaims2);
 
         // When
-        String result1 = tokenManager.verifyToken(token1);
-        String result2 = tokenManager.verifyToken(token2);
+        io.jsonwebtoken.Claims result1 = tokenManager.verifyToken(token1);
+        io.jsonwebtoken.Claims result2 = tokenManager.verifyToken(token2);
 
         // Then
-        assertEquals(username1, result1);
-        assertEquals(username2, result2);
+        assertEquals(username1, result1.getSubject());
+        assertEquals(username2, result2.getSubject());
         verify(tokenManager, times(1)).verifyToken(token1);
         verify(tokenManager, times(1)).verifyToken(token2);
     }
@@ -143,13 +149,15 @@ class JWTAuthenticationFilterTest {
         // Test that the filter uses the token manager correctly
         // Given
         String token = "test-token";
-        when(tokenManager.verifyToken(token)).thenReturn("testuser");
+        io.jsonwebtoken.Claims mockClaims = mock(io.jsonwebtoken.Claims.class);
+        when(mockClaims.getSubject()).thenReturn("testuser");
+        when(tokenManager.verifyToken(token)).thenReturn(mockClaims);
 
         // When
-        String result = tokenManager.verifyToken(token);
+        io.jsonwebtoken.Claims result = tokenManager.verifyToken(token);
 
         // Then
-        assertEquals("testuser", result);
+        assertEquals("testuser", result.getSubject());
         verify(tokenManager).verifyToken(token);
     }
 

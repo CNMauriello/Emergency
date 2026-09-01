@@ -32,16 +32,16 @@ class GatwayClientServiceTest {
         // Given
         String username = "testuser";
         String expectedToken = "token123";
-        when(tokenManager.generateToken(username)).thenReturn(expectedToken);
+        when(tokenManager.generateToken(username, "ROLE_USER")).thenReturn(expectedToken);
 
         // When
-        GatewayResult result = service.generateToken(username);
+        GatewayResult result = service.generateToken(username, "ROLE_USER");
 
         // Then
         assertNotNull(result);
         assertEquals(StatusGateway.TOKEN_GENERATION_SUCCESS, result.getStatusGateway());
         assertEquals(expectedToken, result.getToken());
-        verify(tokenManager, times(1)).generateToken(username);
+        verify(tokenManager, times(1)).generateToken(username, "ROLE_USER");
     }
 
     @Test
@@ -49,9 +49,9 @@ class GatwayClientServiceTest {
     void testGenerateToken_WithNullUsername_ThrowsException() {
         // Given & When & Then
         assertThrows(IllegalArgumentException.class, () ->
-            service.generateToken(null)
+            service.generateToken(null, "ROLE_USER")
         );
-        verify(tokenManager, never()).generateToken(any());
+        verify(tokenManager, never()).generateToken(any(), any());
     }
 
     @Test
@@ -59,9 +59,9 @@ class GatwayClientServiceTest {
     void testGenerateToken_WithEmptyUsername_ThrowsException() {
         // Given & When & Then
         assertThrows(IllegalArgumentException.class, () ->
-            service.generateToken("")
+            service.generateToken("", "ROLE_USER")
         );
-        verify(tokenManager, never()).generateToken(any());
+        verify(tokenManager, never()).generateToken(any(), any());
     }
 
     @Test
@@ -69,16 +69,16 @@ class GatwayClientServiceTest {
     void testGenerateToken_WhenTokenManagerReturnsNull_Failure() {
         // Given
         String username = "testuser";
-        when(tokenManager.generateToken(username)).thenReturn(null);
+        when(tokenManager.generateToken(username, "ROLE_USER")).thenReturn(null);
 
         // When
-        GatewayResult result = service.generateToken(username);
+        GatewayResult result = service.generateToken(username, "ROLE_USER");
 
         // Then
         assertNotNull(result);
         assertEquals(StatusGateway.TOKEN_GENERATION_FAILED, result.getStatusGateway());
         assertNull(result.getToken());
-        verify(tokenManager, times(1)).generateToken(username);
+        verify(tokenManager, times(1)).generateToken(username, "ROLE_USER");
     }
 
     @Test
@@ -87,7 +87,9 @@ class GatwayClientServiceTest {
         // Given
         String token = "validToken123";
         String expectedUsername = "testuser";
-        when(tokenManager.verifyToken(token)).thenReturn(expectedUsername);
+        io.jsonwebtoken.Claims mockClaims = mock(io.jsonwebtoken.Claims.class);
+        when(mockClaims.getSubject()).thenReturn(expectedUsername);
+        when(tokenManager.verifyToken(token)).thenReturn(mockClaims);
 
         // When
         GatewayResult result = service.verifyToken(token);

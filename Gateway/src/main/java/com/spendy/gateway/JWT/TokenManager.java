@@ -16,21 +16,21 @@ public class TokenManager {
     @Value("${jwt.expiration}")
     private long EXPIRATION_TIME; // in millisecondi
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public String verifyToken(String token) {
+    public Claims verifyToken(String token) {
         try {
-            Claims claims = Jwts.parser()
+            return Jwts.parser()
                     .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
-            return claims.getSubject();
         } catch (Exception e) {
             return null; // token non valido o scaduto
         }
