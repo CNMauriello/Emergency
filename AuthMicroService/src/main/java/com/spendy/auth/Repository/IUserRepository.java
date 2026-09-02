@@ -16,14 +16,4 @@ public interface IUserRepository extends JpaRepository<User, String>
 
     @Query("SELECT u FROM User u WHERE u.id_user = :id_user")
     User findByIdUser(@Param("id_user") String id_user);
-
-    @Query("SELECT u FROM User u WHERE u.houseUser = :house_user")
-    User findByHouseUser(@Param("house_user") String house_user);
-
-    @Modifying
-    @Query("UPDATE User u SET u.houseUser = :houseCode WHERE u.username = :username")
-    void setHouseUser(@Param("username") String username, @Param("houseCode") String houseCode);
-
-    @Query("SELECT u FROM User u WHERE u.houseUser = :houseId")
-    List<User> findByHouseId(@Param("houseId") String houseId);
 }

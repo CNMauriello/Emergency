@@ -26,15 +26,7 @@ public class User
     @Column(name = "email")
     private String email;
 
-    @Column(name = "language")
-    private String language;
 
-    @Lob
-    @Column(name = "profile_image", columnDefinition="LONGBLOB")
-    private byte[] profileImage;
-
-    @Column(name = "house_user")
-    private String houseUser;
 
     @Column(name = "role")
     private String role;
@@ -48,8 +40,7 @@ public class User
         this.password = password;
         this.surname = surname;
         this.email = email;
-        this.profileImage = null;
-        this.houseUser=null;
+
         this.role = "ROLE_USER";
     }
 
@@ -108,29 +99,7 @@ public class User
         this.email = email;
     }
 
-    public String getLanguage() {
-        return language;
-    }
 
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public byte[] getProfileImage() {
-        return profileImage;
-    }
-
-    public void setProfileImage(byte[] profileImage) {
-        this.profileImage = profileImage;
-    }
-
-    public String getHouseUser() {
-        return houseUser;
-    }
-
-    public void setHouseUser(String houseUser) {
-        this.houseUser = houseUser;
-    }
 
     public String getRole() {
         return role;
