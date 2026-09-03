@@ -18,4 +18,22 @@ public class GatewayApplication {
     public Mono<String> home() {
         return Mono.just("🟢 Spendy Gateway è attivo e funzionante! (V. Finale)");
     }
+
+    @org.springframework.context.annotation.Bean
+    public org.springframework.cloud.gateway.route.RouteLocator customRouteLocator(org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder builder) {
+        return builder.routes()
+                .route("AuthMicroService", r -> r.path("/Auth/**")
+                        .filters(f -> f.rewritePath("/Auth/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8086"))
+                .route("RegistryService", r -> r.path("/Registry/**")
+                        .filters(f -> f.rewritePath("/Registry/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8081"))
+                .route("Orchestrator", r -> r.path("/Orchestrator/**")
+                        .filters(f -> f.rewritePath("/Orchestrator/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8083"))
+                .route("Emergency", r -> r.path("/Emergency/**")
+                        .filters(f -> f.rewritePath("/Emergency/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8084"))
+                .build();
+    }
 }

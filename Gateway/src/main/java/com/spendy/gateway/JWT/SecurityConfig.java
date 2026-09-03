@@ -1,7 +1,7 @@
 package com.spendy.gateway.JWT;
 
 import com.sun.research.ws.wadl.HTTPMethods;
-import jakarta.ws.rs.HttpMethod;
+import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/Registry/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR")
                         .pathMatchers(HttpMethod.GET, "/Registry/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR")
                         // Operatore di sala
+                        .pathMatchers("/debug/routes").permitAll()
                         .anyExchange().hasAuthority("ROLE_ROOM_OPERATOR")
                 )
                 .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
