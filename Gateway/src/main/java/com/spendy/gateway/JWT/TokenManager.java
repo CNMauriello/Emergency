@@ -20,6 +20,7 @@ public class TokenManager {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("role", role)
+                .claim("ruolo", role)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
