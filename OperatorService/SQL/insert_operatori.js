@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8086/api/auth/register";
+const API_URL = "http://localhost:8088/api/auth/register";
 
 const operatori = [
     {
