@@ -23,5 +23,8 @@ camunda:
 
 logging:
   level:
+    root: INFO
     org.springframework.web.servlet.DispatcherServlet: DEBUG
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+    org.springframework.web.client.RestClient: DEBUG
+    org.springframework.http.client: TRACE

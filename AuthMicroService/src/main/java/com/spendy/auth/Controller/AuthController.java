@@ -115,6 +115,7 @@ public class AuthController {
         User user = authService.getUserFromToken(accessToken);
         if (user != null) {
             Map<String, String> profileMap = new HashMap<>();
+            profileMap.put("id_user", String.valueOf(user.getId_user()));
             profileMap.put("username", user.getUsername());
             profileMap.put("name", user.getName());
             profileMap.put("surname", user.getSurname());
