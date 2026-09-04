@@ -24,7 +24,7 @@ public class GatewayApplication {
         return builder.routes()
                 .route("AuthMicroService", r -> r.path("/Auth/**")
                         .filters(f -> f.rewritePath("/Auth/(?<segment>.*)", "/${segment}"))
-                        .uri("http://localhost:8086"))
+                        .uri("http://localhost:8088"))
                 .route("RegistryService", r -> r.path("/Registry/**")
                         .filters(f -> f.rewritePath("/Registry/(?<segment>.*)", "/${segment}"))
                         .uri("http://localhost:8081"))
@@ -34,6 +34,9 @@ public class GatewayApplication {
                 .route("Emergency", r -> r.path("/Emergency/**")
                         .filters(f -> f.rewritePath("/Emergency/(?<segment>.*)", "/${segment}"))
                         .uri("http://localhost:8084"))
+                .route("Operator", r -> r.path("/Operator/**")
+                        .filters(f -> f.rewritePath("/Operator/(?<segment>.*)", "/${segment}"))
+                        .uri("http://localhost:8087"))
                 .build();
     }
 }
