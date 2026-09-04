@@ -39,7 +39,7 @@ public class InvokeCapabilityDelegate {
         if (endpoint == null || endpoint.isEmpty()) {
             // 1. Recupero variabili
             String eventId = (String) variables.get("event_id");
-            String capability = (String) variables.get("capability");
+            String capability = (String) variables.get("requiredCapability");
 
             // 2. Costruzione del Payload (Escalation Ticket)
             Map<String, Object> escalationTicket = Map.of(
