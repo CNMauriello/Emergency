@@ -6,7 +6,7 @@ const payload = {
   event_id: "evt-fire-001",
   timestamp: "2026-08-29T12:00:00Z",
   emergency_category: "FIRE",
-  severity: "HIGH",
+  severity: "CRITICAL",
   incident_context: {
     has_injured: false,
     has_unconscious: false,
