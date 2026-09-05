@@ -41,7 +41,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET,"/api/auth/updateProfile").authenticated()
                         .pathMatchers("/api/auth/**").permitAll()
                         // Emergency Manager
-                        .pathMatchers("/emergencies", "/emergencies/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
+                        .pathMatchers("/api/emergencies", "/api/emergencies/**").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
                         // Mock
                         .pathMatchers( "/{host}/api/**").hasAnyAuthority( "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/api/stub_service").permitAll()
