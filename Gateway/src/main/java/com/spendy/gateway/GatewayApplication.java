@@ -32,7 +32,7 @@ public class GatewayApplication {
                         .uri("http://localhost:8081"))
 
                 .route("Orchestrator", r -> r
-                        .path("/api/workflows/**", "/api/emergency-triggers/**", "/api/escalations/**")
+                        .path("/api/workflows/**", "/api/emergency-triggers/**", "/api/escalations/**", "/api/process-instances/**")
                         .uri("http://localhost:8083"))
 
                 .route("Emergency", r -> r

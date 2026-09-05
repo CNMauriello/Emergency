@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter} from 'lucide-react';
 import {API_BASE_URL, fetchWithAuth} from '../config.js';
+import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 
 const EmergencyDetail = ({emergencyId, onBack}) => {
     const [emergency, setEmergency] = useState(null);
@@ -13,6 +14,9 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
+    
+    // Stato per la visualizzazione BPMN
+    const [visualizationData, setVisualizationData] = useState(null);
 
     useEffect(() => {
         if (!emergencyId) return;
@@ -69,6 +73,29 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         const interval = setInterval(fetchData, 5000);
         return () => clearInterval(interval);
     }, [emergencyId, selectedCapability]);
+
+    // Polling separato per i dati di visualizzazione del processo BPMN
+    useEffect(() => {
+        if (!emergency || !emergency.workflowInstanceId) return;
+
+        const fetchVisualization = async () => {
+            try {
+                // Sostituire l'URL qui se Orchestrator gira su una porta diversa da API_BASE_URL (es. 8080)
+                // Ma supponiamo API_BASE_URL passi dal Gateway che instrada a Orchestrator
+                const res = await fetchWithAuth(`${API_BASE_URL}/api/process-instances/${emergency.workflowInstanceId}/visualization`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setVisualizationData(data);
+                }
+            } catch (err) {
+                console.error("Errore recupero dati BPMN", err);
+            }
+        };
+
+        fetchVisualization();
+        const interval = setInterval(fetchVisualization, 2000); // 2 secondi come richiesto
+        return () => clearInterval(interval);
+    }, [emergency]);
 
     const handleManualDispatch = async () => {
         if (!selectedUnit) return;
@@ -136,9 +163,9 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* LEFT COLUMN: Dettagli e Segnalazioni */}
-                <div className="space-y-6 lg:col-span-5">
+            <div className="flex flex-col gap-8">
+                {/* TOP SECTION: Dettagli Operativi */}
+                <div className="w-full">
                     {/* Card Dettagli Operativi */}
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
@@ -147,7 +174,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                             </h2>
                             <span className="bg-gray-100 text-gray-500 px-2 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
-                        <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-[13px]">
+                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-y-6 gap-x-6 text-[13px] items-start">
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">TIPOLOGIA</p>
                                 <p className="font-semibold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</p>
@@ -164,154 +191,47 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">FONTE SEGNALAZIONE</p>
                                 <p className="text-gray-700 flex items-center"><i className="fas fa-phone-alt text-gray-400 mr-1.5 text-[10px]"></i> 112 Centrale</p>
                             </div>
-                            <div className="col-span-2 pt-4 border-t border-dashed border-gray-200">
+                            <div className="col-span-2 lg:col-span-1 lg:pl-6 lg:border-l border-dashed border-gray-200">
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">INDIRIZZO FISICO</p>
                                 <p className="text-[#0B1B32] text-[14px]">{emergency.address || 'Indirizzo non disponibile'}</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Card Segnalazioni Correlate */}
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                        <div className="px-5 py-4 border-b border-gray-100">
-                            <h2 className="text-[15px] font-bold text-[#0B1B32]">Segnalazioni Correlate (3)</h2>
-                        </div>
-                        <table className="w-full text-left text-[13px]">
-                            <thead>
-                                <tr className="bg-gray-50/50 text-gray-500 text-[10px] uppercase tracking-wider font-bold">
-                                    <th className="px-5 py-3">ID CHIAMATA</th>
-                                    <th className="px-5 py-3">TIMESTAMP</th>
-                                    <th className="px-5 py-3">AFFIDABILITÀ</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                <tr>
-                                    <td className="px-5 py-3 font-mono text-gray-600">C-9921</td>
-                                    <td className="px-5 py-3 text-gray-600">14:15:02</td>
-                                    <td className="px-5 py-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">Alta</span></td>
-                                </tr>
-                                <tr>
-                                    <td className="px-5 py-3 font-mono text-gray-600">C-9924</td>
-                                    <td className="px-5 py-3 text-gray-600">14:16:45</td>
-                                    <td className="px-5 py-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">Alta</span></td>
-                                </tr>
-                                <tr>
-                                    <td className="px-5 py-3 font-mono text-gray-600">C-9930</td>
-                                    <td className="px-5 py-3 text-gray-600">14:18:10</td>
-                                    <td className="px-5 py-3"><span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[11px] font-bold">Media</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
 
-                {/* RIGHT COLUMN: Stato Esecuzione Workflow */}
-                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 lg:col-span-7">
+                {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
+                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 w-full flex flex-col h-full min-h-[600px]">
                     <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
                         <h2 className="text-xl font-bold text-[#0B1B32] flex items-center">
                             <i className="fas fa-project-diagram text-gray-400 mr-3 text-[18px]"></i> Stato Esecuzione Workflow
                         </h2>
-                        <span className="bg-[#e3f2fd] text-[#1976d2] px-3 py-1 text-[11px] font-bold rounded">Processo BPMN Attivo</span>
+                        <span className="bg-[#e3f2fd] text-[#1976d2] px-3 py-1 text-[11px] font-bold rounded">
+                            {visualizationData?.state === 'ACTIVE' ? 'Processo BPMN Attivo' : (visualizationData?.state || 'Attendere...')}
+                        </span>
                     </div>
 
-                    <div className="relative pl-6 border-l-[3px] border-gray-100 space-y-10 ml-3">
-                        
-                        {/* Step 1: Completato */}
-                        <div className="relative">
-                            <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
-                                <i className="fas fa-check text-[10px]"></i>
-                            </div>
-                            <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">1. Rilevamento e Categorizzazione</h3>
-                            <p className="text-[13px] text-gray-400 mt-1">Completato automaticamente dal sistema AI centrale. (T: 0.2s)</p>
-                        </div>
-
-                        {/* Step 2: Completato */}
-                        <div className="relative">
-                            <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
-                                <i className="fas fa-check text-[10px]"></i>
-                            </div>
-                            <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">2. Matching Piano d'Emergenza</h3>
-                            <p className="text-[13px] text-gray-400 mt-1">Piano 'Incendio Urbano V2' selezionato e parametri applicati.</p>
-                        </div>
-
-                        {/* Step 3: Attivo / Ingaggio Manuale */}
-                        {!isDispatchCompleted && (
-                            <div className="relative">
-                                <div className="w-7 h-7 bg-[#1976d2] rounded-full absolute -left-[42px] flex items-center justify-center border-[4px] border-white shadow-sm">
-                                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-                                </div>
-                                <h3 className="font-bold text-[#0B1B32] text-[18px]">3. Ingaggio Manuale Risorsa</h3>
-                                <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">
-                                    Azione richiesta: Confermare il dispaccio delle unità di terra raccomandate in base alla prossimità.
-                                </p>
-
-                                <div className="bg-white border border-[#1976d2] rounded-md p-5 mt-5 shadow-[0_2px_10px_-3px_rgba(25,118,210,0.3)]">
-                                    <div className="mb-4">
-                                        <label className="text-[11px] font-bold text-[#1976d2] uppercase mb-2 flex items-center tracking-wider">
-                                            <i className="fas fa-hands-helping mr-2 text-[13px]"></i> FORM INTERVENTO MANUALE
-                                        </label>
-                                    </div>
-                                    <div className="mb-4">
-                                        <label className="block text-[13px] font-medium text-[#0B1B32] mb-1.5">
-                                            Seleziona Unità d'Intervento (EmergencyService)
-                                        </label>
-                                        <select
-                                            className="w-full border-gray-300 rounded text-[14px] p-2.5 bg-white border outline-none focus:border-[#1976d2] focus:ring-1 focus:ring-[#1976d2] transition-all"
-                                            value={selectedUnit}
-                                            onChange={(e) => setSelectedUnit(e.target.value)}
-                                        >
-                                            <option value="">Seleziona unità disponibile...</option>
-                                            {services.map(srv => (
-                                                <option key={srv.id} value={srv.id}
-                                                        disabled={srv.status !== 'ACTIVE' && srv.status !== 'UP'}>
-                                                    {srv.type} ({srv.status}) - ID: {srv.id}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="flex justify-between items-center mt-6">
-                                        <p className="text-gray-500 text-[12px]">Il sistema aggiornerà lo stato in 'Dispacciato'</p>
-                                        <button
-                                            onClick={handleManualDispatch}
-                                            disabled={!selectedUnit || dispatching}
-                                            className="bg-[#1976d2] hover:bg-blue-700 text-white px-5 py-2.5 rounded text-[13px] font-bold disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors shadow-sm"
-                                        >
-                                            {dispatching ? (
-                                                <span className="flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Elaborazione...</span>
-                                            ) : (
-                                                'Conferma Dispaccio'
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
+                    <div className="flex-1 w-full relative min-h-[400px]">
+                        {visualizationData ? (
+                            <ProcessBpmnViewer
+                                bpmnXml={visualizationData.bpmnXml}
+                                activeNodes={visualizationData.activeNodes}
+                                completedNodes={visualizationData.completedNodes}
+                                sequenceFlows={visualizationData.sequenceFlows}
+                                incidents={visualizationData.incidents}
+                            />
+                        ) : (
+                            <div className="h-full flex items-center justify-center text-gray-500 flex-col">
+                                {emergency?.workflowInstanceId ? (
+                                    <>
+                                        <Loader2 className="animate-spin mb-3 w-8 h-8" /> 
+                                        <span>Caricamento diagramma e stato BPMN...</span>
+                                    </>
+                                ) : (
+                                    <span>Nessun workflow instance ID associato.</span>
+                                )}
                             </div>
                         )}
-
-                        {/* Step 3: Completato */}
-                        {isDispatchCompleted && (
-                            <div className="relative">
-                                <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
-                                    <i className="fas fa-check text-[10px]"></i>
-                                </div>
-                                <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">3. Ingaggio Manuale Risorsa</h3>
-                                <p className="text-[13px] text-gray-400 mt-1">Risorsa ingaggiata manualmente con successo.</p>
-                            </div>
-                        )}
-
-                        {/* Step 4: Monitoraggio */}
-                        <div className={`relative ${!isDispatchCompleted ? 'opacity-40' : ''}`}>
-                            {isDispatchCompleted && emergency.status !== 'CLOSED' ? (
-                                <div className="w-7 h-7 bg-[#1976d2] rounded-full absolute -left-[42px] flex items-center justify-center border-[4px] border-white shadow-sm">
-                                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
-                                </div>
-                            ) : (
-                                <div className="w-[22px] h-[22px] bg-gray-200 rounded-full absolute -left-[38.5px] border-[4px] border-white"></div>
-                            )}
-                            <h3 className={`font-bold ${isDispatchCompleted ? 'text-[#0B1B32] text-[18px]' : 'text-gray-400 text-[15px]'}`}>4. Monitoraggio e Chiusura</h3>
-                            <p className={`text-[13px] mt-2 ${isDispatchCompleted ? 'text-gray-500' : 'text-gray-400'}`}>
-                                {isDispatchCompleted ? 'Il piano operativo sta proseguendo il suo flusso BPMN. In attesa della chiusura.' : 'In attesa del completamento delle fasi precedenti.'}
-                            </p>
-                        </div>
                     </div>
                 </div>
             </div>

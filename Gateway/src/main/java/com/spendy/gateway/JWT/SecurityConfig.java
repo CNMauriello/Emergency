@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .pathMatchers("/emergencies", "/emergencies/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
                         // Orchestrator
                         .pathMatchers("/api/emergency-triggers").permitAll()
+                        .pathMatchers("/api/process-instances/**").permitAll()
                         .pathMatchers("/api/escalations/{ticketId}/resolve").permitAll()
                         .pathMatchers("/api/workflows", "/api/workflows/**").hasAnyAuthority("ROLE_WORKFLOW_EXPERT", "ROLE_ROOM_OPERATOR")
                         //Operatore dei servizi
