@@ -41,8 +41,10 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    loadServices()
-  }, [loadServices])
+    if (currentView === 'directory') {
+      loadServices()
+    }
+  }, [currentView, loadServices])
 
   const handleViewDetail = (id) => {
     setSelectedEmergencyId(id)

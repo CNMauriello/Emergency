@@ -24,20 +24,6 @@ export default function Header() {
           <i className="far fa-clock"></i> Current Time: {time}
         </span>
       </div>
-      
-      <div className="flex items-center space-x-6 text-gray-500">
-        <button className="relative hover:text-gray-700 transition-colors">
-          <i className="far fa-bell text-lg"></i>
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 w-2.5 h-2.5 rounded-full border-2 border-white"></span>
-        </button>
-        <button className="hover:text-gray-700 transition-colors">
-          <i className="fas fa-cog text-lg"></i>
-        </button>
-        <div className="w-px h-6 bg-gray-200"></div>
-        <button className="flex items-center gap-2 text-sm font-semibold text-[#0B1B32] bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors">
-          <i className="fas fa-sign-out-alt"></i> Logout
-        </button>
-      </div>
     </header>
   )
 }
