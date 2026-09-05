@@ -1,0 +1,140 @@
+openapi: "3.1.0"
+info:
+  title: "Emergency API"
+  description: "Emergency API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8090"
+paths:
+  /api/auth/login:
+    post:
+      summary: "POST api/auth/login"
+      operationId: "login"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/auth/register:
+    post:
+      summary: "POST api/auth/register"
+      operationId: "register"
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/auth/refresh:
+    post:
+      summary: "POST api/auth/refresh"
+      operationId: "refreshToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "string"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/auth/profile:
+    get:
+      summary: "GET api/auth/profile"
+      operationId: "getProfile"
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/auth/updateProfile:
+    put:
+      summary: "PUT api/auth/updateProfile"
+      operationId: "updateProfile"
+      parameters:
+        - name: "Authorization"
+          in: "header"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+  /api/auth/health:
+    get:
+      summary: "GET api/auth/health"
+      operationId: "healthCheck"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Response"
+components:
+  schemas:
+    User:
+      type: "object"
+      properties:
+        id_user:
+          type: "integer"
+          format: "int64"
+          nullable: true
+        username:
+          type: "string"
+          nullable: true
+        name:
+          type: "string"
+          nullable: true
+        password:
+          type: "string"
+          nullable: true
+        surname:
+          type: "string"
+          nullable: true
+        email:
+          type: "string"
+          nullable: true
+        role:
+          type: "string"
+          nullable: true
+    Response:
+      type: "object"
+      properties: { }

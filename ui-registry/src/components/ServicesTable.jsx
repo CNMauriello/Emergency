@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, Fragment } from 'react'
 import { CategoryBadge, StatusBadge } from './Badges.jsx'
 import { API_BASE_URL, fetchWithAuth } from '../config.js'
 
@@ -61,8 +61,8 @@ export default function ServicesTable({
     setSaving(true)
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/services/${editingService.id}`,
+      const response = await fetchWithAuth(
+        `${API_BASE_URL}/Registry/api/services/${editingService.id}`,
         {
           method: 'PATCH',
           headers: {
@@ -104,7 +104,7 @@ export default function ServicesTable({
 
   return (
     <>
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-fit overflow-hidden">
+      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-full overflow-hidden">
         <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100">
           <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
             Catalogo Servizi
@@ -124,9 +124,10 @@ export default function ServicesTable({
           </div>
         </div>
 
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 bg-gray-50/50">
+        <div className="flex-1 overflow-y-auto">
+          <table className="w-full text-left border-collapse relative">
+            <thead className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 shadow-sm border-b border-gray-200">
+              <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase">
               <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 ID
               </th>
@@ -211,7 +212,7 @@ export default function ServicesTable({
                 const isExpanded = expandedService === s.id
 
                 return (
-                  <>
+                  <Fragment key={s.id}>
                     {/* =========================
                         RIGA SERVIZIO
                     ========================= */}
@@ -380,12 +381,13 @@ export default function ServicesTable({
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 )
               })}
           </tbody>
         </table>
       </div>
+    </div>
 
       {/* =========================
           MODALE EDIT

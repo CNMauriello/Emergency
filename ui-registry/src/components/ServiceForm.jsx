@@ -27,7 +27,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
         setLoadingCapabilities(true)
         setCapabilityError(false)
 
-        const response = await fetch(`${API_BASE_URL}/capabilities`)
+        const response = await fetchWithAuth(`${API_BASE_URL}/Registry/api/capabilities`)
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)

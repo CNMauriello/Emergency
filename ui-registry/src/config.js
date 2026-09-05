@@ -1,39 +1,97 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090';
 
-// Cache dei token per ruolo per evitare di chiederli continuamente
-const tokens = {};
+export const AUTH_SERVICE_URL = `${API_BASE_URL}/Auth`;
+export const OPERATOR_SERVICE_URL = `${API_BASE_URL}/Operator`;
+export const ORCHESTRATOR_URL = `${API_BASE_URL}/Orchestrator`;
+export const EMERGENCY_MANAGER_URL = `${API_BASE_URL}/Emergency`;
+export const REGISTRY_SERVICE_URL = `${API_BASE_URL}/Registry`;
 
-async function getTokenForRoute(url) {
-    // Determiniamo il ruolo richiesto in base al microservizio
-    let role = 'ROLE_ROOM_OPERATOR'; // default
-    if (url.includes('/Registry/')) role = 'ROLE_SERVICE_OPERATOR';
-    if (url.includes('/Orchestrator/')) role = 'ROLE_WORKFLOW_EXPERT';
+// Gestione Token
+export function getAuthToken() {
+    return localStorage.getItem('operator_access_token');
+}
 
-    if (tokens[role]) return tokens[role];
+export function getRefreshToken() {
+    return localStorage.getItem('operator_refresh_token');
+}
 
-    try {
-        const res = await fetch(`${API_BASE_URL}/gateway/generate-token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: "operator_auto", role: role })
-        });
-        if (res.ok) {
-            const data = await res.json();
-            tokens[role] = data.token;
-            return data.token;
+export function setAuthTokens(accessToken, refreshToken) {
+    if (accessToken) localStorage.setItem('operator_access_token', accessToken);
+    if (refreshToken) localStorage.setItem('operator_refresh_token', refreshToken);
+}
+
+export function clearAuthSession() {
+    localStorage.removeItem('operator_access_token');
+    localStorage.removeItem('operator_refresh_token');
+    localStorage.removeItem('operator_user');
+}
+
+// Helper per ottenere l'utente autenticato
+export function getAuthUser() {
+    const userStr = localStorage.getItem('operator_user');
+    if (userStr) {
+        try {
+            return JSON.parse(userStr);
+        } catch (e) {
+            return null;
         }
-    } catch (e) {
-        console.warn("Impossibile generare token (Backend offline o auth non necessaria)", e);
     }
     return null;
 }
 
-// Wrapper globale per le fetch autenticate
+// Wrapper globale per le fetch autenticate con dual-token interceptor
 export const fetchWithAuth = async (url, options = {}) => {
-    const token = await getTokenForRoute(url);
-    const headers = {
+    let token = getAuthToken();
+    let headers = {
         ...options.headers,
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     };
-    return fetch(url, { ...options, headers });
+
+    let response = await fetch(url, { ...options, headers });
+
+    // Intercetta il 401 Unauthorized per provare il refresh token (Silenzioso)
+    if (response.status === 401) {
+        const refreshToken = getRefreshToken();
+        if (refreshToken) {
+            try {
+                const refreshResponse = await fetch(`${AUTH_SERVICE_URL}/api/auth/refresh`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshToken })
+                });
+
+                if (refreshResponse.ok) {
+                    const refreshData = await refreshResponse.json();
+                    const newAccessToken = refreshData.accessToken || refreshData.token;
+                    const newRefreshToken = refreshData.refreshToken;
+
+                    setAuthTokens(newAccessToken, newRefreshToken);
+
+                    // Riprova la chiamata originale con il nuovo access token
+                    headers = {
+                        ...options.headers,
+                        'Authorization': `Bearer ${newAccessToken}`
+                    };
+                    response = await fetch(url, { ...options, headers });
+                } else {
+                    // Refresh token scaduto o non valido (es. ruotato)
+                    triggerLogout();
+                }
+            } catch (e) {
+                console.error("Errore durante il refresh del token", e);
+                triggerLogout();
+            }
+        } else {
+            // Nessun refresh token disponibile
+            triggerLogout();
+        }
+    }
+
+    return response;
 };
+
+// Forza l'uscita se il refresh fallisce (catturato da App.jsx)
+function triggerLogout() {
+    clearAuthSession();
+    window.dispatchEvent(new Event('auth:logout'));
+}

@@ -52,7 +52,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/Registry/api/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/Registry/**").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
                         // Operatore di sala
-                        .pathMatchers(HttpMethod.POST, "/Operator/api/operators/login").hasAnyAuthority("ROLE_ROOM_OPERATOR")
+                        .pathMatchers(HttpMethod.POST, "/Operator/api/operators/login").permitAll()
                         .pathMatchers(HttpMethod.GET, "/Operator/api/operators/escalations/active").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .pathMatchers(HttpMethod.GET, "/Operator/api/operators/escalations/{ticketId}").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .pathMatchers(HttpMethod.POST, "/Operator/api/operators/escalations/{ticketId}/resolve").hasAnyAuthority("ROLE_ROOM_OPERATOR")

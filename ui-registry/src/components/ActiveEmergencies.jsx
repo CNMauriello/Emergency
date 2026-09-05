@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets} from 'lucide-react';
+import {Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets, CheckCircle2, MapPin} from 'lucide-react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
 
 const ActiveEmergencies = ({onViewDetail}) => {
@@ -144,7 +144,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
                     return (
                         <div
                             key={em.id}
-                            onClick={() => onViewDetail && onViewDetail(em.id)}
+                            onClick={() => onViewDetail && onViewDetail(em.eventId || em.id)}
                             className="bg-white border border-gray-200 rounded-lg shadow-sm flex overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200"
                         >
                             {/* Indicatore di gravità laterale */}

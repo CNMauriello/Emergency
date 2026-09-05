@@ -106,7 +106,7 @@ public class AuthService {
 
     private String verifyTokenViaRest(String token) {
         Map responseMap = webClient.post()
-                .uri("http://localhost:8080/gateway/verify-token")
+                .uri("http://localhost:8090/gateway/verify-token")
                 .bodyValue(Map.of("token", token))
                 .retrieve()
                 .bodyToMono(Map.class)

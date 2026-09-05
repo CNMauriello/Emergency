@@ -1,0 +1,58 @@
+openapi: "3.1.0"
+info:
+  title: "Emergency API"
+  description: "Emergency API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8090"
+paths:
+  /:
+    get:
+      summary: "GET "
+      operationId: "home"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "string"
+  /gateway/generate-token:
+    post:
+      summary: "POST gateway/generate-token"
+      operationId: "generateToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "string"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+  /gateway/verify-token:
+    post:
+      summary: "POST gateway/verify-token"
+      operationId: "verifyToken"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "string"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: "object"
+  /Auth/**: { }
+  /Orchestrator/**: { }
+  /Operator/**: { }
+  /Emergency/**: { }
+  /Registry/**: { }

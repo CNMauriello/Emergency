@@ -36,4 +36,19 @@ public class OperatoreLoginController {
             return ResponseEntity.status(e.getStatusCode()).body(e.getReason());
         }
     }
+
+    @Autowired
+    private com.spendy.operator.Repository.OperatoreRepository operatoreRepository;
+
+    @PatchMapping("/{id}/logout")
+    public ResponseEntity<?> logout(@PathVariable Long id) {
+        java.util.Optional<com.spendy.operator.Entity.Operatore> opOpt = operatoreRepository.findById(id);
+        if (opOpt.isPresent()) {
+            com.spendy.operator.Entity.Operatore operatore = opOpt.get();
+            operatore.setStato(com.spendy.operator.Entity.StatoEnum.Offline);
+            operatoreRepository.save(operatore);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

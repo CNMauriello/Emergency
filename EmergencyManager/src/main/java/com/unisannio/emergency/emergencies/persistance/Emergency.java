@@ -105,7 +105,7 @@ public class Emergency {
     }
 
     public String getEventId() {
-        return String.valueOf(id);
+        return eventId;
     }
 
     public void setWorkflowInstanceId(String workflowInstanceId) {

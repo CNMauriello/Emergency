@@ -1,4 +1,4 @@
-export default function Sidebar({ currentView, setCurrentView }) {
+export default function Sidebar({ currentView, setCurrentView, user, onLogout }) {
   return (
     <aside className="w-[280px] bg-[#0B1B32] text-white flex flex-col h-full flex-shrink-0 shadow-lg z-10 font-sans">
       {/* Profilo Utente / Logo */}
@@ -69,7 +69,12 @@ export default function Sidebar({ currentView, setCurrentView }) {
 
         <a 
           href="#" 
-          className="flex items-center gap-4 px-6 py-3 border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white transition-colors mt-6"
+          onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}
+          className={`flex items-center gap-4 px-6 py-3 transition-colors mt-6 ${
+            currentView === 'profile'
+              ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold'
+              : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
+          }`}
         >
           <i className="far fa-user-circle w-5 text-center text-[15px]"></i> 
           <span className="text-[15px]">Profile</span>
@@ -78,18 +83,22 @@ export default function Sidebar({ currentView, setCurrentView }) {
 
       {/* Footer Area (New Incident) */}
       <div className="p-6 mt-auto">
-        <button className="w-full bg-white/10 hover:bg-white/20 text-white font-medium py-3 px-4 rounded-md text-sm mb-6 transition-colors flex items-center justify-center gap-2 border border-white/10">
-           <i className="fas fa-plus"></i> NEW INCIDENT
-        </button>
+
         <div className="flex items-center gap-3 bg-[#071324] p-3 rounded-lg border border-white/5">
           <div className="w-8 h-8 rounded-full overflow-hidden">
              <img src="https://i.pravatar.cc/150?img=47" alt="User small" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="text-xs text-white font-bold tracking-wide">Op. ID: 8942</div>
-            <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">Turno A <span className="w-1 h-1 rounded-full bg-gray-500"></span> Offline</div>
+            <div className="text-xs text-white font-bold tracking-wide">Op. ID: {user?.id || user?.matricola || 'N/A'}</div>
+            <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
+              {user?.turno || 'N/A'} 
+              <span className={`w-1 h-1 rounded-full ${user?.stato?.toLowerCase() === 'online' ? 'bg-green-500' : user?.stato?.toLowerCase() === 'occupato' ? 'bg-yellow-500' : 'bg-gray-500'}`}></span> 
+              {user?.stato || 'Offline'}
+            </div>
           </div>
-          <button className="ml-auto text-gray-400 hover:text-white"><i className="fas fa-sign-out-alt text-xs"></i></button>
+          <button onClick={onLogout} className="ml-auto text-gray-400 hover:text-white" title="Esci (Logout)">
+            <i className="fas fa-sign-out-alt text-xs"></i>
+          </button>
         </div>
       </div>
     </aside>

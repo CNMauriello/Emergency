@@ -23,7 +23,7 @@ public class OperatoreLoginService {
     @Autowired
     private OperatoreRepository operatoreRepository;
 
-    private static final String AUTH_SERVICE_URL = "http://localhost:8088/api/auth"; // AuthMicroService
+    private static final String AUTH_SERVICE_URL = "http://localhost:8090/Auth/api/auth"; // AuthMicroService
 
     /**
      * Intercetta username e password, li inoltra via WebClient all'AuthMicroService.

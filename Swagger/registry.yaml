@@ -1,0 +1,193 @@
+openapi: "3.1.0"
+info:
+  title: "Emergency API"
+  description: "Emergency API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8090"
+paths:
+  /api/capabilities:
+    post:
+      summary: "POST api/capabilities"
+      operationId: "createCapability"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CapabilityDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CapabilityDTO"
+    get:
+      summary: "GET api/capabilities"
+      operationId: "getAllCapabilities"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/CapabilityDTO"
+  /api/services/{id}:
+    patch:
+      summary: "PATCH api/services/{id}"
+      operationId: "updateServiceMetrics"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ServiceUpdateRequestDTO"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ServiceUpdateResponseDTO"
+    delete:
+      summary: "DELETE api/services/{id}"
+      operationId: "deleteService"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "integer"
+            format: "int64"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Void"
+  /api/services:
+    get:
+      summary: "GET api/services"
+      operationId: "getByCapability"
+      parameters:
+        - name: "capability"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/EmergencyServiceDTO"
+components:
+  schemas:
+    CapabilityDTO:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+          nullable: true
+    ServiceUpdateRequestDTO:
+      type: "object"
+      properties:
+        status:
+          type: "string"
+          nullable: true
+          enum:
+            - "UP"
+            - "DOWN"
+            - "DEGRADED"
+        avgLatency:
+          type: "number"
+          format: "double"
+          nullable: true
+        currentLoad:
+          type: "number"
+          format: "double"
+          nullable: true
+    ServiceUpdateResponseDTO:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          nullable: true
+        status:
+          type: "string"
+          nullable: true
+          enum:
+            - "UP"
+            - "DOWN"
+            - "DEGRADED"
+        avgLatency:
+          type: "number"
+          format: "double"
+          nullable: true
+        currentLoad:
+          type: "number"
+          format: "double"
+          nullable: true
+    EmergencyServiceDTO:
+      type: "object"
+      properties:
+        id:
+          type: "integer"
+          format: "int64"
+          nullable: true
+        endpoint:
+          type: "string"
+          nullable: true
+        type:
+          type: "string"
+          nullable: true
+          enum:
+            - "FIRE_STATION"
+            - "HOSPITAL"
+            - "POLICE"
+        status:
+          type: "string"
+          nullable: true
+          enum:
+            - "UP"
+            - "DOWN"
+            - "DEGRADED"
+        avgLatency:
+          type: "number"
+          format: "double"
+          nullable: true
+        currentLoad:
+          type: "number"
+          format: "double"
+          nullable: true
+        latitude:
+          type: "number"
+          format: "double"
+          nullable: true
+        longitude:
+          type: "number"
+          format: "double"
+          nullable: true
+        capabilities:
+          type: "array"
+          nullable: true
+          items:
+            type: "string"
+    Void:
+      type: "object"
+      properties: { }

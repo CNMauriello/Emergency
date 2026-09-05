@@ -1,0 +1,148 @@
+openapi: "3.1.0"
+info:
+  title: "Emergency API"
+  description: "Emergency API"
+  version: "1.0.0"
+servers:
+  - url: "http://localhost:8090"
+paths:
+  /api/operators/login:
+    post:
+      summary: "POST api/operators/login"
+      operationId: "login"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "string"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "object"
+  /api/operators/escalations:
+    post:
+      summary: "POST api/operators/escalations"
+      operationId: "createEscalation"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscalationCreationRequest"
+        required: true
+      responses:
+        "201":
+          description: "Created"
+  /api/operators/escalations/{ticketId}/resolve:
+    post:
+      summary: "POST api/operators/escalations/{ticketId}/resolve"
+      operationId: "resolveEscalation"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EscalationResolutionRequest"
+        required: true
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/Void"
+  /api/operators/escalations/active:
+    get:
+      summary: "GET api/operators/escalations/active"
+      operationId: "getActiveEscalations"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/EscalationTicket"
+  /api/operators/escalations/{ticketId}:
+    get:
+      summary: "GET api/operators/escalations/{ticketId}"
+      operationId: "getEscalation"
+      parameters:
+        - name: "ticketId"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/EscalationTicket"
+components:
+  schemas:
+    EscalationCreationRequest:
+      type: "object"
+      properties:
+        ticketId:
+          type: "string"
+          nullable: true
+        eventId:
+          type: "string"
+          nullable: true
+        capability:
+          type: "string"
+          nullable: true
+        failedEndpoints:
+          type: "array"
+          nullable: true
+          items:
+            type: "string"
+    EscalationResolutionRequest:
+      type: "object"
+      properties:
+        operatorId:
+          type: "string"
+          nullable: true
+        resolutionStrategy:
+          type: "string"
+          nullable: true
+        justification:
+          type: "string"
+          nullable: true
+    Void:
+      type: "object"
+      properties: { }
+    EscalationTicket:
+      type: "object"
+      properties:
+        ticketId:
+          type: "string"
+          nullable: true
+        eventId:
+          type: "string"
+          nullable: true
+        capability:
+          type: "string"
+          nullable: true
+        failedEndpoints:
+          type: "array"
+          nullable: true
+          items:
+            type: "string"
+        status:
+          type: "string"
+          nullable: true
+          enum:
+            - "PENDING"
+            - "RESOLVED"

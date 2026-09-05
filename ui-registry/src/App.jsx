@@ -7,9 +7,12 @@ import ActiveEmergencies from './components/ActiveEmergencies.jsx';
 import EmergencyDetail from './components/EmergencyDetail.jsx';
 import WorkflowsTable from './components/WorkflowsTable.jsx';
 import History from './components/History.jsx';
-import { API_BASE_URL, fetchWithAuth } from './config.js';
+import Login from './components/Login.jsx';
+import Profile from './components/Profile.jsx';
+import { API_BASE_URL, fetchWithAuth, getAuthUser, clearAuthSession } from './config.js';
 
 export default function App() {
+  const [user, setUser] = useState(getAuthUser());
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -56,9 +59,36 @@ export default function App() {
     setIsServiceFormVisible(false)
   }
 
+  const handleLogout = useCallback(async () => {
+    if (user && (user.id || user.matricola)) {
+      try {
+        await fetchWithAuth(`${API_BASE_URL}/Operator/api/operators/${user.id || user.matricola}/logout`, {
+          method: 'PATCH'
+        });
+      } catch (err) {
+        console.error('Logout error:', err);
+      }
+    }
+    clearAuthSession();
+    setUser(null);
+  }, [user]);
+
+  useEffect(() => {
+    const handleAuthLogout = () => {
+      setUser(null);
+    };
+
+    window.addEventListener('auth:logout', handleAuthLogout);
+    return () => window.removeEventListener('auth:logout', handleAuthLogout);
+  }, []);
+
+  if (!user) {
+    return <Login onLoginSuccess={setUser} />;
+  }
+
   return (
     <div className="bg-[#f4f7f6] text-gray-800 font-sans h-screen flex overflow-hidden">
-      <Sidebar currentView={currentView} setCurrentView={setCurrentView} />
+      <Sidebar currentView={currentView} setCurrentView={setCurrentView} user={user} onLogout={handleLogout} />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
         <Header />
@@ -122,6 +152,10 @@ export default function App() {
           <div className="flex-1 overflow-y-auto">
             <EmergencyDetail emergencyId={selectedEmergencyId} onBack={handleBackToList} />
           </div>
+        )}
+
+        {currentView === 'profile' && (
+          <Profile />
         )}
       </main>
     </div>

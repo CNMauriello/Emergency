@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
 import { Download, Search, CheckCircle2, AlertTriangle, XCircle, FileText } from 'lucide-react';
+import AuditLogModal from './AuditLogModal.jsx';
 
 export default function History() {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedAuditEmergencyId, setSelectedAuditEmergencyId] = useState(null);
 
     const loadHistory = async () => {
         try {
@@ -125,7 +127,11 @@ export default function History() {
                                     {getResolutionBadge(item.resolution || 'RESOLVED')}
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-[#1976d2] hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded transition-colors" title="Scarica Audit Log (PDF)">
+                                    <button 
+                                        onClick={() => setSelectedAuditEmergencyId(item.id)}
+                                        className="text-[#1976d2] hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded transition-colors" 
+                                        title="Visualizza Audit Log"
+                                    >
                                         <FileText className="w-4 h-4" />
                                     </button>
                                 </td>
@@ -134,6 +140,13 @@ export default function History() {
                     </tbody>
                 </table>
             </div>
+
+            {selectedAuditEmergencyId && (
+                <AuditLogModal 
+                    emergencyId={selectedAuditEmergencyId} 
+                    onClose={() => setSelectedAuditEmergencyId(null)} 
+                />
+            )}
         </div>
     );
 }

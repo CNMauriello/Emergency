@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter} from 'lucide-react';
-import {API_BASE_URL} from '../config.js';
+import {API_BASE_URL, fetchWithAuth} from '../config.js';
 
 const EmergencyDetail = ({emergencyId, onBack}) => {
     const [emergency, setEmergency] = useState(null);
@@ -18,8 +18,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         if (!emergencyId) return;
         const loadCapabilities = async () => {
             try {
-                //const headers = {'Authorization': `Bearer ${localStorage.getItem('faro_token')}`};
-                const res = await fetch(`${API_BASE_URL}/capabilities`);//, {headers});
+                const res = await fetchWithAuth(`${API_BASE_URL}/Registry/api/capabilities`);
                 if (res.ok) {
                     const data = await res.json();
                     setCapabilities(data);
@@ -48,10 +47,10 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                 setEmergency(emData);
 
                 const serviceUrl = selectedCapability
-                    ? `${API_BASE_URL}/services?capability=${selectedCapability}`
-                    : `${API_BASE_URL}/services`;
+                    ? `${API_BASE_URL}/Registry/api/services?capability=${selectedCapability}`
+                    : `${API_BASE_URL}/Registry/api/services?capability=`;
 
-                const srvRes = await fetch(serviceUrl, {headers});
+                const srvRes = await fetchWithAuth(serviceUrl, {headers});
                 if (srvRes.ok) {
                     const srvData = await srvRes.json();
                     setServices(srvData);
@@ -352,7 +351,7 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
     const loadCapabilities = async () => {
       try {
         const headers = { 'Authorization': `Bearer ${localStorage.getItem('faro_token')}` };
-        const res = await fetch(`${API_BASE_URL}/capabilities`, { headers });
+        const res = await fetch(`${API_BASE_URL}/Registry/api/capabilities`, { headers });
         if (res.ok) {
           const data = await res.json();
           setCapabilities(data);
@@ -393,8 +392,8 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
 
         // --- CHIAMATA REALE AL REGISTRY SERVICE ---
         const serviceUrl = selectedCapability
-          ? `${API_BASE_URL}/services?capability=${selectedCapability}`
-          : `${API_BASE_URL}/services`;
+          ? `${API_BASE_URL}/Registry/api/services?capability=${selectedCapability}`
+          : `${API_BASE_URL}/Registry/api/services?capability=`;
 
         const srvRes = await fetch(serviceUrl, { headers });
         if (srvRes.ok) {

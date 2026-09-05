@@ -67,7 +67,7 @@ function postJson(url, body) {
 
 postJson(ORCHESTRATOR_URL, payload)
   .then(() => {
-    console.log("Evento inviato all'orchestrator: Camunda dovrebbe partire.");
+    console.log("Evento inviato all'orchestrator.yaml: Camunda dovrebbe partire.");
   })
   .catch((err) => {
     console.error("Errore durante l'invio del payload:", err.message);
