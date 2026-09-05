@@ -17,8 +17,14 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
 
-  // Default to active emergencies as it is usually the starting page for operations
-  const [currentView, setCurrentView] = useState('active') 
+  const getInitialView = (role) => {
+    if (!role) return 'active';
+    const r = role.toString().toUpperCase();
+    if (r.includes('WORKFLOW_EXPERT')) return 'workflows';
+    if (r.includes('SERVICE_OPERATOR')) return 'directory';
+    return 'active';
+  };
+  const [currentView, setCurrentView] = useState(() => getInitialView(user?.ruolo)); 
   const [selectedEmergencyId, setSelectedEmergencyId] = useState(null)
   const [isServiceFormVisible, setIsServiceFormVisible] = useState(false)
 
@@ -152,7 +158,7 @@ export default function App() {
 
         {currentView === 'detail' && (
           <div className="flex-1 overflow-y-auto">
-            <EmergencyDetail emergencyId={selectedEmergencyId} onBack={handleBackToList} />
+            <EmergencyDetail emergencyId={selectedEmergencyId} onBack={handleBackToList} userRole={user?.ruolo} />
           </div>
         )}
 

@@ -4,7 +4,8 @@ import {API_BASE_URL, fetchWithAuth} from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 import EscalationResolutionModal from './EscalationResolutionModal.jsx';
 
-const EmergencyDetail = ({emergencyId, onBack}) => {
+const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
+    const isUser = userRole?.toString().toUpperCase() === 'ROLE_USER' || userRole?.toString().toUpperCase() === 'USER';
     const [emergency, setEmergency] = useState(null);
     const [services, setServices] = useState([]);
     const [capabilities, setCapabilities] = useState([]);
@@ -244,7 +245,13 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                                         </div>
                                         <button 
                                             onClick={() => setResolvingTicket(ticket)}
-                                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded flex items-center transition-colors"
+                                            disabled={isUser}
+                                            title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
+                                            className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors ${
+                                                isUser 
+                                                ? 'bg-gray-400 cursor-not-allowed' 
+                                                : 'bg-red-600 hover:bg-red-700'
+                                            }`}
                                         >
                                             <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
                                         </button>
@@ -313,7 +320,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter } from 'lucide-react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
 
-const EmergencyDetail = ({ emergencyId, onBack }) => {
+const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
   const [emergency, setEmergency] = useState(null);
   const [services, setServices] = useState([]);
   const [capabilities, setCapabilities] = useState([]);
