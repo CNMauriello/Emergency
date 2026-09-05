@@ -27,7 +27,7 @@ export default function ServicesTable({
     }
 
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/Registry/api/services/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/services/${id}`, {
         method: 'DELETE',
       })
 
@@ -62,7 +62,7 @@ export default function ServicesTable({
 
     try {
       const response = await fetchWithAuth(
-        `${API_BASE_URL}/Registry/api/services/${editingService.id}`,
+        `${API_BASE_URL}/api/services/${editingService.id}`,
         {
           method: 'PATCH',
           headers: {

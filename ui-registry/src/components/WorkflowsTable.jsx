@@ -18,7 +18,7 @@ export default function WorkflowsTable() {
     const loadWorkflows = async () => {
         try {
             setLoading(true);
-            const response = await fetchWithAuth(`${API_BASE_URL}/Orchestrator/api/workflows`);
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/workflows`);
             if (!response.ok) throw new Error('Failed to fetch workflows');
             const data = await response.json();
             setWorkflows(data);
@@ -44,7 +44,7 @@ export default function WorkflowsTable() {
 
     const handleActiveVersionChange = async (processKey, newVersion) => {
         try {
-            const url = `${API_BASE_URL}/Orchestrator/api/workflows/active-version?processKey=${processKey}&targetVersion=${newVersion}`;
+            const url = `${API_BASE_URL}/api/workflows/active-version?processKey=${processKey}&targetVersion=${newVersion}`;
             
             // In case we want to mock the behavior when the backend is offline:
             if (error) {
@@ -75,15 +75,25 @@ export default function WorkflowsTable() {
 
     const handleViewBpmn = async (processKey) => {
         try {
-            const response = await fetchWithAuth(`${API_BASE_URL}/Orchestrator/api/workflows/${processKey}/xml`);
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/workflows/${processKey}/xml`);
             if (!response.ok) throw new Error('Errore nel recupero del BPMN');
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('text/html')) {
+                throw new Error('Il server ha restituito una pagina HTML invece del diagramma BPMN.');
+            }
+            
             const xml = await response.text();
+            if (!xml.includes('<bpmn:definitions') && !xml.includes('<definitions')) {
+                throw new Error('Il contenuto restituito non è un file BPMN valido.');
+            }
+            
             setViewerXml(xml);
             setViewerProcessKey(processKey);
             setViewerOpen(true);
         } catch (err) {
             console.error(err);
-            alert("Impossibile caricare il diagramma BPMN. Assicurati che il backend sia attivo e che la versione attiva esista.");
+            alert("Impossibile caricare il diagramma BPMN. Assicurati che il backend sia attivo e che la versione attiva esista. (" + err.message + ")");
         }
     };
 

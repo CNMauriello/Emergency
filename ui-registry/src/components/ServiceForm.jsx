@@ -27,7 +27,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
         setLoadingCapabilities(true)
         setCapabilityError(false)
 
-        const response = await fetchWithAuth(`${API_BASE_URL}/Registry/api/capabilities`)
+        const response = await fetchWithAuth(`${API_BASE_URL}/api/capabilities`)
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -102,7 +102,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
     setSubmitting(true)
 
     try {
-      const url = `${API_BASE_URL}/Registry/api/services`
+      const url = `${API_BASE_URL}/api/services`
       
       const response = await fetchWithAuth(url, {
         method: 'POST',

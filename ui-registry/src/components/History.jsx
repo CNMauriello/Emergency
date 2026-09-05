@@ -13,7 +13,7 @@ export default function History() {
     const loadHistory = async () => {
         try {
             setLoading(true);
-            const response = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies?status=CLOSED`);
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies?status=CLOSED`);
             if (!response.ok) throw new Error('Failed to fetch history');
             const data = await response.json();
             setHistory(data);
@@ -50,8 +50,8 @@ export default function History() {
     };
 
     const filteredHistory = history.filter(h => 
-        h.id.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        h.eventType.toLowerCase().includes(searchTerm.toLowerCase())
+        String(h.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        String(h.eventType || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (

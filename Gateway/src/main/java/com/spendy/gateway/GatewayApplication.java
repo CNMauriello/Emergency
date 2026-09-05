@@ -22,20 +22,25 @@ public class GatewayApplication {
     @org.springframework.context.annotation.Bean
     public org.springframework.cloud.gateway.route.RouteLocator customRouteLocator(org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("AuthMicroService", r -> r.path("/Auth/**")
-                        .filters(f -> f.rewritePath("/Auth/(?<segment>.*)", "/${segment}"))
+
+                .route("AuthMicroService", r -> r
+                        .path("/api/auth/**")
                         .uri("http://localhost:8088"))
-                .route("RegistryService", r -> r.path("/Registry/**")
-                        .filters(f -> f.rewritePath("/Registry/(?<segment>.*)", "/${segment}"))
+
+                .route("RegistryService", r -> r
+                        .path("/api/capabilities/**", "/api/services/**")
                         .uri("http://localhost:8081"))
-                .route("Orchestrator", r -> r.path("/Orchestrator/**")
-                        .filters(f -> f.rewritePath("/Orchestrator/(?<segment>.*)", "/${segment}"))
+
+                .route("Orchestrator", r -> r
+                        .path("/api/workflows/**", "/api/emergency-triggers/**", "/api/escalations/**")
                         .uri("http://localhost:8083"))
-                .route("Emergency", r -> r.path("/Emergency/**")
-                        .filters(f -> f.rewritePath("/Emergency/(?<segment>.*)", "/${segment}"))
+
+                .route("Emergency", r -> r
+                        .path("/api/emergencies/**")
                         .uri("http://localhost:8084"))
-                .route("Operator", r -> r.path("/Operator/**")
-                        .filters(f -> f.rewritePath("/Operator/(?<segment>.*)", "/${segment}"))
+
+                .route("Operator", r -> r
+                        .path("/api/operators/**")
                         .uri("http://localhost:8087"))
                 .build();
     }

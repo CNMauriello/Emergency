@@ -86,7 +86,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
       // Usually Spring Boot `@RequestParam` works for both query params and FormData. 
       // If the backend expects query params specifically, we might need to append them to the URL.
       // But standard HTML forms send inputs as FormData along with the file. We will append them to the URL to perfectly match the user's prompt string:
-      // POST http://localhost:8090/Orchestrator/api/workflows?file=...&eventType=...&severity=...
+      // POST http://localhost:8090/api/workflows?file=...&eventType=...&severity=...
       
       const response = await fetchWithAuth(`${ORCHESTRATOR_URL}/api/workflows?eventType=${formData.eventType}&severity=${formData.severity}`, {
         method: 'POST',

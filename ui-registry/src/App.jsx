@@ -26,7 +26,7 @@ export default function App() {
     setLoading(true)
     setError(false)
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/Registry/api/services`)
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/services`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -62,7 +62,7 @@ export default function App() {
   const handleLogout = useCallback(async () => {
     if (user && (user.id || user.matricola)) {
       try {
-        await fetchWithAuth(`${API_BASE_URL}/Operator/api/operators/${user.id || user.matricola}/logout`, {
+        await fetchWithAuth(`${API_BASE_URL}/api/operators/${user.id || user.matricola}/logout`, {
           method: 'PATCH'
         });
       } catch (err) {

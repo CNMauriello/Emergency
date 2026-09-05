@@ -1,10 +1,10 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8090';
 
-export const AUTH_SERVICE_URL = `${API_BASE_URL}/Auth`;
-export const OPERATOR_SERVICE_URL = `${API_BASE_URL}/Operator`;
-export const ORCHESTRATOR_URL = `${API_BASE_URL}/Orchestrator`;
-export const EMERGENCY_MANAGER_URL = `${API_BASE_URL}/Emergency`;
-export const REGISTRY_SERVICE_URL = `${API_BASE_URL}/Registry`;
+export const AUTH_SERVICE_URL = `${API_BASE_URL}`;
+export const OPERATOR_SERVICE_URL = `${API_BASE_URL}`;
+export const ORCHESTRATOR_URL = `${API_BASE_URL}`;
+export const EMERGENCY_MANAGER_URL = `${API_BASE_URL}`;
+export const REGISTRY_SERVICE_URL = `${API_BASE_URL}`;
 
 // Gestione Token
 export function getAuthToken() {

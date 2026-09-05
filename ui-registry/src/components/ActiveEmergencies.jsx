@@ -78,7 +78,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
     */
     const fetchEmergencies = async () => {
         try {
-            const response = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies`);
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies`);
 
             // Fallback temporaneo per testare la UI in caso di assenza del backend
             if (!response.ok) {

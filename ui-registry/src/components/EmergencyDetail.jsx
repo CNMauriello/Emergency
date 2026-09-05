@@ -18,7 +18,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         if (!emergencyId) return;
         const loadCapabilities = async () => {
             try {
-                const res = await fetchWithAuth(`${API_BASE_URL}/Registry/api/capabilities`);
+                const res = await fetchWithAuth(`${API_BASE_URL}/api/capabilities`);
                 if (res.ok) {
                     const data = await res.json();
                     setCapabilities(data);
@@ -41,14 +41,14 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                 };
 
                 // Usa GET /emergencies/{id}
-                const emRes = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies/${emergencyId}`, {headers});
+                const emRes = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}`, {headers});
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
 
                 const serviceUrl = selectedCapability
-                    ? `${API_BASE_URL}/Registry/api/services?capability=${selectedCapability}`
-                    : `${API_BASE_URL}/Registry/api/services?capability=`;
+                    ? `${API_BASE_URL}/api/services?capability=${selectedCapability}`
+                    : `${API_BASE_URL}/api/services?capability=`;
 
                 const srvRes = await fetchWithAuth(serviceUrl, {headers});
                 if (srvRes.ok) {
@@ -75,7 +75,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         setDispatching(true);
         try {
             // Usa il nuovo endpoint PATCH /emergencies/{id}/status invece del POST
-            const response = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies/${emergencyId}/status`, {
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -351,7 +351,7 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
     const loadCapabilities = async () => {
       try {
         const headers = { 'Authorization': `Bearer ${localStorage.getItem('faro_token')}` };
-        const res = await fetch(`${API_BASE_URL}/Registry/api/capabilities`, { headers });
+        const res = await fetch(`${API_BASE_URL}/api/capabilities`, { headers });
         if (res.ok) {
           const data = await res.json();
           setCapabilities(data);
@@ -392,8 +392,8 @@ const EmergencyDetail = ({ emergencyId, onBack }) => {
 
         // --- CHIAMATA REALE AL REGISTRY SERVICE ---
         const serviceUrl = selectedCapability
-          ? `${API_BASE_URL}/Registry/api/services?capability=${selectedCapability}`
-          : `${API_BASE_URL}/Registry/api/services?capability=`;
+          ? `${API_BASE_URL}/api/services?capability=${selectedCapability}`
+          : `${API_BASE_URL}/api/services?capability=`;
 
         const srvRes = await fetch(serviceUrl, { headers });
         if (srvRes.ok) {
