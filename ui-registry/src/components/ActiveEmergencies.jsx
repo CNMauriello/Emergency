@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets} from 'lucide-react';
-import {API_BASE_URL} from '../config.js';
+import { API_BASE_URL, fetchWithAuth } from '../config.js';
 
 const ActiveEmergencies = ({onViewDetail}) => {
     const [emergencies, setEmergencies] = useState([]);
@@ -78,9 +78,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
     */
     const fetchEmergencies = async () => {
         try {
-            // Sostituisci con il vero endpoint del Gestore Operatori di Sala
-            const response = await fetch(`http://localhost:8084/api/emergencies`);
-            //${API_BASE_URL}/emergencies
+            const response = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies`);
 
             // Fallback temporaneo per testare la UI in caso di assenza del backend
             if (!response.ok) {
@@ -130,14 +128,18 @@ const ActiveEmergencies = ({onViewDetail}) => {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Active Emergencies</h1>
-            <p className="text-gray-500 mb-8">Real-time monitoring and orchestration dashboard.</p>
+        <div className="p-8 bg-transparent min-h-screen">
+            <div className="mb-6">
+                <h1 className="text-[28px] font-bold text-[#0B1B32]">Active Emergencies</h1>
+                <p className="text-gray-500 mt-1">Real-time monitoring and orchestration dashboard.</p>
+            </div>
 
             <div className="space-y-4">
                 {emergencies.map((em) => {
                     const {steps, currentStep} = getWorkflowInfo(em);
                     const isCritical = em.severity === 'CRITICA' || em.severity === 'CRITICAL';
+                    const severityColor = isCritical ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]';
+                    const severityBorder = isCritical ? 'border-[#d32f2f]' : 'border-[#ed6c02]';
 
                     return (
                         <div
@@ -146,93 +148,81 @@ const ActiveEmergencies = ({onViewDetail}) => {
                             className="bg-white border border-gray-200 rounded-lg shadow-sm flex overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200"
                         >
                             {/* Indicatore di gravità laterale */}
-                            <div className={`w-2 ${isCritical ? 'bg-red-500' : 'bg-orange-500'}`}></div>
+                            <div className={`w-1.5 ${severityColor}`}></div>
 
-                            <div className="p-4 flex-1 flex flex-col justify-between">
-
+                            <div className="p-5 flex-1 flex flex-col justify-between">
                                 {/* Header Card */}
-                                <div className="flex justify-between items-center mb-4 border-b pb-2">
-                                    <div className="flex items-center space-x-4">
-                    <span
-                        className={`px-2 py-1 text-xs font-bold text-white rounded ${isCritical ? 'bg-red-500' : 'bg-orange-500'}`}>
-                      {em.severity}
-                    </span>
-                                        <span className="text-sm text-gray-500">{em.eventId || `ID: ${em.id}`}</span>
+                                <div className="flex justify-between items-center mb-3">
+                                    <div className="flex items-center space-x-3">
+                                        <span className={`px-2 py-0.5 text-[10px] font-bold text-white rounded ${severityColor}`}>
+                                            {em.severity}
+                                        </span>
+                                        <span className="text-[13px] text-gray-500 font-medium">{em.eventId || `ID: ${em.id}`}</span>
                                         {em.timestamp && (
-                                            <span className="text-sm text-gray-500 flex items-center">
-                        <Clock className="w-4 h-4 mr-1"/> {em.timestamp}
-                      </span>
+                                            <span className="text-[13px] text-gray-500 flex items-center font-medium">
+                                                <Clock className="w-3.5 h-3.5 mr-1"/> {em.timestamp}
+                                            </span>
                                         )}
                                     </div>
-                                    <span
-                                        className={`px-3 py-1 text-xs font-bold rounded ${em.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-700'}`}>
-                    {em.status}
-                  </span>
+                                    <span className={`px-2.5 py-1 text-[11px] font-bold rounded border ${em.status === 'IN_PROGRESS' ? 'bg-[#e3f2fd] text-[#1976d2] border-[#bbdefb]' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
+                                        {em.status}
+                                    </span>
                                 </div>
 
                                 {/* Body Card */}
                                 <div className="flex justify-between items-center">
-
                                     {/* Dettagli Evento */}
                                     <div className="flex space-x-4">
-                                        <div className="mt-1">{getIconForType(em.eventType)}</div>
+                                        <div className="mt-0.5 opacity-80">{getIconForType(em.eventType)}</div>
                                         <div>
-                                            <h2 className="text-xl font-bold text-gray-800">{em.eventType}</h2>
+                                            <h2 className="text-[17px] font-bold text-[#0B1B32] uppercase tracking-wide">{em.eventType.replace('_', ' ')}</h2>
                                             {em.address && (
-                                                <p className="text-gray-600 flex items-center mt-1">
-                                                    <AlertTriangle className="w-4 h-4 mr-1 text-gray-400"/> {em.address}
+                                                <p className="text-[13px] text-gray-600 flex items-center mt-1 font-medium">
+                                                    <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400"/> {em.address}
                                                 </p>
                                             )}
-                                            <p className="text-gray-400 text-sm font-mono mt-1">
-                                                Lat: {em.latitude}, Lng: {em.longitude}
+                                            <p className="text-gray-400 text-[12px] font-mono mt-1 flex items-center gap-2">
+                                                <span>Lat: {em.latitude}</span>, <span>Lng: {em.longitude}</span>
                                             </p>
                                         </div>
                                     </div>
 
                                     {/* Workflow Status Progress Bar */}
-                                    <div className="w-1/3">
-                                        <p className="text-xs text-gray-500 font-bold mb-2">WORKFLOW STATUS</p>
-                                        <div className="flex items-center justify-between relative">
+                                    <div className="w-[350px]">
+                                        <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-3">WORKFLOW STATUS</p>
+                                        <div className="flex items-center justify-between relative px-2">
                                             {/* Linea di base grigia */}
-                                            <div
-                                                className="absolute left-0 top-1/2 w-full h-0.5 bg-gray-200 -z-10 transform -translate-y-1/2"></div>
+                                            <div className="absolute left-4 right-4 top-1/2 h-[2px] bg-gray-200 border-t border-b border-dashed border-gray-300 -z-10 transform -translate-y-1/2"></div>
 
-                                            {/* Linea di progresso blu (calcolata in base allo step corrente) */}
+                                            {/* Linea di progresso blu */}
                                             <div
-                                                className="absolute left-0 top-1/2 h-0.5 bg-blue-600 -z-10 transform -translate-y-1/2 transition-all duration-500"
-                                                style={{width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : '100%'}}
+                                                className="absolute left-4 top-1/2 h-[2px] bg-[#1976d2] -z-10 transform -translate-y-1/2 transition-all duration-500"
+                                                style={{width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 2rem)'}}
                                             ></div>
 
                                             {/* Step 1 */}
-                                            <div
-                                                className={`w-6 h-6 rounded-full flex items-center justify-center ${currentStep > 1 ? 'bg-blue-600 text-white' : currentStep === 1 ? 'bg-white border-4 border-blue-600' : 'bg-white border-2 border-gray-300'}`}>
-                                                {currentStep > 1 ? '✓' : currentStep === 1 &&
-                                                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep > 1 ? 'bg-[#1976d2] text-white' : currentStep === 1 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
+                                                    {currentStep > 1 ? <CheckCircle2 className="w-3.5 h-3.5"/> : currentStep === 1 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
+                                                </div>
+                                                <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 1 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[0]}</span>
                                             </div>
 
                                             {/* Step 2 */}
-                                            <div
-                                                className={`w-6 h-6 rounded-full flex items-center justify-center bg-white ${currentStep > 2 ? 'bg-blue-600 text-white border-0' : currentStep === 2 ? 'border-4 border-blue-600' : 'border-2 border-gray-300'}`}>
-                                                {currentStep > 2 ? '✓' : currentStep === 2 &&
-                                                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center bg-white ${currentStep > 2 ? 'bg-[#1976d2] text-white border-0' : currentStep === 2 ? 'border-[3px] border-[#1976d2]' : 'border-2 border-gray-300'}`}>
+                                                    {currentStep > 2 ? <CheckCircle2 className="w-3.5 h-3.5"/> : currentStep === 2 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
+                                                </div>
+                                                <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 2 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[1]}</span>
                                             </div>
 
                                             {/* Step 3 */}
-                                            <div
-                                                className={`w-6 h-6 rounded-full flex items-center justify-center bg-white ${currentStep === 3 ? 'border-4 border-blue-600' : 'border-2 border-gray-300'}`}>
-                                                {currentStep === 3 &&
-                                                    <div className="w-2 h-2 rounded-full bg-blue-600"></div>}
+                                            <div className="flex flex-col items-center">
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center bg-white ${currentStep === 3 ? 'border-[3px] border-[#1976d2]' : 'border-2 border-gray-300'}`}>
+                                                    {currentStep === 3 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
+                                                </div>
+                                                <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 3 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[2]}</span>
                                             </div>
-                                        </div>
-
-                                        {/* Testi degli step */}
-                                        <div className="flex justify-between mt-2 text-xs text-gray-500">
-                                            <span
-                                                className={currentStep === 1 ? 'font-bold text-gray-800' : ''}>{steps[0]}</span>
-                                            <span
-                                                className={currentStep === 2 ? 'font-bold text-gray-800' : ''}>{steps[1]}</span>
-                                            <span
-                                                className={currentStep === 3 ? 'font-bold text-gray-800' : ''}>{steps[2]}</span>
                                         </div>
                                     </div>
                                 </div>

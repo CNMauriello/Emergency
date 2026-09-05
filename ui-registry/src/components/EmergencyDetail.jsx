@@ -42,7 +42,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                 };
 
                 // Usa GET /emergencies/{id}
-                const emRes = await fetch(`http://localhost:8084/api/emergencies/${emergencyId}`, {headers});
+                const emRes = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies/${emergencyId}`, {headers});
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
@@ -76,7 +76,7 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         setDispatching(true);
         try {
             // Usa il nuovo endpoint PATCH /emergencies/{id}/status invece del POST
-            const response = await fetch(`http://localhost:8084/api/emergencies/${emergencyId}/status`, {
+            const response = await fetchWithAuth(`${API_BASE_URL}/Emergency/api/emergencies/${emergencyId}/status`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
@@ -122,135 +122,194 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
         (emergency.history && emergency.history.some(h => h.includes('INGAGGIATA')));
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen">
-            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm font-bold">
+        <div className="p-8 bg-transparent min-h-screen">
+            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
                 <ArrowLeft className="w-4 h-4 mr-1"/> Torna alla lista
             </button>
 
             <div className="flex items-center space-x-4 mb-8">
-                <h1 className="text-3xl font-bold text-gray-800">Emergenza: {emergency.eventType}</h1>
-                <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">{emergency.severity}</span>
-                <span className={`px-2 py-1 text-xs font-bold rounded text-white ${emergency.status === 'CLOSED' ? 'bg-gray-500' : 'bg-blue-500'}`}>
+                <h1 className="text-[28px] font-bold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</h1>
+                <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded ${emergency.severity === 'CRITICA' || emergency.severity === 'CRITICAL' ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]'}`}>
+                    {emergency.severity}
+                </span>
+                <span className={`px-2.5 py-1 text-[11px] font-bold rounded ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white'}`}>
                     {emergency.status}
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-6 lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* LEFT COLUMN: Dettagli e Segnalazioni */}
+                <div className="space-y-6 lg:col-span-5">
+                    {/* Card Dettagli Operativi */}
                     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                        <div className="flex items-center justify-between border-b pb-4 mb-4">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                                <MapPin className="w-5 h-5 mr-2 text-gray-500"/> Dettagli Operativi
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
+                            <h2 className="text-lg font-bold text-[#0B1B32] flex items-center">
+                                <i className="fas fa-layer-group text-gray-400 mr-2 text-[15px]"></i> Dettagli Operativi
                             </h2>
-                            <span className="bg-gray-100 text-gray-500 px-2 py-1 text-xs font-mono rounded">ID: {emergency.id}</span>
+                            <span className="bg-gray-100 text-gray-500 px-2 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
-                        <div className="space-y-3 text-sm">
+                        <div className="grid grid-cols-2 gap-y-6 gap-x-4 text-[13px]">
                             <div>
-                                <p className="text-gray-500 mb-1">EVENT ID ORIGINALE</p>
-                                <p className="font-mono text-gray-800 bg-gray-100 p-1 rounded inline-block">{emergency.eventId}</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">TIPOLOGIA</p>
+                                <p className="font-semibold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</p>
                             </div>
                             <div>
-                                <p className="text-gray-500 mb-1">COORDINATE</p>
-                                <p className="text-gray-800">Lat: {emergency.latitude}, Lng: {emergency.longitude}</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">ORARIO RILEVAMENTO</p>
+                                <p className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 inline-block text-[12px]">{emergency.timestamp || new Date().toISOString().slice(0, 19).replace('T', ' ')}</p>
                             </div>
                             <div>
-                                <p className="text-gray-500 mb-1">WORKFLOW INSTANCE</p>
-                                <p className="text-gray-800 font-mono text-xs">{emergency.workflowInstanceId || 'N/A'}</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">COORDINATE (LAT/LONG)</p>
+                                <p className="text-gray-700 font-mono text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
+                            </div>
+                            <div>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">FONTE SEGNALAZIONE</p>
+                                <p className="text-gray-700 flex items-center"><i className="fas fa-phone-alt text-gray-400 mr-1.5 text-[10px]"></i> 112 Centrale</p>
+                            </div>
+                            <div className="col-span-2 pt-4 border-t border-dashed border-gray-200">
+                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">INDIRIZZO FISICO</p>
+                                <p className="text-[#0B1B32] text-[14px]">{emergency.address || 'Indirizzo non disponibile'}</p>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Card Segnalazioni Correlate */}
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="px-5 py-4 border-b border-gray-100">
+                            <h2 className="text-[15px] font-bold text-[#0B1B32]">Segnalazioni Correlate (3)</h2>
+                        </div>
+                        <table className="w-full text-left text-[13px]">
+                            <thead>
+                                <tr className="bg-gray-50/50 text-gray-500 text-[10px] uppercase tracking-wider font-bold">
+                                    <th className="px-5 py-3">ID CHIAMATA</th>
+                                    <th className="px-5 py-3">TIMESTAMP</th>
+                                    <th className="px-5 py-3">AFFIDABILITÀ</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                <tr>
+                                    <td className="px-5 py-3 font-mono text-gray-600">C-9921</td>
+                                    <td className="px-5 py-3 text-gray-600">14:15:02</td>
+                                    <td className="px-5 py-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">Alta</span></td>
+                                </tr>
+                                <tr>
+                                    <td className="px-5 py-3 font-mono text-gray-600">C-9924</td>
+                                    <td className="px-5 py-3 text-gray-600">14:16:45</td>
+                                    <td className="px-5 py-3"><span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[11px] font-bold">Alta</span></td>
+                                </tr>
+                                <tr>
+                                    <td className="px-5 py-3 font-mono text-gray-600">C-9930</td>
+                                    <td className="px-5 py-3 text-gray-600">14:18:10</td>
+                                    <td className="px-5 py-3"><span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-[11px] font-bold">Media</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
-                    <div className="flex justify-between items-center mb-6 border-b pb-4">
-                        <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                            <Clock className="w-5 h-5 mr-2 text-gray-500"/> Stato Esecuzione Workflow
+                {/* RIGHT COLUMN: Stato Esecuzione Workflow */}
+                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 lg:col-span-7">
+                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
+                        <h2 className="text-xl font-bold text-[#0B1B32] flex items-center">
+                            <i className="fas fa-project-diagram text-gray-400 mr-3 text-[18px]"></i> Stato Esecuzione Workflow
                         </h2>
+                        <span className="bg-[#e3f2fd] text-[#1976d2] px-3 py-1 text-[11px] font-bold rounded">Processo BPMN Attivo</span>
                     </div>
 
-                    <div className="relative pl-4 border-l-2 border-gray-200 space-y-8 ml-2">
-                        {emergency.history && emergency.history.map((step, index) => (
-                            <div key={index} className="relative">
-                                <CheckCircle2 className="w-6 h-6 text-green-500 absolute -left-[1.65rem] bg-white"/>
-                                <h3 className="font-bold text-gray-800">Transizione: {step}</h3>
-                                <p className="text-sm text-gray-500">Eseguita con successo</p>
+                    <div className="relative pl-6 border-l-[3px] border-gray-100 space-y-10 ml-3">
+                        
+                        {/* Step 1: Completato */}
+                        <div className="relative">
+                            <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
+                                <i className="fas fa-check text-[10px]"></i>
                             </div>
-                        ))}
+                            <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">1. Rilevamento e Categorizzazione</h3>
+                            <p className="text-[13px] text-gray-400 mt-1">Completato automaticamente dal sistema AI centrale. (T: 0.2s)</p>
+                        </div>
 
-                        {emergency.status === 'IN_PROGRESS' && !isDispatchCompleted && (
+                        {/* Step 2: Completato */}
+                        <div className="relative">
+                            <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
+                                <i className="fas fa-check text-[10px]"></i>
+                            </div>
+                            <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">2. Matching Piano d'Emergenza</h3>
+                            <p className="text-[13px] text-gray-400 mt-1">Piano 'Incendio Urbano V2' selezionato e parametri applicati.</p>
+                        </div>
+
+                        {/* Step 3: Attivo / Ingaggio Manuale */}
+                        {!isDispatchCompleted && (
                             <div className="relative">
-                                <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <div className="w-7 h-7 bg-[#1976d2] rounded-full absolute -left-[42px] flex items-center justify-center border-[4px] border-white shadow-sm">
+                                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                                 </div>
-                                <h3 className="font-bold text-gray-900 text-lg">Ingaggio Manuale Risorsa</h3>
+                                <h3 className="font-bold text-[#0B1B32] text-[18px]">3. Ingaggio Manuale Risorsa</h3>
+                                <p className="text-[13px] text-gray-500 mt-2 leading-relaxed">
+                                    Azione richiesta: Confermare il dispaccio delle unità di terra raccomandate in base alla prossimità.
+                                </p>
 
-                                <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-5 mt-4">
-                                    <div className="mb-4 border-b border-blue-200 pb-4">
-                                        <label className="block text-xs font-bold text-blue-800 uppercase mb-2 flex items-center">
-                                            <Filter className="w-3 h-3 mr-1"/> Filtra risorse per Capability
+                                <div className="bg-white border border-[#1976d2] rounded-md p-5 mt-5 shadow-[0_2px_10px_-3px_rgba(25,118,210,0.3)]">
+                                    <div className="mb-4">
+                                        <label className="text-[11px] font-bold text-[#1976d2] uppercase mb-2 flex items-center tracking-wider">
+                                            <i className="fas fa-hands-helping mr-2 text-[13px]"></i> FORM INTERVENTO MANUALE
+                                        </label>
+                                    </div>
+                                    <div className="mb-4">
+                                        <label className="block text-[13px] font-medium text-[#0B1B32] mb-1.5">
+                                            Seleziona Unità d'Intervento (EmergencyService)
                                         </label>
                                         <select
-                                            className="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm bg-white border focus:ring-blue-500 focus:border-blue-500"
-                                            value={selectedCapability}
-                                            onChange={(e) => {
-                                                setSelectedCapability(e.target.value);
-                                                setSelectedUnit('');
-                                            }}
+                                            className="w-full border-gray-300 rounded text-[14px] p-2.5 bg-white border outline-none focus:border-[#1976d2] focus:ring-1 focus:ring-[#1976d2] transition-all"
+                                            value={selectedUnit}
+                                            onChange={(e) => setSelectedUnit(e.target.value)}
                                         >
-                                            <option value="">Mostra tutte le unità (Nessun filtro)</option>
-                                            {capabilities.map(cap => (
-                                                <option key={cap.id || cap.name} value={cap.name}>
-                                                    {cap.name}
+                                            <option value="">Seleziona unità disponibile...</option>
+                                            {services.map(srv => (
+                                                <option key={srv.id} value={srv.id}
+                                                        disabled={srv.status !== 'ACTIVE' && srv.status !== 'UP'}>
+                                                    {srv.type} ({srv.status}) - ID: {srv.id}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
-
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Seleziona Unità d'Intervento
-                                    </label>
-                                    <select
-                                        className="w-full border-gray-300 rounded-md shadow-sm p-2 mb-3 bg-white border"
-                                        value={selectedUnit}
-                                        onChange={(e) => setSelectedUnit(e.target.value)}
-                                    >
-                                        <option value="">Seleziona unità disponibile...</option>
-                                        {services.map(srv => (
-                                            <option key={srv.id} value={srv.id}
-                                                    disabled={srv.status !== 'ACTIVE' && srv.status !== 'UP'}>
-                                                {srv.type} (Carico: {srv.currentLoad} - Latenza: {srv.avgLatency}ms) - {srv.status}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <button
-                                        onClick={handleManualDispatch}
-                                        disabled={!selectedUnit || dispatching}
-                                        className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold disabled:bg-blue-300 transition-colors"
-                                    >
-                                        {dispatching ? 'Aggiornamento in corso...' : 'Conferma Dispaccio'}
-                                    </button>
+                                    <div className="flex justify-between items-center mt-6">
+                                        <p className="text-gray-500 text-[12px]">Il sistema aggiornerà lo stato in 'Dispacciato'</p>
+                                        <button
+                                            onClick={handleManualDispatch}
+                                            disabled={!selectedUnit || dispatching}
+                                            className="bg-[#1976d2] hover:bg-blue-700 text-white px-5 py-2.5 rounded text-[13px] font-bold disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors shadow-sm"
+                                        >
+                                            {dispatching ? (
+                                                <span className="flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin"/> Elaborazione...</span>
+                                            ) : (
+                                                'Conferma Dispaccio'
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
+                        {/* Step 3: Completato */}
                         {isDispatchCompleted && (
                             <div className="relative">
-                                <CheckCircle2 className="w-6 h-6 text-green-500 absolute -left-[1.65rem] bg-white"/>
-                                <h3 className="font-bold text-gray-800 line-through">Ingaggio Manuale Risorsa</h3>
-                                <p className="text-sm text-gray-500">Risorsa ingaggiata manualmente con successo.</p>
+                                <div className="w-[26px] h-[26px] bg-[#388e3c] rounded-full absolute -left-[40.5px] flex items-center justify-center border-[4px] border-white text-white">
+                                    <i className="fas fa-check text-[10px]"></i>
+                                </div>
+                                <h3 className="font-bold text-gray-500 text-[15px] line-through decoration-gray-300">3. Ingaggio Manuale Risorsa</h3>
+                                <p className="text-[13px] text-gray-400 mt-1">Risorsa ingaggiata manualmente con successo.</p>
                             </div>
                         )}
 
-                        <div className={`relative ${!isDispatchCompleted ? 'opacity-50' : ''}`}>
+                        {/* Step 4: Monitoraggio */}
+                        <div className={`relative ${!isDispatchCompleted ? 'opacity-40' : ''}`}>
                             {isDispatchCompleted && emergency.status !== 'CLOSED' ? (
-                                <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
-                                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                                <div className="w-7 h-7 bg-[#1976d2] rounded-full absolute -left-[42px] flex items-center justify-center border-[4px] border-white shadow-sm">
+                                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                                 </div>
                             ) : (
-                                <Circle className="w-6 h-6 text-gray-300 absolute -left-[1.65rem] bg-white"/>
+                                <div className="w-[22px] h-[22px] bg-gray-200 rounded-full absolute -left-[38.5px] border-[4px] border-white"></div>
                             )}
-                            <h3 className={`font-bold ${isDispatchCompleted ? 'text-gray-900 text-lg' : 'text-gray-500'}`}>Monitoraggio e Chiusura</h3>
-                            <p className={`text-sm ${isDispatchCompleted ? 'text-gray-600' : 'text-gray-400'}`}>
+                            <h3 className={`font-bold ${isDispatchCompleted ? 'text-[#0B1B32] text-[18px]' : 'text-gray-400 text-[15px]'}`}>4. Monitoraggio e Chiusura</h3>
+                            <p className={`text-[13px] mt-2 ${isDispatchCompleted ? 'text-gray-500' : 'text-gray-400'}`}>
                                 {isDispatchCompleted ? 'Il piano operativo sta proseguendo il suo flusso BPMN. In attesa della chiusura.' : 'In attesa del completamento delle fasi precedenti.'}
                             </p>
                         </div>
@@ -267,7 +326,7 @@ export default EmergencyDetail;
 /*
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter } from 'lucide-react';
-import { API_BASE_URL } from '../config.js';
+import { API_BASE_URL, fetchWithAuth } from '../config.js';
 
 const EmergencyDetail = ({ emergencyId, onBack }) => {
   const [emergency, setEmergency] = useState(null);

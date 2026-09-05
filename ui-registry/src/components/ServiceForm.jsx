@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { API_BASE_URL } from '../config.js'
+import { API_BASE_URL, fetchWithAuth } from '../config.js'
 
 const INITIAL_FORM = {
   type: 'FIRE_STATION',
@@ -102,7 +102,9 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
     setSubmitting(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/services`, {
+      const url = `${API_BASE_URL}/Registry/api/services`
+      
+      const response = await fetchWithAuth(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

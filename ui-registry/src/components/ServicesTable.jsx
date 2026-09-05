@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { CategoryBadge, StatusBadge } from './Badges.jsx'
-import { API_BASE_URL } from '../config.js'
+import { API_BASE_URL, fetchWithAuth } from '../config.js'
 
 export default function ServicesTable({
   services,
@@ -27,7 +27,7 @@ export default function ServicesTable({
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/services/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/Registry/api/services/${id}`, {
         method: 'DELETE',
       })
 
@@ -104,59 +104,58 @@ export default function ServicesTable({
 
   return (
     <>
-      <div className="flex-1 bg-white border border-gray-200 rounded shadow-sm flex flex-col h-fit">
-        <div className="px-6 py-4 flex justify-between items-center">
-          <h2 className="text-[15px] font-semibold text-[#0B1B32] flex items-center gap-3">
-            <i className="fas fa-project-diagram text-gray-400"></i>
-            Registered Endpoints
+      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-fit overflow-hidden">
+        <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100">
+          <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
+            Catalogo Servizi
           </h2>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
+              {services.length} Totali
+            </span>
             <button
               onClick={onRefresh}
-              className="text-gray-400 hover:text-[#0B1B32] transition-colors"
+              className="text-gray-400 hover:text-[#0B1B32] transition-colors bg-gray-50 hover:bg-gray-100 p-2 rounded-full"
               title="Aggiorna"
             >
-              <i className="fas fa-sync-alt"></i>
+              <i className="fas fa-sync-alt text-[12px]"></i>
             </button>
-            <span className="bg-[#e2e8f0] text-[#0B1B32] text-xs font-bold px-3 py-1 rounded-full">
-              Total: {services.length}
-            </span>
           </div>
         </div>
 
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-y border-gray-200 bg-white">
-              <th className="px-6 py-4 font-bold">
+            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 bg-gray-50/50">
+              <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 ID
               </th>
 
-              <th className="px-6 py-4 font-bold">
+              <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 ENDPOINT
               </th>
 
-              <th className="px-6 py-4 font-bold">
+              <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 CATEGORY
               </th>
 
-              <th className="px-6 py-4 font-bold">
+              <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 STATUS
               </th>
 
               {!compactMode && (
                 <>
-                  <th className="px-6 py-4 font-bold">
+                  <th className="px-6 py-4 font-bold text-[#0B1B32]">
                     LATENCY
                   </th>
 
-                  <th className="px-6 py-4 font-bold">
+                  <th className="px-6 py-4 font-bold text-[#0B1B32]">
                     LOAD
                   </th>
                 </>
               )}
 
-              <th className="px-6 py-4 font-bold text-right">
+              <th className="px-6 py-4 font-bold text-[#0B1B32] text-right">
                 ACTIONS
               </th>
             </tr>
@@ -225,13 +224,12 @@ export default function ServicesTable({
                           : 'hover:bg-gray-50'
                       }`}
                     >
-                      {/* ID */}
-                      <td className="px-6 py-5 text-[13px] font-mono text-gray-500">
+                      <td className="px-6 py-5 text-[13px] font-bold text-[#1976d2]">
                         {s.id}
                       </td>
 
                       {/* ENDPOINT */}
-                      <td className="px-6 py-5 text-[13px] font-bold text-[#0B1B32] max-w-[200px] leading-tight break-all">
+                      <td className="px-6 py-5 text-[13px] font-bold text-[#0B1B32] max-w-[200px] truncate" title={s.endpoint}>
                         {s.endpoint}
                       </td>
 
