@@ -125,17 +125,17 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                 .highlight-completed .djs-visual > :nth-child(1) {
                     stroke: #1932d2ff !important;
                     stroke-width: 2px !important;
-                    fill: #86aadeff !important;
+                    fill: #b7d1e4ff !important;
                 }
                 .highlight-active .djs-visual > :nth-child(1) {
                     stroke: #1932d2ff !important;
                     stroke-width: 3px !important;
-                    fill: #86aadeff !important;
+                    fill: #b7d1e4ff !important;
                 }
                 .highlight-incident .djs-visual > :nth-child(1) {
                     stroke: #d32f2f !important;
                     stroke-width: 3px !important;
-                    fill: #ffebee !important;
+                    fill: #f8d7dcff !important;
                 }
                 .highlight-flow .djs-visual > path {
                     stroke: #1932d2ff !important;
