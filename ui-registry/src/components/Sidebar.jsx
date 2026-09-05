@@ -1,11 +1,13 @@
+import { UserCircle } from 'lucide-react';
+
 export default function Sidebar({ currentView, setCurrentView, user, onLogout }) {
   return (
     <aside className="w-[280px] bg-[#0B1B32] text-white flex flex-col h-full flex-shrink-0 shadow-lg z-10 font-sans">
       {/* Profilo Utente / Logo */}
       <div className="p-6 pt-10 border-b border-white/5 flex flex-col items-center gap-3">
         {/* Avatar Placeholder */}
-        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border-2 border-white/10 shadow-sm bg-gray-500">
-          <img src="https://i.pravatar.cc/150?img=47" alt="User" className="w-full h-full object-cover" />
+        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border-2 border-white/10 shadow-sm bg-gray-600 flex items-center justify-center">
+          <UserCircle className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
         </div>
         <div className="text-center">
           <h1 className="font-bold text-lg tracking-wide text-white">Sala Operativa</h1>
@@ -85,13 +87,14 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
       <div className="p-6 mt-auto">
 
         <div className="flex items-center gap-3 bg-[#071324] p-3 rounded-lg border border-white/5">
-          <div className="w-8 h-8 rounded-full overflow-hidden">
-             <img src="https://i.pravatar.cc/150?img=47" alt="User small" className="w-full h-full object-cover" />
+          <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-600 shrink-0">
+             <UserCircle className="w-6 h-6 text-gray-300" strokeWidth={1.5} />
           </div>
           <div>
-            <div className="text-xs text-white font-bold tracking-wide">Op. ID: {user?.id || user?.matricola || 'N/A'}</div>
+            <div className="text-xs text-white font-bold tracking-wide truncate max-w-[140px]" title={user?.nome ? `${user.nome} ${user.cognome}` : 'Operatore'}>
+              {user?.nome ? `${user.nome} ${user.cognome}` : 'Operatore'}
+            </div>
             <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-              {user?.turno || 'N/A'} 
               <span className={`w-1 h-1 rounded-full ${user?.stato?.toLowerCase() === 'online' ? 'bg-green-500' : user?.stato?.toLowerCase() === 'occupato' ? 'bg-yellow-500' : 'bg-gray-500'}`}></span> 
               {user?.stato || 'Offline'}
             </div>

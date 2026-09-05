@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Emergency_Response_Plan" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.48.0">
-  <bpmn:process id="FIRE_CRITICAL" name="Emergency Response Plan" isExecutable="true">
+  <bpmn:process id="FIRE_CRITICAL_2" name="Emergency Response Plan" isExecutable="true">
     <bpmn:startEvent id="Start_Emergency_Response_Plan" name="Start Emergency Response Plan">
       <bpmn:outgoing>Flow_Start_Emergency_Response_Plan</bpmn:outgoing>
     </bpmn:startEvent>

@@ -2,12 +2,18 @@ import { useState, useEffect } from 'react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
 import { FileText } from 'lucide-react';
 import WorkflowModal from './WorkflowModal.jsx';
+import BpmnViewerModal from './BpmnViewerModal.jsx';
 
 export default function WorkflowsTable() {
     const [workflows, setWorkflows] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isWorkflowModalOpen, setIsWorkflowModalOpen] = useState(false);
+    
+    // Viewer states
+    const [viewerOpen, setViewerOpen] = useState(false);
+    const [viewerXml, setViewerXml] = useState('');
+    const [viewerProcessKey, setViewerProcessKey] = useState('');
 
     const loadWorkflows = async () => {
         try {
@@ -64,6 +70,20 @@ export default function WorkflowsTable() {
         } catch (err) {
             console.error(err);
             alert("Errore nell'aggiornamento della versione attiva: " + err.message);
+        }
+    };
+
+    const handleViewBpmn = async (processKey) => {
+        try {
+            const response = await fetchWithAuth(`${API_BASE_URL}/Orchestrator/api/workflows/${processKey}/xml`);
+            if (!response.ok) throw new Error('Errore nel recupero del BPMN');
+            const xml = await response.text();
+            setViewerXml(xml);
+            setViewerProcessKey(processKey);
+            setViewerOpen(true);
+        } catch (err) {
+            console.error(err);
+            alert("Impossibile caricare il diagramma BPMN. Assicurati che il backend sia attivo e che la versione attiva esista.");
         }
     };
 
@@ -173,7 +193,11 @@ export default function WorkflowsTable() {
                                     </select>
                                 </td>
                                 <td className="px-6 py-4 text-right">
-                                    <button className="text-[#1976d2] hover:text-blue-800" title="Visualizza BPMN">
+                                    <button 
+                                        className="text-[#1976d2] hover:text-blue-800 transition-colors" 
+                                        title="Visualizza BPMN"
+                                        onClick={() => handleViewBpmn(group.processKey)}
+                                    >
                                         <FileText className="w-4 h-4" />
                                     </button>
                                 </td>
@@ -189,6 +213,14 @@ export default function WorkflowsTable() {
                     onWorkflowCreated={(newWf) => {
                         setWorkflows([...workflows, newWf]);
                     }}
+                />
+            )}
+
+            {viewerOpen && (
+                <BpmnViewerModal
+                    xml={viewerXml}
+                    processKey={viewerProcessKey}
+                    onClose={() => setViewerOpen(false)}
                 />
             )}
         </div>

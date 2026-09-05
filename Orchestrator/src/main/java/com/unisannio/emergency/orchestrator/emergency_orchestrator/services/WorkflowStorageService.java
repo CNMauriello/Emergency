@@ -145,6 +145,20 @@ public class WorkflowStorageService {
         return workflowRepository.save(targetWorkflow);
     }
 
+    public String getActiveWorkflowXml(String processKey) throws IOException {
+        Workflow activeWorkflow = workflowRepository.findByProcessKeyAndEnabledTrue(processKey)
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Active workflow not found for processKey: " + processKey));
+
+        Path resourcesDir = getDirectoryPath();
+        Path targetVersionFile = resourcesDir.resolve(processKey + "_v" + activeWorkflow.getVersion() + ".bpmn");
+
+        if (Files.exists(targetVersionFile)) {
+            return Files.readString(targetVersionFile);
+        } else {
+            throw new java.io.FileNotFoundException("Active workflow file not found: " + targetVersionFile.getFileName());
+        }
+    }
+
     private void saveFile(MultipartFile file, String processKey, Integer version) throws IOException {
         Path directory = getDirectoryPath();
         

@@ -42,6 +42,18 @@ public class WorkflowController {
         }
     }
 
+    @org.springframework.web.bind.annotation.GetMapping(value = "/{processKey}/xml", produces = "application/xml")
+    public ResponseEntity<?> getActiveWorkflowXml(@org.springframework.web.bind.annotation.PathVariable String processKey) {
+        try {
+            String xml = workflowStorageService.getActiveWorkflowXml(processKey);
+            return ResponseEntity.ok(xml);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error reading workflow XML");
+        }
+    }
+
     @org.springframework.web.bind.annotation.PutMapping("/active-version")
     public ResponseEntity<?> changeActiveVersion(
             @RequestParam("processKey") String processKey,

@@ -21,8 +21,8 @@ export default function Profile() {
         {/* Header Profilo */}
         <div className="bg-[#0B1B32] p-8 flex items-center gap-6 text-white relative">
           <div className="relative">
-            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/10 shadow-lg bg-gray-500">
-              <img src="https://i.pravatar.cc/150?img=47" alt="Avatar" className="w-full h-full object-cover" />
+            <div className="w-24 h-24 rounded-2xl overflow-hidden border-4 border-white/10 shadow-lg bg-gray-600 flex items-center justify-center">
+              <UserCircle className="w-16 h-16 text-gray-300" strokeWidth={1} />
             </div>
             <div className={`absolute -bottom-2 -right-2 w-6 h-6 rounded-full border-4 border-[#0B1B32] ${getStatusColor(user.stato)}`}></div>
           </div>
@@ -41,20 +41,12 @@ export default function Profile() {
             <UserCircle className="w-5 h-5 text-[#1976d2]" /> Informazioni Operatore
           </h2>
 
-          <div className="grid grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 flex items-start gap-4">
                <Hash className="w-5 h-5 text-gray-400 mt-0.5" />
                <div>
                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Matricola / ID</p>
-                 <p className="text-[#0B1B32] font-semibold text-lg">{user.matricola || 'N/A'}</p>
-               </div>
-            </div>
-
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 flex items-start gap-4">
-               <Clock className="w-5 h-5 text-gray-400 mt-0.5" />
-               <div>
-                 <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Turno Assegnato</p>
-                 <p className="text-[#0B1B32] font-semibold text-lg">{user.turno || 'N/A'}</p>
+                 <p className="text-[#0B1B32] font-semibold text-lg">{user.id || user.matricola || 'N/A'}</p>
                </div>
             </div>
           </div>
