@@ -1,7 +1,8 @@
 import React, {useState, useEffect} from 'react';
-import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert} from 'lucide-react';
 import {API_BASE_URL, fetchWithAuth} from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
+import EscalationResolutionModal from './EscalationResolutionModal.jsx';
 
 const EmergencyDetail = ({emergencyId, onBack}) => {
     const [emergency, setEmergency] = useState(null);
@@ -14,7 +15,11 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
+    const [tickets, setTickets] = useState([]);
     
+    // Stato per la modale di risoluzione escalation
+    const [resolvingTicket, setResolvingTicket] = useState(null);
+
     // Stato per la visualizzazione BPMN
     const [visualizationData, setVisualizationData] = useState(null);
 
@@ -58,6 +63,12 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                 if (srvRes.ok) {
                     const srvData = await srvRes.json();
                     setServices(srvData);
+                }
+
+                const tktRes = await fetchWithAuth(`${API_BASE_URL}/api/operators/escalations/active`, {headers});
+                if (tktRes.ok) {
+                    const tktData = await tktRes.json();
+                    setTickets(tktData);
                 }
 
                 setError(null);
@@ -147,6 +158,8 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
     const isDispatchCompleted = emergency.status === 'MONITORING' || emergency.status === 'CLOSED' ||
         (emergency.history && emergency.history.some(h => h.includes('INGAGGIATA')));
 
+    const emergencyTickets = tickets.filter(t => (t.eventId === emergency.eventId || t.event_id === emergency.eventId));
+
     return (
         <div className="p-8 bg-transparent min-h-screen">
             <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
@@ -200,6 +213,48 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
 
                 </div>
 
+                {/* MIDDLE SECTION: Tickets di Escalation */}
+                {emergencyTickets.length > 0 && (
+                    <div className="bg-red-50 p-6 rounded-lg shadow-sm border border-red-200 w-full">
+                        <div className="flex items-center justify-between border-b border-red-200 pb-4 mb-5">
+                            <h2 className="text-lg font-bold text-red-800 flex items-center">
+                                <AlertTriangle className="w-5 h-5 mr-2 text-red-600" /> Ticket di Escalation Aperti (Richiesta Intervento)
+                            </h2>
+                            <span className="bg-red-200 text-red-800 px-2 py-1 text-[11px] font-bold rounded uppercase">
+                                {emergencyTickets.length} Attivi
+                            </span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {emergencyTickets.map((ticket, idx) => (
+                                <div key={idx} className="bg-white p-4 rounded border border-red-100 shadow-sm border-l-4 border-l-red-500 flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-bold text-gray-800">{ticket.taskName || ticket.name || 'Intervento Richiesto'}</h3>
+                                            <span className="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded">
+                                                {ticket.taskId || ticket.id || ticket.ticketId}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-3">
+                                            {ticket.message || ticket.description || 'Richiesta di intervento o validazione umana necessaria per far avanzare il processo BPMN.'}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                        <div className="text-[11px] text-gray-400">
+                                            <span className="font-semibold text-gray-600">Creazione:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0,19).replace('T', ' ')}
+                                        </div>
+                                        <button 
+                                            onClick={() => setResolvingTicket(ticket)}
+                                            className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded flex items-center transition-colors"
+                                        >
+                                            <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
                 <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 w-full flex flex-col h-full min-h-[600px]">
                     <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
@@ -235,6 +290,17 @@ const EmergencyDetail = ({emergencyId, onBack}) => {
                     </div>
                 </div>
             </div>
+
+            {/* Modale Risoluzione Escalation */}
+            <EscalationResolutionModal 
+                ticket={resolvingTicket} 
+                isOpen={!!resolvingTicket} 
+                onClose={() => setResolvingTicket(null)} 
+                onSuccess={() => {
+                    // La prossima iterazione del polling aggiornerà automaticamente la lista
+                    // O potremmo fare un re-fetch immediato se volessimo
+                }} 
+            />
         </div>
     );
 };

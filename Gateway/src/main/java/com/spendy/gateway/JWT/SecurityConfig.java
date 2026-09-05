@@ -42,6 +42,9 @@ public class SecurityConfig {
                         .pathMatchers("/api/auth/**").permitAll()
                         // Emergency Manager
                         .pathMatchers("/emergencies", "/emergencies/{id}").hasAnyAuthority("ROLE_USER", "ROLE_ROOM_OPERATOR")
+                        // Mock
+                        .pathMatchers( "/{host}/api/**").hasAnyAuthority( "ROLE_ROOM_OPERATOR")
+                        .pathMatchers("/api/stub_service").permitAll()
                         // Orchestrator
                         .pathMatchers("/api/emergency-triggers").permitAll()
                         .pathMatchers("/api/process-instances/**").permitAll()
