@@ -80,7 +80,7 @@ public class EscalationService {
         ticketRepository.save(ticket);
 
         // 3. Integrazione Camunda tramite Webhook Asincrono
-        String webhookEndpoint = "http://localhost:8083/api/orchestrator/escalations/" + ticketId + "/resolve";
+        String webhookEndpoint = "http://localhost:8083/api/escalations/" + ticketId + "/resolve";
         
         Map<String, Object> webhookPayload = Map.of(
                 "resolutionStrategy", request.getResolutionStrategy()

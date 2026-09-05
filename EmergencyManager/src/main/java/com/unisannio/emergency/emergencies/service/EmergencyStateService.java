@@ -52,7 +52,7 @@ public class EmergencyStateService {
             if (isSeverityEscalated(existing.getSeverity(), event.getSeverity())) {
                 existing.setSeverity(event.getSeverity());
                 emergencyRepository.save(existing);
-                orchestratorClient.notifyEscalation(existing.getId(), event);
+                orchestratorClient.notifyNewEmergency(event);
             }
         } else {
             Emergency newEmergency = new Emergency();

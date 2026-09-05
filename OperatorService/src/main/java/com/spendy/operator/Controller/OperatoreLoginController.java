@@ -14,7 +14,7 @@ import java.util.Map;
  * e marca l'operatore come Online.
  */
 @RestController
-@RequestMapping("/api/operatori")
+@RequestMapping("/api/operators")
 public class OperatoreLoginController {
 
     @Autowired
