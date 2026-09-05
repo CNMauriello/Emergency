@@ -123,12 +123,12 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .highlight-completed .djs-visual > :nth-child(1) {
-                    stroke: #1932d2ff !important;
+                    stroke: #0d1b78ff !important;
                     stroke-width: 2px !important;
                     fill: #b7d1e4ff !important;
                 }
                 .highlight-active .djs-visual > :nth-child(1) {
-                    stroke: #1932d2ff !important;
+                    stroke: #0d1b78ff !important;
                     stroke-width: 3px !important;
                     fill: #b7d1e4ff !important;
                 }
@@ -138,7 +138,7 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                     fill: #f8d7dcff !important;
                 }
                 .highlight-flow .djs-visual > path {
-                    stroke: #1932d2ff !important;
+                    stroke: #0d1b78ff !important;
                     stroke-width: 2px !important;
                     marker-end: url(#sequenceflow-end-blue) !important;
                 }
@@ -149,7 +149,7 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
             <svg width="0" height="0" style={{ position: 'absolute' }}>
                 <defs>
                     <marker id="sequenceflow-end-blue" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="10" orient="auto">
-                        <path d="M 1 5 L 11 10 L 1 15 Z" fill="#1932d2ff" stroke="#1932d2ff" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+                        <path d="M 1 5 L 11 10 L 1 15 Z" fill="#0d1b78ff" stroke="#0d1b78ff" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
                     </marker>
                 </defs>
             </svg>
