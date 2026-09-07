@@ -1,69 +1,65 @@
 import { useState, useEffect } from 'react';
-import { API_BASE_URL, fetchWithAuth } from '../config.js';
-import { Download, Search, CheckCircle2, AlertTriangle, XCircle, FileText } from 'lucide-react';
-import AuditLogModal from './AuditLogModal.jsx';
+import { OPERATOR_SERVICE_URL, fetchWithAuth } from '../config.js';
+import { Download, Search, CheckCircle2, AlertTriangle, ShieldAlert, Info } from 'lucide-react';
 
 export default function History() {
-    const [history, setHistory] = useState([]);
+    const [auditLogs, setAuditLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedAuditEmergencyId, setSelectedAuditEmergencyId] = useState(null);
 
-    const loadHistory = async () => {
+    const loadAuditLogs = async () => {
         try {
             setLoading(true);
-            const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies?status=CLOSED`);
-            if (!response.ok) throw new Error('Failed to fetch history');
+            const response = await fetchWithAuth(`${OPERATOR_SERVICE_URL}/api/audit`);
+            if (!response.ok) throw new Error('Failed to fetch audit logs');
             const data = await response.json();
-            setHistory(data);
+            setAuditLogs(data);
         } catch (err) {
-            console.error('Error fetching history:', err);
-            // Fallback for demonstration when backend is not ready or has no closed emergencies
-            setHistory([
-                { id: 'E-8821', eventType: 'INCENDIO_URBANO', closedAt: '2023-11-20 18:45', duration: '2h 15m', resolution: 'RESOLVED' },
-                { id: 'E-8822', eventType: 'INCIDENTE_STRADALE', closedAt: '2023-11-20 16:30', duration: '45m', resolution: 'RESOLVED' },
-                { id: 'E-8825', eventType: 'ALLARME_INTRUSIONE', closedAt: '2023-11-20 14:10', duration: '12m', resolution: 'FALSE_ALARM' },
-                { id: 'E-8829', eventType: 'EMERGENZA_MEDICA', closedAt: '2023-11-19 23:55', duration: '1h 05m', resolution: 'CANCELED' }
+            console.error('Error fetching audit logs:', err);
+            // Fallback mock
+            setAuditLogs([
+                { id: 1, emergencyId: 'E-8821', timestamp: '2023-11-20T18:45:00', operator: 'OP-8942', action: 'EMERGENCY_CLOSED', details: 'Chiusura intervento', outcome: 'SUCCESS', override: false },
+                { id: 2, emergencyId: 'E-8822', timestamp: '2023-11-20T17:30:12', operator: 'OP-8942', action: 'DISPATCH_TEAM', details: 'Invio squadra VVF-01', outcome: 'SUCCESS', override: false },
+                { id: 3, emergencyId: 'E-8825', timestamp: '2023-11-20T16:45:33', operator: 'SYSTEM', action: 'WORKFLOW_TRIGGERED', details: 'Innesco processo INCENDIO_URBANO', outcome: 'SUCCESS', override: false },
+                { id: 4, emergencyId: 'E-8829', timestamp: '2023-11-20T16:40:05', operator: 'OP-7731', action: 'VALIDATION_OVERRIDE', details: 'Forzatura severità ad ALTA', outcome: 'WARNING', override: true },
             ]);
-            setError('Backend non raggiungibile per lo storico, mostro dati mockati.');
+            setError('Backend non raggiungibile per gli audit log, mostro dati mockati.');
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadHistory();
+        loadAuditLogs();
     }, []);
 
-    const getResolutionBadge = (resolution) => {
-        switch (resolution) {
-            case 'RESOLVED':
-                return <span className="px-2.5 py-1 text-[11px] font-bold text-[#2e7d32] bg-[#e8f5e9] border border-[#c8e6c9] rounded flex items-center gap-1"><CheckCircle2 className="w-3 h-3"/> Risolto</span>;
-            case 'FALSE_ALARM':
-                return <span className="px-2.5 py-1 text-[11px] font-bold text-[#ed6c02] bg-[#fff3e0] border border-[#ffe0b2] rounded flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> Falso Allarme</span>;
-            case 'CANCELED':
-                return <span className="px-2.5 py-1 text-[11px] font-bold text-gray-600 bg-gray-100 border border-gray-200 rounded flex items-center gap-1"><XCircle className="w-3 h-3"/> Annullato</span>;
-            default:
-                return <span className="px-2.5 py-1 text-[11px] font-bold text-gray-600 bg-gray-100 border border-gray-200 rounded">{resolution}</span>;
+    const getActionIcon = (outcome) => {
+        switch (outcome) {
+            case 'SUCCESS': return <CheckCircle2 className="w-4 h-4 text-green-500" />;
+            case 'WARNING': return <AlertTriangle className="w-4 h-4 text-yellow-500" />;
+            default: return <Info className="w-4 h-4 text-blue-500" />;
         }
     };
 
-    const filteredHistory = history.filter(h => 
-        String(h.id || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-        String(h.eventType || '').toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredLogs = auditLogs.filter(log => 
+        String(log.emergencyId || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+        String(log.operator || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(log.action || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="flex-1 p-8 bg-transparent min-h-screen">
             <div className="mb-6 flex justify-between items-end">
                 <div>
-                    <h1 className="text-[28px] font-bold text-[#0B1B32]">Storico Eventi Conclusi</h1>
-                    <p className="text-gray-500 mt-1">Archivio delle emergenze gestite e chiuse. I log di audit sono disponibili per la tracciabilità legale delle operazioni.</p>
+                    <h1 className="text-[28px] font-bold text-[#0B1B32] flex items-center gap-2">
+                        <ShieldAlert className="w-6 h-6 text-[#6ea8fe]" /> Storico Audit Log
+                    </h1>
+                    <p className="text-gray-500 mt-1">Registro immutabile di tutte le operazioni e azioni eseguite nel sistema.</p>
                 </div>
                 <div className="flex gap-3">
                     <button className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded text-[13px] font-bold shadow-sm transition-colors flex items-center gap-2">
-                        <Download className="w-4 h-4" /> Esporta CSV
+                        <Download className="w-4 h-4" /> Esporta JSON
                     </button>
                 </div>
             </div>
@@ -73,7 +69,7 @@ export default function History() {
                     <div className="relative w-72">
                         <input 
                             type="text" 
-                            placeholder="Cerca per ID o tipologia..." 
+                            placeholder="Cerca per ID, Operatore o Azione..." 
                             className="w-full pl-9 pr-4 py-2 text-[13px] border border-gray-300 rounded outline-none focus:border-[#1976d2] focus:ring-1 focus:ring-[#1976d2]"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -82,13 +78,13 @@ export default function History() {
                     </div>
                     
                     <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
-                        {filteredHistory.length} Eventi
+                        {filteredLogs.length} Log Registrati
                     </span>
                 </div>
 
                 {error && (
                     <div className="px-6 py-3 bg-yellow-50 text-yellow-800 text-[13px] flex items-center border-b border-yellow-200">
-                        <i className="fas fa-exclamation-triangle mr-2 text-yellow-600"></i>
+                        <AlertTriangle className="w-4 h-4 mr-2 text-yellow-600" />
                         {error}
                     </div>
                 )}
@@ -97,56 +93,53 @@ export default function History() {
                     <thead>
                         <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 bg-gray-50/50">
                             <th className="px-6 py-4">ID Evento</th>
-                            <th className="px-6 py-4">Chiusura</th>
-                            <th className="px-6 py-4">Tipologia</th>
-                            <th className="px-6 py-4">Durata</th>
-                            <th className="px-6 py-4">Risoluzione Finale</th>
-                            <th className="px-6 py-4 text-right">Audit Log</th>
+                            <th className="px-6 py-4">Data/Ora</th>
+                            <th className="px-6 py-4">Operatore</th>
+                            <th className="px-6 py-4">Azione</th>
+                            <th className="px-6 py-4">Dettagli</th>
+                            <th className="px-6 py-4 text-center">Esito</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {loading ? (
                             <tr>
                                 <td colSpan="6" className="text-center py-8 text-gray-500">
-                                    <i className="fas fa-spinner fa-spin mr-2"></i> Caricamento storico...
+                                    <i className="fas fa-spinner fa-spin mr-2"></i> Caricamento audit log...
                                 </td>
                             </tr>
-                        ) : filteredHistory.length === 0 ? (
+                        ) : filteredLogs.length === 0 ? (
                             <tr>
                                 <td colSpan="6" className="text-center py-8 text-gray-500">
-                                    Nessun evento trovato.
+                                    Nessun log di audit trovato.
                                 </td>
                             </tr>
-                        ) : filteredHistory.map((item) => (
-                            <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32] font-mono">{item.id}</td>
-                                <td className="px-6 py-4 text-[13px] text-gray-600">{item.closedAt || item.timestamp}</td>
-                                <td className="px-6 py-4 text-[13px] font-medium text-[#0B1B32]">{item.eventType.replace('_', ' ')}</td>
-                                <td className="px-6 py-4 text-[13px] text-gray-500">{item.duration || 'N/A'}</td>
-                                <td className="px-6 py-4">
-                                    {getResolutionBadge(item.resolution || 'RESOLVED')}
+                        ) : filteredLogs.map((log) => (
+                            <tr key={log.id} className={`hover:bg-gray-50 transition-colors ${log.override ? 'bg-yellow-50/20' : ''}`}>
+                                <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32] font-mono">{log.emergencyId}</td>
+                                <td className="px-6 py-4 text-[13px] text-gray-600">
+                                    {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A'}
                                 </td>
-                                <td className="px-6 py-4 text-right">
-                                    <button 
-                                        onClick={() => setSelectedAuditEmergencyId(item.id)}
-                                        className="text-[#1976d2] hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-2 rounded transition-colors" 
-                                        title="Visualizza Audit Log"
-                                    >
-                                        <FileText className="w-4 h-4" />
-                                    </button>
+                                <td className="px-6 py-4">
+                                    <span className="text-[11px] font-mono bg-blue-50 text-[#1976d2] px-2 py-0.5 rounded border border-blue-100">
+                                        {log.operator}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32]">
+                                    {log.action?.replace(/_/g, ' ')}
+                                </td>
+                                <td className="px-6 py-4 text-[12px] text-gray-600 max-w-xs truncate" title={log.details}>
+                                    {log.details}
+                                </td>
+                                <td className="px-6 py-4 flex justify-center items-center">
+                                    <div className="p-1.5 bg-gray-50 rounded-full border border-gray-200">
+                                        {getActionIcon(log.outcome)}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-
-            {selectedAuditEmergencyId && (
-                <AuditLogModal 
-                    emergencyId={selectedAuditEmergencyId} 
-                    onClose={() => setSelectedAuditEmergencyId(null)} 
-                />
-            )}
         </div>
     );
 }

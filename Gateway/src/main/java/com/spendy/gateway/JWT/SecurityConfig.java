@@ -65,6 +65,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/api/operators/escalations/active").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .pathMatchers(HttpMethod.GET, "/api/operators/escalations/{ticketId}").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .pathMatchers(HttpMethod.POST, "/api/operators/escalations/{ticketId}/resolve").hasAnyAuthority("ROLE_ROOM_OPERATOR")
+                        .pathMatchers(HttpMethod.GET, "/api/audit", "/api/audit/**").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .anyExchange().hasAuthority("ROLE_ROOM_OPERATOR")
                 )
                 .addFilterBefore(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
