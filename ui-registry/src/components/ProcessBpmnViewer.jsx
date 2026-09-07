@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 
-const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [] }) => {
+const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [], calledProcessInstances = {}, onChildProcessClick }) => {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
     const loadedXmlRef = useRef(null);
@@ -27,6 +27,26 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
             }
         };
     }, []);
+
+    // Handle clicks on elements
+    useEffect(() => {
+        if (!viewerRef.current) return;
+
+        const eventBus = viewerRef.current.get('eventBus');
+        
+        const handleElementClick = (e) => {
+            const elementId = e.element.id;
+            if (calledProcessInstances && calledProcessInstances[elementId] && onChildProcessClick) {
+                onChildProcessClick(calledProcessInstances[elementId]);
+            }
+        };
+
+        eventBus.on('element.click', handleElementClick);
+
+        return () => {
+            eventBus.off('element.click', handleElementClick);
+        };
+    }, [calledProcessInstances, onChildProcessClick]);
 
     // Load XML when it changes
     useEffect(() => {
@@ -68,7 +88,7 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
         if (loadedXmlRef.current === bpmnXml) {
             applyHighlights();
         }
-    }, [activeNodes, completedNodes, incidents, sequenceFlows, bpmnXml]);
+    }, [activeNodes, completedNodes, incidents, sequenceFlows, bpmnXml, calledProcessInstances]);
 
     const applyHighlights = () => {
         if (!viewerRef.current) return;
@@ -96,6 +116,10 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
             activeNodes.forEach(id => addMarker(id, 'highlight-active'));
             incidents.forEach(id => addMarker(id, 'highlight-incident'));
             sequenceFlows.forEach(id => addMarker(id, 'highlight-flow'));
+            
+            if (calledProcessInstances) {
+                Object.keys(calledProcessInstances).forEach(id => addMarker(id, 'highlight-call-activity'));
+            }
 
         } catch (e) {
             console.error("Could not apply highlights", e);
@@ -141,6 +165,14 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                     stroke: #0d1b78ff !important;
                     stroke-width: 2px !important;
                     marker-end: url(#sequenceflow-end-blue) !important;
+                }
+                .highlight-call-activity .djs-visual > :nth-child(1) {
+                    stroke: #10b981 !important;
+                    stroke-width: 3px !important;
+                    cursor: pointer !important;
+                }
+                .highlight-call-activity:hover .djs-visual > :nth-child(1) {
+                    fill: #d1fae5 !important;
                 }
                 .bjs-powered-by, .bjs-breadcrumbs {
                     display: none !important;

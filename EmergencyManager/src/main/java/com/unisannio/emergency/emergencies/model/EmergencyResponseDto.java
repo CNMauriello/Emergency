@@ -11,6 +11,7 @@ public class EmergencyResponseDto {
     private String status;
     private double latitude;
     private double longitude;
+    private String timestamp;
     private String workflowInstanceId;
     private List<String> history;
 
@@ -40,6 +41,9 @@ public class EmergencyResponseDto {
 
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    public String getTimestamp() { return timestamp; }
+    public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
 
     public String getWorkflowInstanceId() { return workflowInstanceId; }
     public void setWorkflowInstanceId(String workflowInstanceId) { this.workflowInstanceId = workflowInstanceId; }

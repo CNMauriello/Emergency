@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -103,6 +105,31 @@ public class ProcessVisualizationController {
                 }
             }
 
+            // 5b. Get child process instances for call activities
+            Map<String, Long> calledProcessInstances = new HashMap<>();
+            try {
+                List<ProcessInstance> childInstances = camundaClient.newProcessInstanceSearchRequest()
+                        .filter(f -> f.parentProcessInstanceKey(processInstanceKey))
+                        .send()
+                        .join()
+                        .items();
+                        
+                Map<Long, String> instanceKeyToElementId = elementInstances.stream()
+                        .collect(Collectors.toMap(ElementInstance::getElementInstanceKey, ElementInstance::getElementId));
+                        
+                for (ProcessInstance child : childInstances) {
+                    Long parentElementInstanceKey = child.getParentElementInstanceKey();
+                    if (parentElementInstanceKey != null) {
+                        String elementId = instanceKeyToElementId.get(parentElementInstanceKey);
+                        if (elementId != null) {
+                            calledProcessInstances.put(elementId, child.getProcessInstanceKey());
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("Could not fetch child process instances: " + ex.getMessage());
+            }
+
             // 6. Build DTO
             ProcessInstanceVisualizationDTO dto = new ProcessInstanceVisualizationDTO();
             dto.setProcessInstanceKey(processInstanceKey);
@@ -113,6 +140,7 @@ public class ProcessVisualizationController {
             dto.setCompletedNodes(completedNodes);
             dto.setSequenceFlows(sequenceFlows);
             dto.setIncidents(incidents);
+            dto.setCalledProcessInstances(calledProcessInstances);
 
             return ResponseEntity.ok(dto);
 

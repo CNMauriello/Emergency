@@ -3,10 +3,13 @@ package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates.bi
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;
 import io.camunda.client.api.worker.JobClient;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.List;
@@ -14,6 +17,7 @@ import java.util.List;
 @Component("invokeCapabilityDelegate")
 public class InvokeCapabilityDelegate {
 
+    private static final Logger logger = LoggerFactory.getLogger(InvokeCapabilityDelegate.class);
     private final RestClient restClient;
 
     public InvokeCapabilityDelegate() {
@@ -53,6 +57,7 @@ public class InvokeCapabilityDelegate {
                 System.out.println("Invocazione Backend-for-Frontend per creazione ticket di escalation con ticketId: " + job.getKey());
                 restClient.post()
                         .uri("http://localhost:8087/api/operators/escalations")
+                        .contentType(MediaType.APPLICATION_JSON)
                         .body(escalationTicket)
                         .retrieve()
                         .toBodilessEntity();
@@ -67,11 +72,12 @@ public class InvokeCapabilityDelegate {
 
         try {
             // Inoltro della richiesta di ingaggio reale al servizio del territorio
-            ResponseEntity<Void> response = restClient.post()
+            ResponseEntity<Void> response = restClient.get()
                     .uri(endpoint)
-                    .body(event) // Viene trasmesso l'intero fascicolo
                     .retrieve()
                     .toBodilessEntity();
+
+            logger.info("Chiamata a {} completata. Codice risposta: {}", endpoint, response.getStatusCode());
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 // Ingaggio confermato dal servizio
@@ -82,6 +88,7 @@ public class InvokeCapabilityDelegate {
             }
 
         } catch (RestClientResponseException e) {
+            logger.warn("Il servizio all'endpoint {} ha risposto con errore HTTP: {} - {}", endpoint, e.getStatusCode(), e.getMessage());
             // Il servizio ha risposto con 503 (Unavailable) o 409 (Conflict)
             failedEndpoints.add(endpoint);
             client.newCompleteCommand(job.getKey())
@@ -89,6 +96,7 @@ public class InvokeCapabilityDelegate {
                     .send().join();
             return;
         } catch (Exception e) {
+            logger.error("Errore di rete o host irraggiungibile per l'endpoint {}: {}", endpoint, e.getMessage());
             // Errore di timeout o host irraggiungibile. Si passa al prossimo candidato
             failedEndpoints.add(endpoint);
             client.newCompleteCommand(job.getKey())

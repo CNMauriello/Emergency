@@ -20,6 +20,9 @@ public class EmergencyMapper {
         dto.setStatus(String.valueOf(e.getStatus()));
         dto.setLatitude(e.getLatitude());
         dto.setLongitude(e.getLongitude());
+        if (e.getTimestamp() != null) {
+            dto.setTimestamp(e.getTimestamp().toString());
+        }
         dto.setWorkflowInstanceId(e.getWorkflowInstanceId());
         dto.setHistory(e.getHistory());
 

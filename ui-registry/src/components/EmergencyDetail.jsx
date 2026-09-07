@@ -3,6 +3,17 @@ import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, 
 import {API_BASE_URL, fetchWithAuth} from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 import EscalationResolutionModal from './EscalationResolutionModal.jsx';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix per l'icona di default di leaflet in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
     const isUser = userRole?.toString().toUpperCase() === 'ROLE_USER' || userRole?.toString().toUpperCase() === 'USER';
@@ -23,6 +34,9 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
     // Stato per la visualizzazione BPMN
     const [visualizationData, setVisualizationData] = useState(null);
+    const [viewStack, setViewStack] = useState([]); // Stack of child workflow instance IDs
+
+    const [fetchedAddress, setFetchedAddress] = useState('');
 
     useEffect(() => {
         if (!emergencyId) return;
@@ -86,15 +100,33 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
         return () => clearInterval(interval);
     }, [emergencyId, selectedCapability]);
 
-    // Polling separato per i dati di visualizzazione del processo BPMN
+    // Recupero indirizzo dalle coordinate
     useEffect(() => {
-        if (!emergency || !emergency.workflowInstanceId) return;
+        if (emergency && emergency.latitude && emergency.longitude && !emergency.address && !fetchedAddress) {
+            const fetchAddress = async () => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${emergency.latitude}&lon=${emergency.longitude}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        setFetchedAddress(data.display_name || 'Indirizzo non trovato');
+                    }
+                } catch (err) {
+                    console.error("Errore recupero indirizzo da Nominatim", err);
+                }
+            };
+            fetchAddress();
+        }
+    }, [emergency, fetchedAddress]);
+
+    // Polling separato per i dati di visualizzazione del processo BPMN
+    const currentWorkflowInstanceId = viewStack.length > 0 ? viewStack[viewStack.length - 1] : emergency?.workflowInstanceId;
+
+    useEffect(() => {
+        if (!currentWorkflowInstanceId) return;
 
         const fetchVisualization = async () => {
             try {
-                // Sostituire l'URL qui se Orchestrator gira su una porta diversa da API_BASE_URL (es. 8080)
-                // Ma supponiamo API_BASE_URL passi dal Gateway che instrada a Orchestrator
-                const res = await fetchWithAuth(`${API_BASE_URL}/api/process-instances/${emergency.workflowInstanceId}/visualization`);
+                const res = await fetchWithAuth(`${API_BASE_URL}/api/process-instances/${currentWorkflowInstanceId}/visualization`);
                 if (res.ok) {
                     const data = await res.json();
                     setVisualizationData(data);
@@ -107,7 +139,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
         fetchVisualization();
         const interval = setInterval(fetchVisualization, 2000); // 2 secondi come richiesto
         return () => clearInterval(interval);
-    }, [emergency]);
+    }, [currentWorkflowInstanceId]);
 
     const handleManualDispatch = async () => {
         if (!selectedUnit) return;
@@ -161,6 +193,15 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
     const emergencyTickets = tickets.filter(t => (t.eventId === emergency.eventId || t.event_id === emergency.eventId));
 
+    const customMarkerIcon = new L.Icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+
     return (
         <div className="p-8 bg-transparent min-h-screen">
             <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
@@ -178,40 +219,61 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
             </div>
 
             <div className="flex flex-col gap-8">
-                {/* TOP SECTION: Dettagli Operativi */}
-                <div className="w-full">
+                {/* TOP SECTION: Dettagli Operativi e Mappa */}
+                <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Card Dettagli Operativi */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2 flex flex-col">
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
                             <h2 className="text-lg font-bold text-[#0B1B32] flex items-center">
                                 <i className="fas fa-layer-group text-gray-400 mr-2 text-[15px]"></i> Dettagli Operativi
                             </h2>
                             <span className="bg-gray-100 text-gray-500 px-2 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-5 gap-y-6 gap-x-6 text-[13px] items-start">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-[13px] items-start flex-grow">
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">TIPOLOGIA</p>
                                 <p className="font-semibold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">ORARIO RILEVAMENTO</p>
-                                <p className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 inline-block text-[12px]">{emergency.timestamp || new Date().toISOString().slice(0, 19).replace('T', ' ')}</p>
+                                <p className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 inline-block text-[12px]">{emergency.timestamp}</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">COORDINATE (LAT/LONG)</p>
                                 <p className="text-gray-700 font-mono text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
                             </div>
-                            <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">FONTE SEGNALAZIONE</p>
-                                <p className="text-gray-700 flex items-center"><i className="fas fa-phone-alt text-gray-400 mr-1.5 text-[10px]"></i> 112 Centrale</p>
-                            </div>
-                            <div className="col-span-2 lg:col-span-1 lg:pl-6 lg:border-l border-dashed border-gray-200">
+                            <div className="col-span-2 lg:col-span-3 lg:pl-6 lg:border-l border-dashed border-gray-200">
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">INDIRIZZO FISICO</p>
-                                <p className="text-[#0B1B32] text-[14px]">{emergency.address || 'Indirizzo non disponibile'}</p>
+                                <p className="text-[#0B1B32] text-[14px]">{emergency.address || fetchedAddress || 'Recupero in corso...'}</p>
                             </div>
                         </div>
                     </div>
 
+                    {/* Card Mappa */}
+                    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 h-[300px] lg:h-auto lg:col-span-1 overflow-hidden relative">
+                        <MapContainer 
+                            center={[emergency.latitude, emergency.longitude]} 
+                            zoom={15} 
+                            style={{ height: '100%', width: '100%', borderRadius: '0.375rem' }}
+                            zoomControl={false}
+                        >
+                            <TileLayer
+                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                            />
+                            <Marker position={[emergency.latitude, emergency.longitude]} icon={customMarkerIcon}>
+                                <Popup>
+                                    <div className="text-center">
+                                        <strong>{emergency.eventType.replace('_', ' ')}</strong><br/>
+                                        {emergency.severity}
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        </MapContainer>
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded shadow-sm z-[400] text-xs font-bold text-gray-700 border border-gray-200 flex items-center">
+                            <MapPin className="w-3.5 h-3.5 mr-1 text-red-500" /> Control Center View
+                        </div>
+                    </div>
                 </div>
 
                 {/* MIDDLE SECTION: Tickets di Escalation */}
@@ -275,13 +337,25 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
                     <div className="flex-1 w-full relative min-h-[400px]">
                         {visualizationData ? (
-                            <ProcessBpmnViewer
-                                bpmnXml={visualizationData.bpmnXml}
-                                activeNodes={visualizationData.activeNodes}
-                                completedNodes={visualizationData.completedNodes}
-                                sequenceFlows={visualizationData.sequenceFlows}
-                                incidents={visualizationData.incidents}
-                            />
+                            <>
+                                {viewStack.length > 0 && (
+                                    <button 
+                                        onClick={() => setViewStack(viewStack.slice(0, -1))} 
+                                        className="absolute top-2 left-2 z-10 bg-white border border-gray-300 shadow-sm px-3 py-1.5 rounded text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"
+                                    >
+                                        <ArrowLeft className="w-4 h-4 mr-1" /> Livello Superiore
+                                    </button>
+                                )}
+                                <ProcessBpmnViewer
+                                    bpmnXml={visualizationData.bpmnXml}
+                                    activeNodes={visualizationData.activeNodes}
+                                    completedNodes={visualizationData.completedNodes}
+                                    sequenceFlows={visualizationData.sequenceFlows}
+                                    incidents={visualizationData.incidents}
+                                    calledProcessInstances={visualizationData.calledProcessInstances}
+                                    onChildProcessClick={(childKey) => setViewStack([...viewStack, childKey])}
+                                />
+                            </>
                         ) : (
                             <div className="h-full flex items-center justify-center text-gray-500 flex-col">
                                 {emergency?.workflowInstanceId ? (

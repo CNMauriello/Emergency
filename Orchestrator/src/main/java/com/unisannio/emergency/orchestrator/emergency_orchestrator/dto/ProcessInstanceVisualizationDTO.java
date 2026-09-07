@@ -11,6 +11,7 @@ public class ProcessInstanceVisualizationDTO {
     private List<String> completedNodes;
     private List<String> sequenceFlows;
     private List<String> incidents;
+    private java.util.Map<String, Long> calledProcessInstances;
 
     // Getters and Setters
     public Long getProcessInstanceKey() { return processInstanceKey; }
@@ -36,4 +37,7 @@ public class ProcessInstanceVisualizationDTO {
 
     public List<String> getIncidents() { return incidents; }
     public void setIncidents(List<String> incidents) { this.incidents = incidents; }
+
+    public java.util.Map<String, Long> getCalledProcessInstances() { return calledProcessInstances; }
+    public void setCalledProcessInstances(java.util.Map<String, Long> calledProcessInstances) { this.calledProcessInstances = calledProcessInstances; }
 }

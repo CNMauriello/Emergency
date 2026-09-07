@@ -3,6 +3,7 @@ package com.unisannio.emergency.orchestrator.emergency_orchestrator.delegates.bi
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
@@ -72,6 +73,7 @@ public class FindCapabilityProvidersDelegate {
 
             List<String> response = restClient.post()
                     .uri(binderUrl)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .body(binderRequest)
                     .retrieve()
                     .body(new ParameterizedTypeReference<List<String>>() {});
