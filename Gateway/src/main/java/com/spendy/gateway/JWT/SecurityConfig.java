@@ -45,7 +45,10 @@ public class SecurityConfig {
                         .pathMatchers("/api/emergencies/{id}/status").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         // Mock
                         .pathMatchers( "/{host}/api/**").permitAll()
-                        .pathMatchers("/api/stub_service").permitAll()
+                        .pathMatchers("/api/evacuation_service").permitAll()
+                        .pathMatchers("/api/dispatch").hasAnyAuthority("ROLE_ROOM_OPERATOR")
+                        .pathMatchers("/api/military-intervention").hasAnyAuthority("ROLE_ROOM_OPERATOR")
+
                         // Orchestrator
                         .pathMatchers("/api/emergency-triggers").permitAll()
                         .pathMatchers("/api/process-instances/**").permitAll()

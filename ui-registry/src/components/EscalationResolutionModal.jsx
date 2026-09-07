@@ -41,7 +41,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             const payload = {
                 operatorId,
                 resolutionStrategy: strategy,
-                justification: logs.join(' | ') + ' | ' + justification
+                justification: justification
             };
 
             const tid = ticket?.taskId || ticket?.ticketId || ticket?.id;
@@ -93,7 +93,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             } catch (err) {
                 setL1Nodes(prev => {
                     const next = [...prev];
-                    next[i] = { ...next[i], status: 'failed' };
+                    next[i] = { ...next[i], status: 'failed', errorCode: err.message.replace('HTTP ', '') };
                     return next;
                 });
                 addLog(`Nodo ${node.url} - Fallito: ${err.message}`);
@@ -119,13 +119,38 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         addLog("Passaggio al Livello 2: Ingaggio Fuori Banda attivato.");
     };
 
-    const handleLevel2Success = () => {
+    const handleLevel2Success = async () => {
         if (!l2AuthCode) {
             alert("Inserire un codice di autorizzazione o motivazione.");
             return;
         }
-        addLog(`Autorizzazione vocale ricevuta. Codice: ${l2AuthCode}`);
-        resolveEscalation("LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
+        
+        setSubmitting(true);
+        try {
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/dispatch`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ authorizationCode: l2AuthCode })
+            });
+
+            if (response.ok) {
+                addLog(`Autorizzazione vocale ricevuta. Codice: ${l2AuthCode}`);
+                resolveEscalation("LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
+            } else if (response.status === 404) {
+                addLog("Risorse non disponibili al momento.");
+                handleLevel2Fail();
+            } else if (response.status === 401) {
+                addLog("Codice autorizzazione non valido.");
+                alert("Codice non valido.");
+            } else {
+                addLog(`Errore inatteso: ${response.status}`);
+            }
+        } catch (err) {
+            console.error(err);
+            addLog(`Errore di comunicazione: ${err.message}`);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     const handleLevel2Fail = () => {
@@ -135,13 +160,28 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         addLog("Passaggio al Livello 3: Escalation Estrema.");
     };
 
-    const handleLevel3Resolve = () => {
-        addLog("Autorizzazione Militare confermata.");
-        resolveEscalation("LEVEL_3_EXTREME_MILITARY", "Risolto tramite intervento Forze Armate / Prefettura, bypass discovery.");
+    const handleLevel3Resolve = async () => {
+        setSubmitting(true);
+        try {
+            const response = await fetchWithAuth(`${API_BASE_URL}/api/military-intervention`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+                addLog("Autorizzazione Militare confermata.");
+                resolveEscalation("LEVEL_3_EXTREME_MILITARY", "Risolto tramite intervento Forze Armate / Prefettura, bypass discovery.");
+            } else {
+                addLog(`Errore durante l'autorizzazione militare: ${response.status}`);
+            }
+        } catch(err) {
+            addLog(`Errore di comunicazione: ${err.message}`);
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity">
             <div className="bg-[#0B1B32] text-white w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-700 overflow-hidden flex flex-col h-[85vh]">
                 
                 {/* HEADER */}
@@ -234,7 +274,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                                 <Server className={`w-8 h-8 mb-3 transition-colors ${node.status === 'pending' ? 'text-gray-500' : (node.status === 'success' ? 'text-green-400' : 'text-red-400')}`} />
                                                 <div className="text-xs font-mono text-gray-400 truncate max-w-full px-2" title={node.url}>{shortName}</div>
                                                 <div className={`text-[10px] mt-2 px-2 py-1 rounded transition-colors ${node.status === 'pending' ? 'bg-gray-800 text-gray-500' : (node.status === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}`}>
-                                                    {node.status === 'pending' ? (levelStatus === 'running' ? 'PINGING...' : 'IDLE') : (node.status === 'success' ? 'ACCETTATO' : 'FALLITO/404')}
+                                                    {node.status === 'pending' ? (levelStatus === 'running' ? 'PINGING...' : 'IDLE') : (node.status === 'success' ? 'ACCETTATO' : `FALLITO/${node.errorCode || 'ERR'}`)}
                                                 </div>
                                             </div>
                                         );

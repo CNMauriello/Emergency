@@ -69,10 +69,9 @@ public class EscalationService {
 
         // 2. Tracciabilità (Log Immutabile)
         Long parsedOperatorId = extractId(request.getOperatorId());
-        Long parsedEventId = extractId(ticket.getEventId());
         String azione = request.getResolutionStrategy() + " - " + request.getJustification();
 
-        AuditLog auditLog = new AuditLog(parsedOperatorId, parsedEventId, azione);
+        AuditLog auditLog = new AuditLog(parsedOperatorId, ticket.getEventId(), azione);
         auditLog.setTimestamp(LocalDateTime.now());
         auditLogRepository.save(auditLog);
 

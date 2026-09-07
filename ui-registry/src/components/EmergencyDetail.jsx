@@ -242,7 +242,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">COORDINATE (LAT/LONG)</p>
                                 <p className="text-gray-700 font-mono text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
                             </div>
-                            <div className="col-span-2 lg:col-span-3 lg:pl-6 lg:border-l border-dashed border-gray-200">
+                            <div className="col-span-2 lg:col-span-3">
                                 <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">INDIRIZZO FISICO</p>
                                 <p className="text-[#0B1B32] text-[14px]">{emergency.address || fetchedAddress || 'Recupero in corso...'}</p>
                             </div>

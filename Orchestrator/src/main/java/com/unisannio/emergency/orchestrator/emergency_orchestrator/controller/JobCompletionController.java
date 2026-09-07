@@ -33,14 +33,18 @@ public class JobCompletionController {
 
         System.out.println("Risoluzione asincrona del JobKey " + jobKey + " (TicketID: " + ticketId + ") con strategia: " + strategy);
 
-        camundaClient.newCompleteCommand(jobKey)
-                .variables(Map.of(
-                        "isCapabilityAvailable", true, 
-                        "escalationResolved", true,
-                        "resolutionStrategy", strategy
-                ))
-                .send()
-                .join();
+        try {
+            camundaClient.newCompleteCommand(jobKey)
+                    .variables(Map.of(
+                            "isCapabilityAvailable", true, 
+                            "escalationResolved", true,
+                            "resolutionStrategy", strategy
+                    ))
+                    .send()
+                    .join();
+        } catch (Exception e) {
+            System.err.println("Errore durante il completamento del job in Camunda (potrebbe essere già scaduto il lock o risolto): " + e.getMessage());
+        }
 
         return ResponseEntity.ok().build();
     }

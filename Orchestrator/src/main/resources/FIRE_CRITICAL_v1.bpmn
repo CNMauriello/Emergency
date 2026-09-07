@@ -96,7 +96,7 @@ and incident_context.has_injured = false</bpmn:conditionExpression>
         <zeebe:ioMapping>
           <zeebe:input source="noAuth" target="authentication.type" />
           <zeebe:input source="GET" target="method" />
-          <zeebe:input source="http://localhost:8090/api/stub_service" target="url" />
+          <zeebe:input source="http://localhost:8090/api/evacuation_service" target="url" />
           <zeebe:input source="=false" target="storeResponse" />
           <zeebe:input source="=false" target="followRedirects" />
           <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
@@ -148,7 +148,7 @@ and incident_context.has_injured = false</bpmn:conditionExpression>
         <zeebe:ioMapping>
           <zeebe:input source="noAuth" target="authentication.type" />
           <zeebe:input source="GET" target="method" />
-          <zeebe:input source="http://localhost:8090/api/stub_service" target="url" />
+          <zeebe:input source="http://localhost:8090/api/evacuation_service" target="url" />
           <zeebe:input source="=false" target="storeResponse" />
           <zeebe:input source="=false" target="followRedirects" />
           <zeebe:input source="=20" target="connectionTimeoutInSeconds" />

@@ -15,9 +15,9 @@ public class AuditLog {
     private Long operatoreId;
 
     @Column(name = "emergency_id", nullable = false)
-    private Long emergencyId;
+    private String emergencyId;
 
-    @Column(name = "azione", nullable = false)
+    @Column(name = "azione", nullable = false, length = 4000)
     private String azione;
 
     @Column(name = "timestamp", nullable = false)
@@ -26,7 +26,7 @@ public class AuditLog {
     public AuditLog() {
     }
 
-    public AuditLog(Long operatoreId, Long emergencyId, String azione) {
+    public AuditLog(Long operatoreId, String emergencyId, String azione) {
         this.operatoreId = operatoreId;
         this.emergencyId = emergencyId;
         this.azione = azione;
@@ -49,11 +49,11 @@ public class AuditLog {
         this.operatoreId = operatoreId;
     }
 
-    public Long getEmergencyId() {
+    public String getEmergencyId() {
         return emergencyId;
     }
 
-    public void setEmergencyId(Long emergencyId) {
+    public void setEmergencyId(String emergencyId) {
         this.emergencyId = emergencyId;
     }
 
