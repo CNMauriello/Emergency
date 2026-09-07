@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert, Play} from 'lucide-react';
 import {API_BASE_URL, fetchWithAuth} from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 import EscalationResolutionModal from './EscalationResolutionModal.jsx';
@@ -37,6 +37,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
     const [viewStack, setViewStack] = useState([]); // Stack of child workflow instance IDs
 
     const [fetchedAddress, setFetchedAddress] = useState('');
+    const [playTrigger, setPlayTrigger] = useState(0);
 
     useEffect(() => {
         if (!emergencyId) return;
@@ -330,9 +331,20 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                         <h2 className="text-xl font-bold text-[#0B1B32] flex items-center">
                             <i className="fas fa-project-diagram text-gray-400 mr-3 text-[18px]"></i> Stato Esecuzione Workflow
                         </h2>
-                        <span className="bg-[#e3f2fd] text-[#1976d2] px-3 py-1 text-[11px] font-bold rounded">
-                            {visualizationData?.state === 'ACTIVE' ? 'Processo BPMN Attivo' : (visualizationData?.state || 'Attendere...')}
-                        </span>
+                        <div className="flex items-center space-x-3">
+                            {visualizationData && (
+                                <button 
+                                    onClick={() => setPlayTrigger(prev => prev + 1)}
+                                    className="w-[150px] justify-center bg-[#e3f2fd] hover:bg-[#bbdefb] text-[#1976d2] border border-[#bbdefb] px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-colors"
+                                    title="Riproduci animazione percorso BPMN"
+                                >
+                                    <Play className="w-3.5 h-3.5 mr-1.5" /> Play
+                                </button>
+                            )}
+                            <span className="w-[150px] justify-center flex items-center bg-[#e3f2fd] text-[#1976d2] px-3 py-1.5 text-[11px] font-bold rounded border border-transparent">
+                                {visualizationData?.state === 'ACTIVE' ? 'Processo BPMN Attivo' : (visualizationData?.state || 'Attendere...')}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="flex-1 w-full relative min-h-[400px]">
@@ -354,6 +366,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                     incidents={visualizationData.incidents}
                                     calledProcessInstances={visualizationData.calledProcessInstances}
                                     onChildProcessClick={(childKey) => setViewStack([...viewStack, childKey])}
+                                    playTrigger={playTrigger}
                                 />
                             </>
                         ) : (

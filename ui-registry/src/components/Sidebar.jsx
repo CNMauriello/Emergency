@@ -34,7 +34,7 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
             }`}
           >
             <i className="fas fa-exclamation-triangle w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">Active Emergencies</span>
+            <span className="text-[15px]">Emergencies</span>
           </a>
         )}
 

@@ -1,8 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import {Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets, CheckCircle2, MapPin} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Flame, Home, Clock, AlertTriangle, Loader2, Car, Wind, Droplets, CheckCircle2, MapPin } from 'lucide-react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
 
-const ActiveEmergencies = ({onViewDetail}) => {
+const ActiveEmergencies = ({ onViewDetail }) => {
     const [emergencies, setEmergencies] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -11,15 +11,15 @@ const ActiveEmergencies = ({onViewDetail}) => {
     const getIconForType = (eventType) => {
         switch (eventType) {
             case 'FIRE':
-                return <Flame className="text-red-500 w-6 h-6"/>;
+                return <Flame className="text-red-500 w-6 h-6" />;
             case 'FLOOD':
-                return <Droplets className="text-blue-500 w-6 h-6"/>;
+                return <Droplets className="text-blue-500 w-6 h-6" />;
             case 'CAR_CRASH':
-                return <Car className="text-orange-500 w-6 h-6"/>;
+                return <Car className="text-orange-500 w-6 h-6" />;
             case 'GAS_LEAK':
-                return <Wind className="text-yellow-500 w-6 h-6"/>;
+                return <Wind className="text-yellow-500 w-6 h-6" />;
             default:
-                return <Home className="text-gray-500 w-6 h-6"/>;
+                return <Home className="text-gray-500 w-6 h-6" />;
         }
     };
 
@@ -35,7 +35,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
         if (em.status === 'IN_PROGRESS') currentStep = 2;
         if (em.status === 'CLOSED') currentStep = 3;
 
-        return {steps, currentStep};
+        return { steps, currentStep };
     };
 
 
@@ -110,7 +110,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
     if (loading) {
         return (
             <div className="flex-1 flex items-center justify-center min-h-screen bg-gray-50">
-                <Loader2 className="animate-spin w-10 h-10 text-blue-600"/>
+                <Loader2 className="animate-spin w-10 h-10 text-blue-600" />
             </div>
         );
     }
@@ -118,7 +118,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
     if (error) {
         return (
             <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-gray-50 p-8">
-                <AlertTriangle className="w-12 h-12 text-red-500 mb-4"/>
+                <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
                 <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile connettersi al Server</h2>
                 <p className="text-red-600 font-mono text-sm">{error}</p>
                 <p className="text-gray-500 mt-4 text-sm">Assicurati che il Gestore Operatori di Sala sia in
@@ -130,25 +130,32 @@ const ActiveEmergencies = ({onViewDetail}) => {
     return (
         <div className="p-8 bg-transparent min-h-screen">
             <div className="mb-6">
-                <h1 className="text-[28px] font-bold text-[#0B1B32]">Active Emergencies</h1>
+                <h1 className="text-[28px] font-bold text-[#0B1B32]">Emergencies</h1>
                 <p className="text-gray-500 mt-1">Real-time monitoring and orchestration dashboard.</p>
             </div>
 
             <div className="space-y-4">
-                {emergencies.map((em) => {
-                    const {steps, currentStep} = getWorkflowInfo(em);
+                {[...emergencies].sort((a, b) => {
+                    const isAClosed = a.status === 'CLOSED';
+                    const isBClosed = b.status === 'CLOSED';
+                    if (!isAClosed && isBClosed) return -1;
+                    if (isAClosed && !isBClosed) return 1;
+                    return 0;
+                }).map((em) => {
+                    const { steps, currentStep } = getWorkflowInfo(em);
                     const isCritical = em.severity === 'CRITICA' || em.severity === 'CRITICAL';
                     const severityColor = isCritical ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]';
                     const severityBorder = isCritical ? 'border-[#d32f2f]' : 'border-[#ed6c02]';
+                    const isClosed = em.status === 'CLOSED';
 
                     return (
                         <div
                             key={em.id}
                             onClick={() => onViewDetail && onViewDetail(em.eventId || em.id)}
-                            className="bg-white border border-gray-200 rounded-lg shadow-sm flex overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200"
+                            className={`bg-white border border-gray-200 rounded-lg shadow-sm flex overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200 ${isClosed ? 'opacity-60' : ''}`}
                         >
                             {/* Indicatore di gravità laterale */}
-                            <div className={`w-1.5 ${severityColor}`}></div>
+                            <div className={`w-1.5 ${isClosed ? 'bg-gray-400' : severityColor}`}></div>
 
                             <div className="p-5 flex-1 flex flex-col justify-between">
                                 {/* Header Card */}
@@ -160,7 +167,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
                                         <span className="text-[13px] text-gray-500 font-medium">{em.eventId || `ID: ${em.id}`}</span>
                                         {em.timestamp && (
                                             <span className="text-[13px] text-gray-500 flex items-center font-medium">
-                                                <Clock className="w-3.5 h-3.5 mr-1"/> {em.timestamp}
+                                                <Clock className="w-3.5 h-3.5 mr-1" /> {em.timestamp}
                                             </span>
                                         )}
                                     </div>
@@ -178,7 +185,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
                                             <h2 className="text-[17px] font-bold text-[#0B1B32] uppercase tracking-wide">{em.eventType.replace('_', ' ')}</h2>
                                             {em.address && (
                                                 <p className="text-[13px] text-gray-600 flex items-center mt-1 font-medium">
-                                                    <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400"/> {em.address}
+                                                    <MapPin className="w-3.5 h-3.5 mr-1 text-gray-400" /> {em.address}
                                                 </p>
                                             )}
                                             <p className="text-gray-400 text-[12px] font-mono mt-1 flex items-center gap-2">
@@ -188,7 +195,7 @@ const ActiveEmergencies = ({onViewDetail}) => {
                                     </div>
 
                                     {/* Workflow Status Progress Bar */}
-                                    <div className="w-[350px]">
+                                    <div className="w-[350px] mb-6">
                                         <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-3">WORKFLOW STATUS</p>
                                         <div className="flex items-center justify-between relative px-2">
                                             {/* Linea di base grigia */}
@@ -197,28 +204,28 @@ const ActiveEmergencies = ({onViewDetail}) => {
                                             {/* Linea di progresso blu */}
                                             <div
                                                 className="absolute left-4 top-1/2 h-[2px] bg-[#1976d2] -z-10 transform -translate-y-1/2 transition-all duration-500"
-                                                style={{width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 2rem)'}}
+                                                style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 2rem)' }}
                                             ></div>
 
                                             {/* Step 1 */}
                                             <div className="flex flex-col items-center">
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep > 1 ? 'bg-[#1976d2] text-white' : currentStep === 1 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
-                                                    {currentStep > 1 ? <CheckCircle2 className="w-3.5 h-3.5"/> : currentStep === 1 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
+                                                    {currentStep > 1 ? <CheckCircle2 className="w-3.5 h-3.5" /> : currentStep === 1 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
                                                 <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 1 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[0]}</span>
                                             </div>
 
                                             {/* Step 2 */}
                                             <div className="flex flex-col items-center">
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center bg-white ${currentStep > 2 ? 'bg-[#1976d2] text-white border-0' : currentStep === 2 ? 'border-[3px] border-[#1976d2]' : 'border-2 border-gray-300'}`}>
-                                                    {currentStep > 2 ? <CheckCircle2 className="w-3.5 h-3.5"/> : currentStep === 2 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep > 2 ? 'bg-[#1976d2] text-white border-0' : currentStep === 2 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
+                                                    {currentStep > 2 ? <CheckCircle2 className="w-3.5 h-3.5" /> : currentStep === 2 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
                                                 <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 2 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[1]}</span>
                                             </div>
 
                                             {/* Step 3 */}
                                             <div className="flex flex-col items-center">
-                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center bg-white ${currentStep === 3 ? 'border-[3px] border-[#1976d2]' : 'border-2 border-gray-300'}`}>
+                                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep === 3 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
                                                     {currentStep === 3 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
                                                 <span className={`text-[11px] mt-2 absolute -bottom-5 ${currentStep === 3 ? 'font-bold text-[#0B1B32]' : 'text-gray-500'}`}>{steps[2]}</span>
