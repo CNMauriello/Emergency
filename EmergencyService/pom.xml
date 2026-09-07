@@ -12,7 +12,7 @@
 	</parent>
 
 	<groupId>com.unisannio.emergency</groupId>
-	<artifactId>emergencies</artifactId>
+	<artifactId>EmergencyService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>emergencies</name>
 	<description>Gestore Stato Emergenze - FARO</description>
