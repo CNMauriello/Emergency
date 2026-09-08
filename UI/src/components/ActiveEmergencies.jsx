@@ -140,7 +140,17 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                     const isBClosed = b.status === 'CLOSED';
                     if (!isAClosed && isBClosed) return -1;
                     if (isAClosed && !isBClosed) return 1;
-                    return 0;
+                    
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
+                    
+                    if (!isNaN(timeA) && !isNaN(timeB)) {
+                        if (timeB !== timeA) {
+                            return timeB - timeA;
+                        }
+                    }
+                    
+                    return (b.id || 0) - (a.id || 0);
                 }).map((em) => {
                     const { steps, currentStep } = getWorkflowInfo(em);
                     const isCritical = em.severity === 'CRITICA' || em.severity === 'CRITICAL';
