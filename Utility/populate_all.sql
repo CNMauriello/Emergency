@@ -643,3 +643,24 @@ SELECT 'emergency_service_capability', COUNT(*)
 FROM emergency_service_capability;
 
 
+
+
+-- ============================================================
+-- ORCHESTRATOR SERVICE
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS workflows (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    process_key VARCHAR(255) NOT NULL,
+    event_type VARCHAR(255) NOT NULL,
+    severity VARCHAR(255) NOT NULL,
+    version INT NOT NULL,
+    enabled BOOLEAN NOT NULL,
+    PRIMARY KEY (id)
+);
+
+INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALUES 
+('FIRE_CRITICAL', 'FIRE', 'CRITICAL', 1, true),
+('FLOOD_CRITICAL', 'FLOOD', 'CRITICAL', 1, true),
+('HEALTH_CRISIS_CRITICAL', 'HEALTH_CRISIS', 'CRITICAL', 1, true),
+('CAR_CRASH_CRITICAL', 'CAR_CRASH', 'CRITICAL', 1, true);

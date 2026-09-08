@@ -1,16 +1,16 @@
 # Configurazione MySQL
-$DB_USER = "root"
-$DB_PASS = "root" # Cambia se necessario
+$DB_USER = "emergency"
+$DB_PASS = "Emergency123456@" # Cambia se necessario
 $DB_HOST = "localhost"
 $DB_PORT = "3306"
 
-# Nome del database per AuthMicroService (da adattare se diverso)
-$AUTH_DB_NAME = "auth"
+# Nome del database (tutto risiede nello schema registry)
+$DB_NAME = "registry"
 
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host " 1. Esecuzione di populate_all.sql" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
-cmd.exe /c "mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS < populate_all.sql"
+cmd.exe /c "mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS $DB_NAME < populate_all.sql"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Errore nell'esecuzione di populate_all.sql" -ForegroundColor Red
     exit
@@ -31,7 +31,7 @@ Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host " 3. Esecuzione di update_roles.sql" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
-cmd.exe /c "mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS $AUTH_DB_NAME < update_roles.sql"
+cmd.exe /c "mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p$DB_PASS $DB_NAME < update_roles.sql"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Errore nell'esecuzione di update_roles.sql" -ForegroundColor Red
     exit
