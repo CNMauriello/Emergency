@@ -94,9 +94,9 @@ export default function Login({ onLoginSuccess }) {
         }
       }
 
-      // Salva in localStorage per persistenza
+      // Salva in sessionStorage per isolamento tab
       setAuthTokens(data.accessToken, data.refreshToken);
-      localStorage.setItem('operator_user', JSON.stringify(data.operatore || data.user || data));
+      sessionStorage.setItem('operator_user', JSON.stringify(data.operatore || data.user || data));
 
       // Notifica App.jsx
       onLoginSuccess(data.operatore || data.user || data);

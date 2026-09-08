@@ -8,27 +8,27 @@ export const REGISTRY_SERVICE_URL = `${API_BASE_URL}`;
 
 // Gestione Token
 export function getAuthToken() {
-    return localStorage.getItem('operator_access_token');
+    return sessionStorage.getItem('operator_access_token');
 }
 
 export function getRefreshToken() {
-    return localStorage.getItem('operator_refresh_token');
+    return sessionStorage.getItem('operator_refresh_token');
 }
 
 export function setAuthTokens(accessToken, refreshToken) {
-    if (accessToken) localStorage.setItem('operator_access_token', accessToken);
-    if (refreshToken) localStorage.setItem('operator_refresh_token', refreshToken);
+    if (accessToken) sessionStorage.setItem('operator_access_token', accessToken);
+    if (refreshToken) sessionStorage.setItem('operator_refresh_token', refreshToken);
 }
 
 export function clearAuthSession() {
-    localStorage.removeItem('operator_access_token');
-    localStorage.removeItem('operator_refresh_token');
-    localStorage.removeItem('operator_user');
+    sessionStorage.removeItem('operator_access_token');
+    sessionStorage.removeItem('operator_refresh_token');
+    sessionStorage.removeItem('operator_user');
 }
 
 // Helper per ottenere l'utente autenticato
 export function getAuthUser() {
-    const userStr = localStorage.getItem('operator_user');
+    const userStr = sessionStorage.getItem('operator_user');
     if (userStr) {
         try {
             return JSON.parse(userStr);
