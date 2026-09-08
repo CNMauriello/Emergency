@@ -1,3 +1,33 @@
+-- ============================================================
+-- OPERATOR SERVICE
+-- ============================================================
+-- Script per l'inserimento iniziale di 3 Operatori di Sala
+-- Assicurarsi che gli auth_user_id (1, 2, 3) corrispondano agli id reali presenti nel database dell'AuthMicroService.
+
+INSERT INTO operatori (auth_user_id, nome, cognome, ruolo, stato) VALUES 
+(1, 'Mario', 'Rossi', 'Supervisor', 'Offline'),
+(2, 'Luigi', 'Verdi', 'Dispatcher', 'Offline'),
+(3, 'Giulia', 'Bianchi', 'Operator', 'Offline');
+
+
+-- ============================================================
+-- EMERGENCY SERVICE
+-- ============================================================
+INSERT INTO emergenze (event_id, event_type, severity, latitude, longitude, timestamp, status)
+VALUES (
+    'evt-fire-001', 
+    'FIRE', 
+    'CRITICAL', 
+    40.8362, 
+    14.3064, 
+    '2026-08-29 12:00:00', 
+    'OPEN'
+);
+
+
+-- ============================================================
+-- REGISTRY SERVICE
+-- ============================================================
 USE registry;
 
 -- ============================================================
@@ -611,3 +641,5 @@ UNION ALL
 
 SELECT 'emergency_service_capability', COUNT(*)
 FROM emergency_service_capability;
+
+
