@@ -176,7 +176,7 @@ public class WorkflowStorageService {
         Path directory = Paths.get(currentDir);
         
         if (!currentDir.endsWith("Orchestrator")) {
-            directory = directory.resolve("Orchestrator");
+            directory = directory.resolve("OrchestratorService");
         }
         return directory.resolve("src/main/resources/");
     }
