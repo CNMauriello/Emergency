@@ -135,13 +135,14 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
             if (response.ok) {
                 addLog(`Autorizzazione vocale ricevuta. Codice: ${l2AuthCode}`);
-                resolveEscalation("LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
+                await resolveEscalation("LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
             } else if (response.status === 404) {
                 addLog("Risorse non disponibili al momento.");
                 handleLevel2Fail();
             } else if (response.status === 401) {
                 addLog("Codice autorizzazione non valido.");
                 alert("Codice non valido.");
+                setL2AuthCode("");
             } else {
                 addLog(`Errore inatteso: ${response.status}`);
             }

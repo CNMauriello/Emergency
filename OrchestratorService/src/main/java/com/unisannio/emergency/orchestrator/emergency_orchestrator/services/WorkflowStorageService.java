@@ -95,10 +95,10 @@ public class WorkflowStorageService {
                 default -> "UNKNOWN";
             };
             case "HEALTH_CRISIS" -> switch (severity) {
-                case "LOW" -> "HEALTH_LOW";
-                case "MEDIUM" -> "HEALTH_STANDARD";
-                case "HIGH" -> "HEALTH_HIGH";
-                case "CRITICAL" -> "HEALTH_CRITICAL";
+                case "LOW" -> "HEALTH_CRISIS_LOW";
+                case "MEDIUM" -> "HEALTH_CRISIS_STANDARD";
+                case "HIGH" -> "HEALTH_CRISIS_HIGH";
+                case "CRITICAL" -> "HEALTH_CRISIS_CRITICAL";
                 default -> "UNKNOWN";
             };
             case "UNKNOWN" -> "GENERIC_RESPONSE";
