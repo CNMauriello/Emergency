@@ -90,8 +90,13 @@ export default function App() {
     return () => window.removeEventListener('auth:logout', handleAuthLogout);
   }, []);
 
+  const handleLogin = (loggedInUser) => {
+    setUser(loggedInUser);
+    setCurrentView(getInitialView(loggedInUser?.ruolo || loggedInUser?.role));
+  };
+
   if (!user) {
-    return <Login onLoginSuccess={setUser} />;
+    return <Login onLoginSuccess={handleLogin} />;
   }
 
   return (

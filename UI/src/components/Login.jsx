@@ -94,6 +94,17 @@ export default function Login({ onLoginSuccess }) {
         }
       }
 
+      // Verifica congruenza tra tab scelta e ruolo effettivo
+      if (activeTab === 'workflow_expert' && data.user.ruolo !== 'ROLE_WORKFLOW_EXPERT') {
+        throw new Error('Accesso negato: non sei un Esperto Workflow.');
+      }
+      if (activeTab === 'service_operator' && data.user.ruolo !== 'ROLE_SERVICE_OPERATOR') {
+        throw new Error('Accesso negato: non sei un Operatore Servizi.');
+      }
+      if (activeTab === 'user' && data.user.ruolo !== 'ROLE_USER') {
+        throw new Error('Accesso negato: usa la tab corrispondente al tuo ruolo.');
+      }
+
       // Salva in sessionStorage per isolamento tab
       setAuthTokens(data.accessToken, data.refreshToken);
       sessionStorage.setItem('operator_user', JSON.stringify(data.operatore || data.user || data));

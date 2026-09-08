@@ -120,6 +120,7 @@ public class AuthController {
             profileMap.put("name", user.getName());
             profileMap.put("surname", user.getSurname());
             profileMap.put("email", user.getEmail());
+            profileMap.put("ruolo", user.getRole());
             return Response.ok(profileMap).build();
         } else {
             return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid access token").build();

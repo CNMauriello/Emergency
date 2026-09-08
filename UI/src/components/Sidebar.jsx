@@ -83,7 +83,7 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
           </a>
         )}
 
-        {!isUser && (
+        {isRoomOperator && (
           <a 
             href="#" 
             onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}
@@ -101,7 +101,7 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
 
       {/* Footer Area */}
       <div className="p-6 mt-auto">
-        {isUser ? (
+        {!isRoomOperator ? (
           <button 
             onClick={onLogout} 
             className="w-full flex items-center justify-center gap-2 bg-[#071324] hover:bg-white/5 text-gray-300 hover:text-white py-3 rounded-lg border border-white/5 transition-colors font-semibold text-sm"
