@@ -34,6 +34,16 @@ public class MockController {
         return ResponseEntity.ok(Map.of("areEvacuated", true));
     }
 
+    @GetMapping("/api/health_service")
+    public ResponseEntity<Map<String, Boolean>> getHealthService(HttpServletRequest request) {
+        logger.info("========== REQUEST ==========");
+        logger.info("Method: {}", request.getMethod());
+        logger.info("URL: {}", request.getRequestURI());
+
+        // Restituisce il campo isStabilized atteso dal task BPMN
+        return ResponseEntity.ok(Map.of("isStabilized", true));
+    }
+
     @GetMapping("/{host}/api")
     public ResponseEntity<Void> getApi(@PathVariable("host") String host, HttpServletRequest request) {
         logger.info("========== REQUEST ==========");

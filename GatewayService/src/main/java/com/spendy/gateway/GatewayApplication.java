@@ -43,7 +43,7 @@ public class GatewayApplication {
                         .path("/api/operators/**", "/api/audit", "/api/audit/**")
                         .uri("http://localhost:8087"))
                 .route("Mock", r ->r
-                        .path( "/{host}/api/**", "/api/evacuation_service", "/api/dispatch", "/api/military-intervention")
+                        .path( "/{host}/api/**", "/api/evacuation_service", "/api/dispatch", "/api/military-intervention", "/api/health_service")
                         .uri("http://localhost:8089"))
                 .build();
     }

@@ -46,6 +46,7 @@ public class SecurityConfig {
                         // Mock
                         .pathMatchers( "/{host}/api/**").permitAll()
                         .pathMatchers("/api/evacuation_service").permitAll()
+                        .pathMatchers("/api/health_service").permitAll()
                         .pathMatchers("/api/dispatch").hasAnyAuthority("ROLE_ROOM_OPERATOR")
                         .pathMatchers("/api/military-intervention").hasAnyAuthority("ROLE_ROOM_OPERATOR")
 
