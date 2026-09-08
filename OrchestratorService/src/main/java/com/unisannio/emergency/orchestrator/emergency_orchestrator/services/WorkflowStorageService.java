@@ -5,6 +5,7 @@ import com.unisannio.emergency.orchestrator.emergency_orchestrator.repository.Wo
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import io.camunda.client.CamundaClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,9 +19,11 @@ import java.util.Optional;
 public class WorkflowStorageService {
 
     private final WorkflowRepository workflowRepository;
+    private final CamundaClient camundaClient;
 
-    public WorkflowStorageService(WorkflowRepository workflowRepository) {
+    public WorkflowStorageService(WorkflowRepository workflowRepository, CamundaClient camundaClient) {
         this.workflowRepository = workflowRepository;
+        this.camundaClient = camundaClient;
     }
 
     @Transactional
@@ -51,6 +54,15 @@ public class WorkflowStorageService {
         
         // Save physical file
         saveFile(file, processKey, workflow.getVersion());
+        
+        // Deploy su Camunda 8
+        Path savedFile = getDirectoryPath().resolve(processKey + "_v" + workflow.getVersion() + ".bpmn");
+        try (java.io.InputStream is = Files.newInputStream(savedFile)) {
+            camundaClient.newDeployResourceCommand()
+                    .addResourceStream(is, processKey + ".bpmn")
+                    .send()
+                    .join();
+        }
 
         return workflowRepository.save(workflow);
     }
