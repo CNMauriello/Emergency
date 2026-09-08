@@ -103,21 +103,8 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
       onClose();
     } catch (err) {
       console.error(err);
-      setError('Backend non disponibile. Creazione workflow mock.');
-      setTimeout(() => {
-        onWorkflowCreated({ 
-          id: `wf-${Math.floor(Math.random()*1000)}`, 
-          processKey: file.name.replace('.bpmn', '').toUpperCase(),
-          eventType: formData.eventType,
-          gravity: formData.severity,
-          version: '1',
-          enabled: false,
-          lastUpdated: new Date().toLocaleString()
-        });
-        onClose();
-      }, 1500);
-    } finally {
-      if (!error) setLoading(false);
+      setError(err.message || 'Errore durante la creazione del workflow.');
+      setLoading(false);
     }
   };
 

@@ -24,15 +24,8 @@ export default function WorkflowsTable() {
             setWorkflows(data);
         } catch (err) {
             console.error('Error fetching workflows:', err);
-            // Fallback for demonstration when backend is not ready
-            setWorkflows([
-                { id: 'wf-001', processKey: 'INCENDIO_URBANO', eventType: 'FIRE', gravity: 'ALTA', version: '2', enabled: true, lastUpdated: '2023-10-12 14:00' },
-                { id: 'wf-001-old', processKey: 'INCENDIO_URBANO', eventType: 'FIRE', gravity: 'ALTA', version: '1', enabled: false, lastUpdated: '2023-10-10 10:00' },
-                { id: 'wf-002', processKey: 'INCIDENTE_STRADALE_GRAVE', eventType: 'TRAFFIC_ACCIDENT', gravity: 'CRITICA', version: '1', enabled: true, lastUpdated: '2023-10-15 09:30' },
-                { id: 'wf-003', processKey: 'ALLAGAMENTO_AREA', eventType: 'FLOOD', gravity: 'MEDIA', version: '1', enabled: false, lastUpdated: '2023-09-01 11:20' },
-                { id: 'wf-003-new', processKey: 'ALLAGAMENTO_AREA', eventType: 'FLOOD', gravity: 'MEDIA', version: '2', enabled: true, lastUpdated: '2023-09-10 11:20' }
-            ]);
-            setError('Backend non disponibile, dati mockati caricati.');
+            setWorkflows([]);
+            setError(err.message || 'Errore nel recupero dei workflow dal backend.');
         } finally {
             setLoading(false);
         }
@@ -46,16 +39,7 @@ export default function WorkflowsTable() {
         try {
             const url = `${API_BASE_URL}/api/workflows/active-version?processKey=${processKey}&targetVersion=${newVersion}`;
             
-            // In case we want to mock the behavior when the backend is offline:
-            if (error) {
-                setWorkflows(workflows.map(wf => {
-                    if (wf.processKey === processKey) {
-                        return { ...wf, enabled: wf.version.toString() === newVersion.toString() };
-                    }
-                    return wf;
-                }));
-                return;
-            }
+
 
             const response = await fetchWithAuth(url, {
                 method: 'PUT'
@@ -179,6 +163,16 @@ export default function WorkflowsTable() {
                             <tr>
                                 <td colSpan="5" className="text-center py-8 text-gray-500">
                                     <i className="fas fa-spinner fa-spin mr-2"></i> Caricamento processi...
+                                </td>
+                            </tr>
+                        ) : workflowGroups.length === 0 ? (
+                            <tr>
+                                <td colSpan="5" className="text-center py-16">
+                                    <div className="flex flex-col items-center justify-center text-gray-500">
+                                        <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
+                                        <p className="text-[15px] font-bold text-gray-700">Nessun piano BPMN registrato</p>
+                                        <p className="text-[13px] mt-1">Non ci sono attualmente workflow configurati nel sistema.</p>
+                                    </div>
                                 </td>
                             </tr>
                         ) : workflowGroups.map((group) => (
