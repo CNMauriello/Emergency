@@ -20,10 +20,17 @@ export default function Login({ onLoginSuccess }) {
 
     if (activeTab === 'user' && isRegistering) {
       try {
+        const roleMapping = {
+          'service_operator': 'ROLE_SERVICE_OPERATOR',
+          'workflow_expert': 'ROLE_WORKFLOW_EXPERT',
+          'user': 'ROLE_USER'
+        };
+        const role = roleMapping[activeTab] || 'ROLE_USER';
+
         const response = await fetch(`${AUTH_SERVICE_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password, name, surname, email }),
+          body: JSON.stringify({ username, password, name, surname, email, role }),
         });
 
         if (!response.ok) {
@@ -56,7 +63,7 @@ export default function Login({ onLoginSuccess }) {
           body: JSON.stringify({ username, password }),
         });
       } else {
-        // Usa l'API dell'AuthMicroService per gli utenti
+        // Usa l'API dell'AuthMicroService per utenti e operatori non di sala
         response = await fetch(`${AUTH_SERVICE_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -70,8 +77,8 @@ export default function Login({ onLoginSuccess }) {
 
       let data = await response.json();
 
-      // Se l'accesso è utente, recuperiamo i dettagli del profilo
-      if (activeTab === 'user') {
+      // Se l'accesso è tramite AuthMicroService, recuperiamo i dettagli del profilo
+      if (activeTab !== 'operator') {
         try {
           const profileRes = await fetch(`${AUTH_SERVICE_URL}/api/auth/profile`, {
             headers: { 'Authorization': `Bearer ${data.accessToken}` }
@@ -106,20 +113,34 @@ export default function Login({ onLoginSuccess }) {
       <div className="bg-white p-10 rounded-xl shadow-xl w-[400px] border border-gray-100 flex flex-col items-center max-h-[90vh] overflow-y-auto">
 
         {/* Toggle tabs */}
-        <div className="flex w-full mb-8 bg-gray-100 rounded-lg p-1 relative z-10 shrink-0">
+        <div className="flex w-full mb-8 bg-gray-100 rounded-lg p-1 relative z-10 shrink-0 overflow-x-auto hide-scrollbar">
           <button
             type="button"
             onClick={() => { setActiveTab('operator'); setIsRegistering(false); }}
-            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${activeTab === 'operator' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`flex-1 py-2 px-1 text-[11px] font-bold rounded-md transition-all duration-200 whitespace-nowrap ${activeTab === 'operator' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
           >
-            Operatore
+            S. Operativa
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('service_operator'); setIsRegistering(false); }}
+            className={`flex-1 py-2 px-1 text-[11px] font-bold rounded-md transition-all duration-200 whitespace-nowrap ${activeTab === 'service_operator' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            Op. Servizi
+          </button>
+          <button
+            type="button"
+            onClick={() => { setActiveTab('workflow_expert'); setIsRegistering(false); }}
+            className={`flex-1 py-2 px-1 text-[11px] font-bold rounded-md transition-all duration-200 whitespace-nowrap ${activeTab === 'workflow_expert' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
+          >
+            Exp. Workflow
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('user')}
-            className={`flex-1 py-2 text-sm font-bold rounded-md transition-all duration-200 ${activeTab === 'user' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
+            className={`flex-1 py-2 px-1 text-[11px] font-bold rounded-md transition-all duration-200 whitespace-nowrap ${activeTab === 'user' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
           >
-            Utente Standard
+            Utente
           </button>
         </div>
 
@@ -128,7 +149,7 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         <h1 className="text-2xl font-bold text-[#0B1B32] mb-1 tracking-wide text-center">
-          {activeTab === 'operator' ? 'Sala Operativa' : (isRegistering ? 'Registrazione' : 'Consultazione')}
+          {activeTab === 'operator' ? 'Sala Operativa' : (activeTab === 'service_operator' ? (isRegistering ? 'Registrazione' : 'Operatore Servizi') : (activeTab === 'workflow_expert' ? (isRegistering ? 'Registrazione' : 'Esperto Workflow') : (isRegistering ? 'Registrazione' : 'Consultazione')))}
         </h1>
         <p className={`text-xs ${activeTab === 'operator' ? 'text-[#1976d2]' : 'text-gray-500'} uppercase font-bold tracking-widest mb-6 transition-colors text-center`}>
           {activeTab === 'operator' ? 'Accesso Autorizzato' : (isRegistering ? 'Crea un Account' : 'Accesso Esterno')}

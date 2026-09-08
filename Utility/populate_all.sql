@@ -2,12 +2,14 @@
 -- OPERATOR SERVICE
 -- ============================================================
 -- Script per l'inserimento iniziale di 3 Operatori di Sala
--- Assicurarsi che gli auth_user_id (1, 2, 3) corrispondano agli id reali presenti nel database dell'AuthMicroService.
+-- Assicurarsi che gli auth_user_id (1, 2, 3, 4, 5) corrispondano agli id reali presenti nel database dell'AuthMicroService.
 
 INSERT INTO operatori (auth_user_id, nome, cognome, ruolo, stato) VALUES 
 (1, 'Mario', 'Rossi', 'Supervisor', 'Offline'),
 (2, 'Luigi', 'Verdi', 'Dispatcher', 'Offline'),
-(3, 'Giulia', 'Bianchi', 'Operator', 'Offline');
+(3, 'Giulia', 'Bianchi', 'Operator', 'Offline'),
+(4, 'Maria', 'Viola', 'Operator', 'Offline'),
+(5, 'Giacomo', 'Neri', 'Operator', 'Offline');
 
 
 -- ============================================================
@@ -582,7 +584,8 @@ WHERE name IN (
     'MedicalEmergency',
     'TraumaCare',
     'Ambulance',
-    'WaterRescue'
+    'WaterRescue',
+    'HelicopterRescue'
 );
 
 

@@ -21,6 +21,20 @@ const operatori = [
         surname: "Bianchi",
         email: "giulia.bianchi@emergency.com",
         password: "Password123!"
+    },
+    {
+        username: "maria.viola",
+        name: "Maria",
+        surname: "Viola",
+        email: "maria.viola@emergency.com",
+        password: "Password123!"
+    },
+    {
+        username: "giacomo.neri",
+        name: "Giacomo",
+        surname: "Neri",
+        email: "giacomo.neri@emergency.com",
+        password: "Password123!"
     }
 ];
 
