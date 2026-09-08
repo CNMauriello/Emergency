@@ -17,14 +17,8 @@ export default function History() {
             setAuditLogs(data);
         } catch (err) {
             console.error('Error fetching audit logs:', err);
-            // Fallback mock
-            setAuditLogs([
-                { id: 1, emergencyId: 'E-8821', timestamp: '2023-11-20T18:45:00', operator: 'OP-8942', action: 'EMERGENCY_CLOSED', details: 'Chiusura intervento', outcome: 'SUCCESS', override: false },
-                { id: 2, emergencyId: 'E-8822', timestamp: '2023-11-20T17:30:12', operator: 'OP-8942', action: 'DISPATCH_TEAM', details: 'Invio squadra VVF-01', outcome: 'SUCCESS', override: false },
-                { id: 3, emergencyId: 'E-8825', timestamp: '2023-11-20T16:45:33', operator: 'SYSTEM', action: 'WORKFLOW_TRIGGERED', details: 'Innesco processo INCENDIO_URBANO', outcome: 'SUCCESS', override: false },
-                { id: 4, emergencyId: 'E-8829', timestamp: '2023-11-20T16:40:05', operator: 'OP-7731', action: 'VALIDATION_OVERRIDE', details: 'Forzatura severità ad ALTA', outcome: 'WARNING', override: true },
-            ]);
-            setError('Backend non raggiungibile per gli audit log, mostro dati mockati.');
+            setError(err.message || 'Errore nel recupero degli audit log dal backend.');
+            setAuditLogs([]);
         } finally {
             setLoading(false);
         }
@@ -139,8 +133,12 @@ export default function History() {
                                 </tr>
                             ) : filteredLogs.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="text-center py-8 text-gray-500">
-                                        Nessun log di audit trovato.
+                                    <td colSpan="6" className="text-center py-16">
+                                        <div className="flex flex-col items-center justify-center text-gray-500">
+                                            <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
+                                            <h2 className="text-[15px] font-bold text-gray-700">Nessun log di audit registrato</h2>
+                                            <p className="text-[13px] mt-1 text-gray-500">Non ci sono attualmente operazioni o azioni eseguite nel sistema.</p>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : filteredLogs.map((log) => (

@@ -20,14 +20,8 @@ export default function AuditLogModal({ emergencyId, onClose }) {
         setLogs(data);
       } catch (err) {
         console.error(err);
-        // Fallback mock
-        setLogs([
-          { id: 1, timestamp: '2023-11-20T18:45:00', operator: 'OP-8942', action: 'EMERGENCY_CLOSED', details: 'Chiusura intervento', outcome: 'SUCCESS', override: false },
-          { id: 2, timestamp: '2023-11-20T17:30:12', operator: 'OP-8942', action: 'DISPATCH_TEAM', details: 'Invio squadra VVF-01', outcome: 'SUCCESS', override: false },
-          { id: 3, timestamp: '2023-11-20T16:45:33', operator: 'SYSTEM', action: 'WORKFLOW_TRIGGERED', details: 'Innesco processo INCENDIO_URBANO', outcome: 'SUCCESS', override: false },
-          { id: 4, timestamp: '2023-11-20T16:40:05', operator: 'OP-7731', action: 'VALIDATION_OVERRIDE', details: 'Forzatura severità ad ALTA', outcome: 'WARNING', override: true },
-        ]);
-        setError('Dati caricati in modalità mock. Backend offline.');
+        setError(err.message || 'Errore nel recupero dei log di audit dal backend.');
+        setLogs([]);
       } finally {
         setLoading(false);
       }
@@ -94,6 +88,12 @@ export default function AuditLogModal({ emergencyId, onClose }) {
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <i className="fas fa-circle-notch fa-spin text-3xl mb-3 text-[#1976d2]"></i>
               <p className="text-sm font-medium">Recupero log sicuri in corso...</p>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+              <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
+              <h2 className="text-[15px] font-bold text-gray-700">Nessun log di audit registrato</h2>
+              <p className="text-[13px] mt-1 text-gray-500">Non ci sono attualmente operazioni registrate per questa emergenza.</p>
             </div>
           ) : (
             <div className="relative border-l-2 border-gray-100 ml-3 space-y-8 pb-4">

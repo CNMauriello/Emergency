@@ -183,9 +183,7 @@ export default function ServicesTable({
                   className="p-4 text-center text-red-500 bg-red-50"
                 >
                   <i className="fas fa-exclamation-triangle mr-2"></i>
-
-                  Errore di connessione al backend
-                  (Spring Boot non avviato o problema di CORS).
+                  Errore nel recupero dei servizi
                 </td>
               </tr>
             )}
@@ -197,10 +195,13 @@ export default function ServicesTable({
                 <tr>
                   <td
                     colSpan={compactMode ? 5 : 7}
-                    className="p-4 text-center text-gray-500"
+                    className="p-4 text-center py-16"
                   >
-                    Nessun servizio registrato.
-                    Aggiungine uno usando il form.
+                    <div className="flex flex-col items-center justify-center text-gray-500">
+                      <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
+                      <h2 className="text-[15px] font-bold text-gray-700">Non ci sono servizi disponibili</h2>
+                      <p className="text-[13px] mt-1 text-gray-500">Aggiungi una nuova unità operativa usando il bottone "Registra Nuovo Servizio".</p>
+                    </div>
                   </td>
                 </tr>
               )}

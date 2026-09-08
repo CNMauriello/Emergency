@@ -135,7 +135,14 @@ const ActiveEmergencies = ({ onViewDetail }) => {
             </div>
 
             <div className="space-y-4">
-                {[...emergencies].sort((a, b) => {
+                {emergencies.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm text-gray-500">
+                        <AlertTriangle className="w-12 h-12 text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-2" />
+                        <h2 className="text-[16px] font-bold text-gray-700">Non ci sono emergenze attive</h2>
+                        <p className="text-[14px] mt-1 text-gray-500">Al momento non è in corso alcuna emergenza sulla mappa territoriale.</p>
+                    </div>
+                ) : (
+                    [...emergencies].sort((a, b) => {
                     const isAClosed = a.status === 'CLOSED';
                     const isBClosed = b.status === 'CLOSED';
                     if (!isAClosed && isBClosed) return -1;
@@ -246,7 +253,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                             </div>
                         </div>
                     );
-                })}
+                }))}
             </div>
         </div>
     );
