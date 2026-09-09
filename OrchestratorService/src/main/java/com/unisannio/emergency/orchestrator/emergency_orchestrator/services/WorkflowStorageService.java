@@ -194,6 +194,14 @@ public class WorkflowStorageService {
     }
 
     private Path getDirectoryPath() {
+        Path configuredPath = Paths.get(storagePath);
+        
+        // Se il path fornito è assoluto (es. volume Docker/Kubernetes come /app/bpmns)
+        if (configuredPath.isAbsolute()) {
+            return configuredPath;
+        }
+
+        // Logica di fallback per l'ambiente locale
         String currentDir = System.getProperty("user.dir");
         Path directory = Paths.get(currentDir);
 

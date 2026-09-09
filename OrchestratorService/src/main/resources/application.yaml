@@ -33,7 +33,7 @@ logging:
 
 workflow:
   storage:
-    path: src/main/resources/
+    path: ${WORKFLOW_STORAGE_PATH}
 
 binder:
   candidates:
