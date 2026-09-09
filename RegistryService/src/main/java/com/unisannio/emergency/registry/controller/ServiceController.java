@@ -40,7 +40,6 @@ public class ServiceController {
         return service.createService(request);
     }
 
-    //DELETE /services?endpoint=http://localhost:9000/fire
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteService(@PathVariable("id") Long id) {
         service.deleteService(id);

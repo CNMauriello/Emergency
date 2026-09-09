@@ -23,7 +23,8 @@ public class OperatoreLoginService {
     @Autowired
     private OperatoreRepository operatoreRepository;
 
-    private static final String AUTH_SERVICE_URL = "http://localhost:8090/api/auth"; // AuthMicroService
+    @org.springframework.beans.factory.annotation.Value("${auth.service.url}")
+    private String authServiceUrl;
 
     /**
      * Intercetta username e password, li inoltra via WebClient all'AuthMicroService.
@@ -33,7 +34,7 @@ public class OperatoreLoginService {
         try {
             // 1. Chiamata di login verso AuthMicroService
             Map<String, String> authResponse = webClient.post()
-                    .uri(AUTH_SERVICE_URL + "/login")
+                    .uri(authServiceUrl + "/login")
                     .bodyValue(Map.of("username", username, "password", password))
                     .retrieve()
                     .bodyToMono(Map.class)
@@ -48,7 +49,7 @@ public class OperatoreLoginService {
 
             // 2. Chiamata per recuperare il profile (che ora contiene id_user)
             Map<String, String> profileResponse = webClient.get()
-                    .uri(AUTH_SERVICE_URL + "/profile")
+                    .uri(authServiceUrl + "/profile")
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                     .retrieve()
                     .bodyToMono(Map.class)

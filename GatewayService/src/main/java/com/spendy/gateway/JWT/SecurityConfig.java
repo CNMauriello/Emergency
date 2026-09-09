@@ -15,6 +15,9 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @EnableReactiveMethodSecurity
 public class SecurityConfig {
 
+    @org.springframework.beans.factory.annotation.Value("${cors.allowed-origins}")
+    private String corsAllowedOrigins;
+
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http,
                                                          JWTAuthenticationFilter jwtAuthenticationFilter) {
@@ -24,7 +27,11 @@ public class SecurityConfig {
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .cors(cors -> cors.configurationSource(exchange -> {
                     org.springframework.web.cors.CorsConfiguration config = new org.springframework.web.cors.CorsConfiguration();
-                    config.addAllowedOrigin("http://localhost:5173");
+                    if (corsAllowedOrigins != null) {
+                        for (String origin : corsAllowedOrigins.split(",")) {
+                            config.addAllowedOrigin(origin.trim());
+                        }
+                    }
                     config.addAllowedMethod("*");
                     config.addAllowedHeader("*");
                     config.setAllowCredentials(true);

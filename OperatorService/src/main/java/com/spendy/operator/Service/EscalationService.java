@@ -27,6 +27,9 @@ public class EscalationService {
     private final AuditLogRepository auditLogRepository;
     private final RestTemplate restTemplate;
 
+    @org.springframework.beans.factory.annotation.Value("${escalation.webhook.base-url}")
+    private String escalationWebhookBaseUrl;
+
     public EscalationService(EscalationTicketRepository ticketRepository,
             AuditLogRepository auditLogRepository,
             RestTemplate restTemplate) {
@@ -79,7 +82,7 @@ public class EscalationService {
         ticketRepository.save(ticket);
 
         // 3. Integrazione Camunda tramite Webhook Asincrono
-        String webhookEndpoint = "http://localhost:8083/api/escalations/" + ticketId + "/resolve";
+        String webhookEndpoint = escalationWebhookBaseUrl + "/" + ticketId + "/resolve";
         
         Map<String, Object> webhookPayload = Map.of(
                 "resolutionStrategy", request.getResolutionStrategy()

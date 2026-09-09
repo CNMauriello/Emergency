@@ -8,12 +8,18 @@ import org.springframework.web.filter.CorsFilter;
 
 // @Configuration (Commentato per evitare CORS duplicati col Gateway)
 public class CorsGlobalConfiguration {
+
+    @org.springframework.beans.factory.annotation.Value("${cors.allowed-origins}")
+    private String corsAllowedOrigins;
+
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:5173");
-        corsConfig.addAllowedOrigin("http://100.117.226.152:5173");
-        corsConfig.addAllowedOrigin("http://100.115.146.177:5173");
+        if (corsAllowedOrigins != null) {
+            for (String origin : corsAllowedOrigins.split(",")) {
+                corsConfig.addAllowedOrigin(origin.trim());
+            }
+        }
         corsConfig.addAllowedMethod("*");
         corsConfig.addAllowedHeader("*");
         corsConfig.setAllowCredentials(true);

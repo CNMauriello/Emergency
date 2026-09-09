@@ -21,6 +21,9 @@ public class WorkflowStorageService {
     private final WorkflowRepository workflowRepository;
     private final CamundaClient camundaClient;
 
+    @org.springframework.beans.factory.annotation.Value("${workflow.storage.path}")
+    private String storagePath;
+
     public WorkflowStorageService(WorkflowRepository workflowRepository, CamundaClient camundaClient) {
         this.workflowRepository = workflowRepository;
         this.camundaClient = camundaClient;
@@ -31,7 +34,8 @@ public class WorkflowStorageService {
         String processKey = generateProcessKey(eventType, severity);
 
         if ("UNKNOWN".equals(processKey)) {
-            throw new IllegalArgumentException("Unknown process key for eventType: " + eventType + " and severity: " + severity);
+            throw new IllegalArgumentException(
+                    "Unknown process key for eventType: " + eventType + " and severity: " + severity);
         }
 
         Optional<Workflow> latestWorkflowOpt = workflowRepository.findTopByProcessKeyOrderByVersionDesc(processKey);
@@ -42,7 +46,7 @@ public class WorkflowStorageService {
         workflow.setSeverity(severity);
         workflow.setProcessKey(processKey);
         workflow.setVersion(nextVersion);
-        
+
         // Disattiva il workflow precedentemente attivo se presente
         workflowRepository.findByProcessKeyAndEnabledTrue(processKey).ifPresent(active -> {
             active.setEnabled(false);
@@ -51,10 +55,10 @@ public class WorkflowStorageService {
 
         // Imposta il nuovo workflow come attivo
         workflow.setEnabled(true);
-        
+
         // Save physical file
         saveFile(file, processKey, workflow.getVersion());
-        
+
         // Deploy su Camunda 8
         Path savedFile = getDirectoryPath().resolve(processKey + "_v" + workflow.getVersion() + ".bpmn");
         try (java.io.InputStream is = Files.newInputStream(savedFile)) {
@@ -110,7 +114,8 @@ public class WorkflowStorageService {
     public Workflow changeActiveVersion(String processKey, Integer targetVersion) throws IOException {
         // Recupera il workflow target
         Workflow targetWorkflow = workflowRepository.findByProcessKeyAndVersion(processKey, targetVersion)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Target workflow not found for version: " + targetVersion));
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
+                        "Target workflow not found for version: " + targetVersion));
 
         if (targetWorkflow.getEnabled()) {
             return targetWorkflow; // Already active
@@ -129,11 +134,12 @@ public class WorkflowStorageService {
                 String currentContent = Files.readString(currentVersionFile);
                 String oldId = processKey;
                 String newId = processKey + "_" + currentVersion;
-                
-                String replacedCurrent = currentContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"", "$1id=\"" + newId + "\"");
+
+                String replacedCurrent = currentContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"",
+                        "$1id=\"" + newId + "\"");
                 Files.writeString(currentVersionFile, replacedCurrent);
             }
-            
+
             Workflow currentActive = currentActiveOpt.get();
             currentActive.setEnabled(false);
             workflowRepository.save(currentActive);
@@ -146,10 +152,12 @@ public class WorkflowStorageService {
             String oldId = processKey + "_" + targetVersion;
             String newId = processKey;
 
-            String replacedTarget = targetContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"", "$1id=\"" + newId + "\"");
+            String replacedTarget = targetContent.replaceFirst("(<bpmn:process[^>]*?)id=\"" + oldId + "\"",
+                    "$1id=\"" + newId + "\"");
             Files.writeString(targetVersionFile, replacedTarget);
         } else {
-            throw new java.io.FileNotFoundException("Target version file not found: " + targetVersionFile.getFileName());
+            throw new java.io.FileNotFoundException(
+                    "Target version file not found: " + targetVersionFile.getFileName());
         }
 
         // 3. Aggiornamento Database
@@ -159,7 +167,8 @@ public class WorkflowStorageService {
 
     public String getActiveWorkflowXml(String processKey) throws IOException {
         Workflow activeWorkflow = workflowRepository.findByProcessKeyAndEnabledTrue(processKey)
-                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException("Active workflow not found for processKey: " + processKey));
+                .orElseThrow(() -> new jakarta.persistence.EntityNotFoundException(
+                        "Active workflow not found for processKey: " + processKey));
 
         Path resourcesDir = getDirectoryPath();
         Path targetVersionFile = resourcesDir.resolve(processKey + "_v" + activeWorkflow.getVersion() + ".bpmn");
@@ -167,17 +176,18 @@ public class WorkflowStorageService {
         if (Files.exists(targetVersionFile)) {
             return Files.readString(targetVersionFile);
         } else {
-            throw new java.io.FileNotFoundException("Active workflow file not found: " + targetVersionFile.getFileName());
+            throw new java.io.FileNotFoundException(
+                    "Active workflow file not found: " + targetVersionFile.getFileName());
         }
     }
 
     private void saveFile(MultipartFile file, String processKey, Integer version) throws IOException {
         Path directory = getDirectoryPath();
-        
+
         if (!Files.exists(directory)) {
             Files.createDirectories(directory);
         }
-        
+
         String filename = processKey + "_v" + version + ".bpmn";
         Path targetPath = directory.resolve(filename);
         Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
@@ -186,10 +196,10 @@ public class WorkflowStorageService {
     private Path getDirectoryPath() {
         String currentDir = System.getProperty("user.dir");
         Path directory = Paths.get(currentDir);
-        
+
         if (!currentDir.endsWith("Orchestrator")) {
             directory = directory.resolve("OrchestratorService");
         }
-        return directory.resolve("src/main/resources/");
+        return directory.resolve(storagePath);
     }
 }

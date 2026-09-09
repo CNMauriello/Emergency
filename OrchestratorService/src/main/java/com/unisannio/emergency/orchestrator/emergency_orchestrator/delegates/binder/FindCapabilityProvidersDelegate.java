@@ -18,8 +18,8 @@ public class FindCapabilityProvidersDelegate {
 
     private final RestClient restClient;
 
-    private final String binderUrl =
-            "http://localhost:8082/api/binder/candidates";
+    @org.springframework.beans.factory.annotation.Value("${binder.candidates.url}")
+    private String binderUrl;
 
     public FindCapabilityProvidersDelegate() {
         this.restClient = RestClient.create();

@@ -56,9 +56,12 @@ public class AuthService {
         return new AuthResult(StatusAuth.INVALID_CREDENTIALS, null);
     }
 
+    @org.springframework.beans.factory.annotation.Value("${gateway.generate-token.url}")
+    private String gatewayGenerateTokenUrl;
+
     private String generateTokenViaRest(String username, String role) {
         Map responseMap = webClient.post()
-                .uri("http://localhost:8090/gateway/generate-token")
+                .uri(gatewayGenerateTokenUrl)
                 .bodyValue(Map.of("username", username, "role", role))
                 .retrieve()
                 .bodyToMono(Map.class)
@@ -104,9 +107,12 @@ public class AuthService {
         return token;
     }
 
+    @org.springframework.beans.factory.annotation.Value("${gateway.verify-token.url}")
+    private String gatewayVerifyTokenUrl;
+
     private String verifyTokenViaRest(String token) {
         Map responseMap = webClient.post()
-                .uri("http://localhost:8090/gateway/verify-token")
+                .uri(gatewayVerifyTokenUrl)
                 .bodyValue(Map.of("token", token))
                 .retrieve()
                 .bodyToMono(Map.class)

@@ -28,3 +28,15 @@ logging:
     org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
     org.springframework.web.client.RestClient: DEBUG
     org.springframework.http.client: TRACE
+
+workflow:
+  storage:
+    path: src/main/resources/
+
+binder:
+  candidates:
+    url: http://localhost:8082/api/binder/candidates
+
+operator:
+  escalations:
+    url: http://localhost:8087/api/operators/escalations

@@ -20,6 +20,9 @@ public class InvokeCapabilityDelegate {
     private static final Logger logger = LoggerFactory.getLogger(InvokeCapabilityDelegate.class);
     private final RestClient restClient;
 
+    @org.springframework.beans.factory.annotation.Value("${operator.escalations.url}")
+    private String operatorEscalationsUrl;
+
     public InvokeCapabilityDelegate() {
         this.restClient = RestClient.create();
     }
@@ -56,7 +59,7 @@ public class InvokeCapabilityDelegate {
             try {
                 System.out.println("Invocazione Backend-for-Frontend per creazione ticket di escalation con ticketId: " + job.getKey());
                 restClient.post()
-                        .uri("http://localhost:8087/api/operators/escalations")
+                        .uri(operatorEscalationsUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(escalationTicket)
                         .retrieve()

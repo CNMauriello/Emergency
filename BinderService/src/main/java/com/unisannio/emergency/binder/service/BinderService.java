@@ -17,11 +17,10 @@ public class BinderService {
     private final RestClient registryClient;
     private final RankingStrategy rankingStrategy;
 
-    // Rimosso RestClient.Builder dai parametri
-    public BinderService(RankingStrategy rankingStrategy) {
+    public BinderService(RankingStrategy rankingStrategy, @org.springframework.beans.factory.annotation.Value("${registry.service.url}") String registryUrl) {
         // Costruzione diretta del RestClient
         this.registryClient = RestClient.builder()
-                .baseUrl("http://localhost:8081") // URL del RegistryService
+                .baseUrl(registryUrl) // URL del RegistryService
                 .build();
 
         this.rankingStrategy = rankingStrategy;
