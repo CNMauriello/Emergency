@@ -28,6 +28,11 @@ services:
       - "3307:3306"
     volumes:
       - ./Utility/init_dbs.sql:/docker-entrypoint-initdb.d/init_dbs.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   registry-service:
     build:
@@ -36,7 +41,8 @@ services:
     container_name: registry-service
     env_file: .env
     depends_on:
-      - mysql-db
+      mysql-db:
+        condition: service_healthy
 
   auth-service:
     build:
@@ -45,8 +51,10 @@ services:
     container_name: auth-service
     env_file: .env
     depends_on:
-      - mysql-db
-      - registry-service
+      mysql-db:
+        condition: service_healthy
+      registry-service:
+        condition: service_started
 
   gateway-service:
     build:
@@ -66,9 +74,12 @@ services:
     container_name: emergency-service
     env_file: .env
     depends_on:
-      - mysql-db
-      - registry-service
-      - kafka
+      mysql-db:
+        condition: service_healthy
+      registry-service:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   operator-service:
     build:
@@ -77,8 +88,10 @@ services:
     container_name: operator-service
     env_file: .env
     depends_on:
-      - mysql-db
-      - registry-service
+      mysql-db:
+        condition: service_healthy
+      registry-service:
+        condition: service_started
 
   mock-service:
     build:
@@ -96,9 +109,12 @@ services:
     container_name: orchestrator-binder-camunda
     env_file: .env
     depends_on:
-      - mysql-db
-      - registry-service
-      - kafka
+      mysql-db:
+        condition: service_healthy
+      registry-service:
+        condition: service_started
+      kafka:
+        condition: service_started
 
   ui:
     build:
@@ -122,13 +138,30 @@ services:
       - MYSQL_OPTS=--skip-ssl
     command: >
       sh -c "
-        apt-get update && apt-get install -y default-mysql-client &&
-        echo 'Waiting for services to start (45s)...' &&
-        sleep 45 &&
+        apt-get update && apt-get install -y default-mysql-client curl &&
+        echo 'Waiting for microservices to create tables...' &&
+        while ! mysql -h \"$$DB_EXPOSED_HOST\" -P \"$$DB_EXPOSED_PORT\" -u \"$$DB_USERNAME\" -p\"$$DB_PASSWORD\" -e \"DESCRIBE operator_db.operators;\" > /dev/null 2>&1; do
+          sleep 5;
+        done &&
+        echo 'Tables are ready! Executing seeder scripts...' &&
         chmod +x run_scripts.sh &&
         ./run_scripts.sh || echo 'Seeder terminato (potrebbe aver ignorato duplicati)'
       "
     depends_on:
-      - mysql-db
-      - gateway-service
-      - auth-service
+      mysql-db:
+        condition: service_healthy
+      gateway-service:
+        condition: service_started
+      auth-service:
+        condition: service_started
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
