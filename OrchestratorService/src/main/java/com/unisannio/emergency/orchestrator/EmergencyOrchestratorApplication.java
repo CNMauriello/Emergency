@@ -5,9 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@Deployment(
-        resources = "classpath:Emergency_Response_Plan_Orchestrator.bpmn"
-)
+@Deployment(resources = "file:/app/bpmns/*.bpmn")
 public class EmergencyOrchestratorApplication {
 
     public static void main(String[] args) {
