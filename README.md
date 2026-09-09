@@ -8,24 +8,18 @@ Il **Sottosistema di Orchestrazione** costituisce il motore decisionale ed esecu
 * **Human-in-the-loop**: Quando l'automatismo esaurisce le proprie policy, cede il controllo all'operatore di sala (forzature, salti, interruzioni) garantendo la tracciabilità legale su log immutabile.
 
 ## Architettura e Microservizi
-Il sistema adotta un'architettura a microservizi con orchestrazione centralizzata (pattern database-per-service):
-* **Gestore stato emergenze (GSE)**: Nodo di frontiera. Consuma lo Stream eventi da Kafka partizionato per geohash, deduplica le segnalazioni e gestisce la macchina a stati dell'emergenza.
-* **Orchestratore emergenza (ORC)**: Motore decisionale (Spring Boot + Camunda embedded). Recupera il piano, istanzia l'esecuzione ed esegue i task coordinando i vari componenti.
-* **Gestore WorkFlow (GWF)**: Custodisce nel DB Workflow le definizioni BPMN dei piani operativi e le loro associazioni.
-* **Binder (BND)**: Proxy che realizza il *late binding* interrogando il registro, ordinando le risorse e gestendo iterativamente i fallimenti di rete (policy di fallback).
-* **Gestore Servizi (GSV)**: Registro attivo dei servizi del territorio con meccanismo di heartbeat e discovery.
-* **Gestore operatori di sala (GOS)**: Backend-for-Frontend (BFF) per la UI. Gestisce il locking pessimistico sull'emergenza e l'audit delle operazioni manuali.
-* **UI Operatore di sala**: Client Web per la sala operativa, che visualizza l'avanzamento dei task e fornisce i form di intervento manuale.
+Il sistema adotta un'architettura a microservizi con orchestrazione centralizzata (pattern database-per-service). La repository contiene i seguenti moduli principali:
 
-## Architettura e Microservizi
-Il progetto adotta un'architettura a microservizi con orchestrazione centralizzata. La repository contiene i seguenti moduli principali:
-
-*   **`Orchestrator`**: Il nucleo decisionale basato su Spring Boot e Camunda BPMN 2.0. Gestisce l'esecuzione dei piani operativi in risposta alle emergenze.
-*   **`EmergencyManager`**: Frontiera della catena di orchestrazione. Consuma lo Stream eventi (via Kafka), deduplica le segnalazioni e gestisce la macchina a stati dell'emergenza.
-*   **`BinderService`**: Realizza il *late binding*. Risolve a runtime gli endpoint concreti dei servizi del territorio da ingaggiare applicando policy di fallback e circuit breaker.
-*   **`RegistryService`**: Registro dei servizi del territorio con pattern heartbeat. Espone API per la registrazione, l'aggiornamento e la discovery delle capability.
-*   **`ui-registry`**: Interfaccia Web per la sala operativa, che permette il monitoraggio in tempo reale, la visualizzazione dei workflow e l'ingaggio manuale delle risorse.
-*   **`GenericServiceStub`**: Stub (Node.js) utilizzato per simulare le API dei servizi esterni del territorio durante lo sviluppo e i test.
+* **`GatewayService`**: API Gateway che espone un punto di accesso unificato e instrada le richieste verso i microservizi di competenza.
+* **`AuthMicroService`**: Servizio responsabile dell'autenticazione e della validazione dei token JWT.
+* **`EmergencyService`** *(Gestore stato emergenze)*: Nodo di frontiera. Consuma lo Stream eventi da Kafka, deduplica le segnalazioni e gestisce la macchina a stati dell'emergenza.
+* **`OrchestratorService`** *(Orchestratore emergenza)*: Motore decisionale (Spring Boot + Camunda 8 embedded). Recupera il piano operativo, istanzia l'esecuzione e coordina i task.
+* **`BinderService`** *(Binder)*: Proxy che realizza il *late binding* interrogando il registro, ordinando le risorse candidate e gestendo iterativamente i fallimenti di rete (policy di fallback).
+* **`RegistryService`** *(Gestore Servizi)*: Registro attivo dei servizi del territorio con pattern heartbeat e discovery delle capability.
+* **`OperatorService`** *(Gestore operatori di sala)*: Backend-for-Frontend (BFF) per la UI. Gestisce le escalation manuali, l'audit delle operazioni e il locking pessimistico sull'emergenza.
+* **`MockService`**: Stub utilizzato per simulare le API dei servizi esterni del territorio durante lo sviluppo e l'integrazione.
+* **`UI`**: Interfaccia Web per la sala operativa, che permette il monitoraggio in tempo reale, la visualizzazione dei workflow e l'ingaggio manuale delle risorse.
+* **`Utility`**: Modulo contenente librerie, modelli dati e funzioni di utilità condivise trasversalmente dai microservizi.
 
 *(Nota: L'infrastruttura globale comprende ulteriori componenti logici come il Gestore Segnalazioni, l'Analizzatore Trend e il Modulo ML, impiegati nella fase di stream processing e rilevamento).*
 
