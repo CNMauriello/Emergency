@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8088/api/auth/register";
+const API_URL = process.env.API_URL || "http://localhost:8090/api/auth/register";
 
 const operatori = [
     {

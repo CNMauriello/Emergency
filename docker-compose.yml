@@ -1,0 +1,134 @@
+services:
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_NUM_PARTITIONS=3
+      - CLUSTER_ID=ciWo7IWazngRchmPESDPnd
+
+  mysql-db:
+    image: mysql:8.3.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./Utility/init_dbs.sql:/docker-entrypoint-initdb.d/init_dbs.sql
+
+  registry-service:
+    build:
+      context: .
+      dockerfile: RegistryService/Dockerfile
+    container_name: registry-service
+    env_file: .env
+    depends_on:
+      - mysql-db
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: AuthMicroService/Dockerfile
+    container_name: auth-service
+    env_file: .env
+    depends_on:
+      - mysql-db
+      - registry-service
+
+  gateway-service:
+    build:
+      context: .
+      dockerfile: GatewayService/Dockerfile
+    container_name: gateway-service
+    env_file: .env
+    ports:
+      - "8090:8090"
+    depends_on:
+      - registry-service
+
+  emergency-service:
+    build:
+      context: .
+      dockerfile: EmergencyService/Dockerfile
+    container_name: emergency-service
+    env_file: .env
+    depends_on:
+      - mysql-db
+      - registry-service
+      - kafka
+
+  operator-service:
+    build:
+      context: .
+      dockerfile: OperatorService/Dockerfile
+    container_name: operator-service
+    env_file: .env
+    depends_on:
+      - mysql-db
+      - registry-service
+
+  mock-service:
+    build:
+      context: .
+      dockerfile: MockService/Dockerfile
+    container_name: mock-service
+    env_file: .env
+    depends_on:
+      - registry-service
+
+  orchestrator-binder-camunda:
+    build:
+      context: .
+      dockerfile: Dockerfile.orchestrator-bundle
+    container_name: orchestrator-binder-camunda
+    env_file: .env
+    depends_on:
+      - mysql-db
+      - registry-service
+      - kafka
+
+  ui:
+    build:
+      context: ./UI
+      dockerfile: Dockerfile
+    container_name: emergency-ui
+    ports:
+      - "5173:80"
+
+  db-seeder:
+    image: node:18-bookworm-slim
+    container_name: db-seeder
+    volumes:
+      - ./Utility:/app
+    working_dir: /app
+    env_file: .env
+    environment:
+      - DB_EXPOSED_HOST=mysql-db
+      - DB_EXPOSED_PORT=3306
+      - API_URL=http://gateway-service:8090/api/auth/register
+      - MYSQL_OPTS=--skip-ssl
+    command: >
+      sh -c "
+        apt-get update && apt-get install -y default-mysql-client &&
+        echo 'Waiting for services to start (45s)...' &&
+        sleep 45 &&
+        chmod +x run_scripts.sh &&
+        ./run_scripts.sh || echo 'Seeder terminato (potrebbe aver ignorato duplicati)'
+      "
+    depends_on:
+      - mysql-db
+      - gateway-service
+      - auth-service

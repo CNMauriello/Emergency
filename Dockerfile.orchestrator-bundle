@@ -1,0 +1,30 @@
+FROM maven:3.9.6-eclipse-temurin-21 AS build
+WORKDIR /app
+COPY . .
+# Build Orchestrator and Binder
+RUN mvn clean package -pl OrchestratorService -am -DskipTests
+RUN mvn clean package -pl BinderService -am -DskipTests
+
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+# Install bash and tar
+RUN apk add --no-cache bash curl tar
+
+# Download and extract Zeebe (Camunda 8 Engine)
+RUN curl -sL https://github.com/camunda/zeebe/releases/download/8.5.0/camunda-zeebe-8.5.0.tar.gz -o zeebe.tar.gz && \
+    tar xzf zeebe.tar.gz && \
+    rm zeebe.tar.gz && \
+    mv camunda-zeebe-8.5.0 zeebe
+
+# Copy microservices JARs
+COPY --from=build /app/OrchestratorService/target/*.jar orchestrator.jar
+COPY --from=build /app/BinderService/target/*.jar binder.jar
+
+# Copy start script
+COPY start-bundle.sh .
+RUN chmod +x start-bundle.sh
+
+EXPOSE 8083 8082 26500
+
+ENTRYPOINT ["./start-bundle.sh"]
