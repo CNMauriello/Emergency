@@ -6,13 +6,12 @@ DB_PASS="Emergency123456@" # Cambia se necessario
 DB_HOST="localhost"
 DB_PORT="3306"
 
-# Nome del database (tutto risiede nello schema registry)
-DB_NAME="registry"
+# I database sono ora specificati nei singoli script SQL
 
 echo "============================================="
 echo " 1. Esecuzione di populate_all.sql"
 echo "============================================="
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < populate_all.sql
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" < populate_all.sql
 if [ $? -ne 0 ]; then
     echo "Errore nell'esecuzione di populate_all.sql"
     exit 1
@@ -33,7 +32,7 @@ echo ""
 echo "============================================="
 echo " 3. Esecuzione di update_roles.sql"
 echo "============================================="
-mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" < update_roles.sql
+mysql -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" -p"$DB_PASS" < update_roles.sql
 if [ $? -ne 0 ]; then
     echo "Errore nell'esecuzione di update_roles.sql"
     exit 1

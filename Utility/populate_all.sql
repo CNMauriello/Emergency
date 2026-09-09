@@ -1,6 +1,8 @@
 -- ============================================================
 -- OPERATOR SERVICE
 -- ============================================================
+USE operator_db;
+
 -- Script per l'inserimento iniziale di 3 Operatori di Sala
 -- Assicurarsi che gli auth_user_id (1, 2, 3) corrispondano agli id reali presenti nel database dell'AuthMicroService.
 
@@ -13,6 +15,8 @@ INSERT INTO operatori (auth_user_id, nome, cognome, ruolo, stato) VALUES
 -- ============================================================
 -- EMERGENCY SERVICE
 -- ============================================================
+USE emergency_db;
+
 INSERT INTO emergenze (event_id, event_type, severity, latitude, longitude, timestamp, status)
 VALUES (
     'evt-fire-001', 
@@ -28,7 +32,7 @@ VALUES (
 -- ============================================================
 -- REGISTRY SERVICE
 -- ============================================================
-USE registry;
+USE registry_db;
 
 -- ============================================================
 -- RESET DATABASE
@@ -649,6 +653,7 @@ FROM emergency_service_capability;
 -- ============================================================
 -- ORCHESTRATOR SERVICE
 -- ============================================================
+USE orchestrator_db;
 
 CREATE TABLE IF NOT EXISTS workflows (
     id BIGINT NOT NULL AUTO_INCREMENT,

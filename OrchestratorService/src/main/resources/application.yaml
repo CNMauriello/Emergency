@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/registry
+    url: jdbc:mysql://localhost:3306/orchestrator_db?createDatabaseIfNotExist=true
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: emergency
     password: Emergency123456@
