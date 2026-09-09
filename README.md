@@ -38,6 +38,46 @@ Il progetto adotta un'architettura a microservizi con orchestrazione centralizza
 * **Connettori**: HTTP / REST (application/json) per le comunicazioni sincrone.
 * **Frontend Web / Mobile**: Node.js / HTML / CSS / Tailwind (Dashboard Operatori)
 
+## Configurazione
+Per configurare correttamente l'ambiente, è necessario creare un file `.env` nella root del progetto. Di seguito le principali variabili di configurazione supportate:
+
+### Database (MySQL)
+* `DB_HOST`: Host del database MySQL (default: `localhost`)
+* `DB_PORT`: Porta di connessione (default: `3306`)
+* `DB_USERNAME`: Username del database
+* `DB_PASSWORD`: Password dell'utente
+
+### Sicurezza (JWT)
+* `JWT_SECRET`: Chiave segreta utilizzata per firmare e verificare i token JWT
+* `JWT_EXPIRATION`: Durata di validità del token in millisecondi (es. `3600000` per 1 ora)
+
+### API Gateway & CORS
+* `GATEWAY_URL`: URL dell'API Gateway
+* `CORS_ALLOWED_ORIGINS`: Origini consentite per le richieste dal frontend (es. `http://localhost:5173`)
+
+### Microservizi
+Indirizzi base per la comunicazione interna tra i microservizi:
+* `REGISTRY_SERVICE_URL`
+* `BINDER_SERVICE_URL`
+* `ORCHESTRATOR_SERVICE_URL`
+* `EMERGENCY_SERVICE_URL`
+* `OPERATOR_SERVICE_URL`
+* `AUTH_INTERNAL_URL`
+* `MOCK_SERVICE_URL`
+
+### Indirizzi specifici e Webhooks
+* `BINDER_CANDIDATES_URL`: Endpoint per il calcolo dei candidati
+* `OPERATOR_ESCALATIONS_URL`: Endpoint per gestire l'escalation manuale
+* `ESCALATION_WEBHOOK_URL`: Webhook per notificare le escalation
+
+### Camunda 8 (Orchestrazione)
+* `CAMUNDA_GRPC_ADDRESS`: Indirizzo gRPC di Camunda (default: `http://localhost:26500`)
+* `CAMUNDA_REST_ADDRESS`: Indirizzo REST API di Camunda (default: `http://localhost:8080`)
+
+### Kafka e Storage
+* `KAFKA_BOOTSTRAP_SERVERS`: Indirizzo del broker Kafka (default: `localhost:9092`)
+* `WORKFLOW_STORAGE_PATH`: Percorso di archiviazione locale per le definizioni BPMN (es. `src/main/resources/`)
+
 ## Team
 Progetto realizzato per la **CINI Smart City University Challenge 2026** (co-located with I-Cities 2026).
 
