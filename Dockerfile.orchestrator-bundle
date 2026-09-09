@@ -28,6 +28,6 @@ COPY --from=build /app/OrchestratorService/src/main/resources/*.bpmn /app/bpmns/
 COPY start-bundle.sh .
 RUN chmod +x start-bundle.sh
 
-EXPOSE 8083 8082 26500
+EXPOSE 8083 8082 26500 8080
 
 ENTRYPOINT ["./start-bundle.sh"]

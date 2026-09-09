@@ -110,6 +110,8 @@ services:
       dockerfile: Dockerfile.orchestrator-bundle
     container_name: orchestrator-binder-camunda
     env_file: .env
+    ports:
+      - "8080:8080"
     depends_on:
       mysql-db:
         condition: service_healthy
@@ -167,3 +169,16 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+
+  operate:
+    image: camunda/operate:8.5.0
+    container_name: operate
+    ports:
+      - "8079:8080"
+    environment:
+      - CAMUNDA_OPERATE_ZEEBE_GATEWAYADDRESS=orchestrator-binder-camunda:26500
+      - CAMUNDA_OPERATE_ELASTICSEARCH_URL=http://elasticsearch:9200
+      - CAMUNDA_OPERATE_ZEEBEELASTICSEARCH_URL=http://elasticsearch:9200
+    depends_on:
+      - orchestrator-binder-camunda
+      - elasticsearch
