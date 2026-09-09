@@ -21,6 +21,9 @@ RUN curl -sL https://github.com/camunda/zeebe/releases/download/8.8.5/camunda-ze
 COPY --from=build /app/OrchestratorService/target/*.jar orchestrator.jar
 COPY --from=build /app/BinderService/target/*.jar binder.jar
 
+# Copy BPMN files
+COPY --from=build /app/OrchestratorService/src/main/resources/*.bpmn /app/bpmns/
+
 # Copy start script
 COPY start-bundle.sh .
 RUN chmod +x start-bundle.sh
