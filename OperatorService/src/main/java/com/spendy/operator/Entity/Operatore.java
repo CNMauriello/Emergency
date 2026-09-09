@@ -3,7 +3,7 @@ package com.spendy.operator.Entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "operatori")
+@Table(name = "operators")
 public class Operatore {
 
     @Id
