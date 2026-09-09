@@ -1,9 +1,11 @@
 spring:
+  config:
+    import: optional:file:.env[.properties],optional:file:../.env[.properties]
   datasource:
-    url: jdbc:mysql://localhost:3306/orchestrator_db?createDatabaseIfNotExist=true
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/orchestrator_db?createDatabaseIfNotExist=true
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: emergency
-    password: Emergency123456@
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,8 +20,8 @@ server:
 camunda:
   client:
     mode: self-managed
-    grpc-address: http://localhost:26500
-    rest-address: http://localhost:8080
+    grpc-address: ${CAMUNDA_GRPC_ADDRESS}
+    rest-address: ${CAMUNDA_REST_ADDRESS}
 
 logging:
   level:
@@ -35,8 +37,8 @@ workflow:
 
 binder:
   candidates:
-    url: http://localhost:8082/api/binder/candidates
+    url: ${BINDER_CANDIDATES_URL}
 
 operator:
   escalations:
-    url: http://localhost:8087/api/operators/escalations
+    url: ${OPERATOR_ESCALATIONS_URL}
