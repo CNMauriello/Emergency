@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert, Play} from 'lucide-react';
+import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert, Play, Terminal, Maximize} from 'lucide-react';
 import {API_BASE_URL, fetchWithAuth} from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 import EscalationResolutionModal from './EscalationResolutionModal.jsx';
@@ -38,6 +38,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
     const [fetchedAddress, setFetchedAddress] = useState('');
     const [playTrigger, setPlayTrigger] = useState(0);
+    const [recenterTrigger, setRecenterTrigger] = useState(0);
 
     useEffect(() => {
         if (!emergencyId) return;
@@ -205,16 +206,16 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
     return (
         <div className="p-8 bg-transparent min-h-screen">
-            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
-                <ArrowLeft className="w-4 h-4 mr-1"/> Torna alla lista
+            <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold tracking-wide transition-colors group">
+                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform"/> Torna alla lista
             </button>
 
             <div className="flex items-center space-x-4 mb-8">
-                <h1 className="text-[28px] font-bold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</h1>
-                <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded ${emergency.severity === 'CRITICA' || emergency.severity === 'CRITICAL' ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]'}`}>
+                <h1 className="text-[28px] font-black text-[#0B1B32] tracking-wide">{emergency.eventType.replace('_', ' ')}</h1>
+                <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded shadow-sm ${emergency.severity === 'CRITICA' || emergency.severity === 'CRITICAL' ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]'}`}>
                     {emergency.severity}
                 </span>
-                <span className={`px-2.5 py-1 text-[11px] font-bold rounded ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white'}`}>
+                <span className={`px-2.5 py-1 text-[11px] font-bold rounded shadow-sm ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white'}`}>
                     {emergency.status}
                 </span>
             </div>
@@ -223,39 +224,41 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                 {/* TOP SECTION: Dettagli Operativi e Mappa */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Card Dettagli Operativi */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2 flex flex-col">
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
-                            <h2 className="text-lg font-bold text-[#0B1B32] flex items-center">
-                                <i className="fas fa-layer-group text-gray-400 mr-2 text-[15px]"></i> Dettagli Operativi
+                    <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-200/60 lg:col-span-2 flex flex-col relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[#0088cc]"></div>
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5 bg-gradient-to-r from-white to-gray-50/50">
+                            <h2 className="text-lg font-bold text-[#0B1B32] flex items-center tracking-wide">
+                                <i className="fas fa-layer-group text-[#0088cc] mr-3 text-[16px]"></i> Dettagli Operativi
                             </h2>
-                            <span className="bg-gray-100 text-gray-500 px-2 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
+                            <span className="bg-gray-50 border border-gray-200 text-gray-500 px-2.5 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-[13px] items-start flex-grow">
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">TIPOLOGIA</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">TIPOLOGIA</p>
                                 <p className="font-semibold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</p>
                             </div>
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">ORARIO RILEVAMENTO</p>
-                                <p className="font-mono bg-gray-100 px-1.5 py-0.5 rounded text-gray-700 inline-block text-[12px]">{emergency.timestamp}</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">ORARIO RILEVAMENTO</p>
+                                <p className="font-mono bg-gray-50 border border-gray-100 px-2 py-1 rounded text-[#0088cc] font-bold inline-block text-[12px] shadow-sm">{emergency.timestamp}</p>
                             </div>
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">COORDINATE (LAT/LONG)</p>
-                                <p className="text-gray-700 font-mono text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">COORDINATE (LAT/LONG)</p>
+                                <p className="text-slate-600 font-mono font-bold text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
                             </div>
                             <div className="col-span-2 lg:col-span-3">
-                                <p className="text-gray-400 text-[10px] font-bold tracking-wider mb-1 uppercase">INDIRIZZO FISICO</p>
-                                <p className="text-[#0B1B32] text-[14px]">{emergency.address || fetchedAddress || 'Recupero in corso...'}</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">INDIRIZZO FISICO</p>
+                                <p className="text-[#0B1B32] font-medium text-[14px]">{emergency.address || fetchedAddress || 'Recupero in corso...'}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Card Mappa */}
-                    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 h-[300px] lg:h-auto lg:col-span-1 overflow-hidden relative">
+                    <div className="bg-white p-1.5 rounded-xl shadow-lg border border-gray-200/60 h-[300px] lg:h-auto lg:col-span-1 overflow-hidden relative">
+                        <div className="absolute inset-0 border-2 border-[#0088cc]/10 rounded-xl pointer-events-none z-[401]"></div>
                         <MapContainer 
                             center={[emergency.latitude, emergency.longitude]} 
                             zoom={15} 
-                            style={{ height: '100%', width: '100%', borderRadius: '0.375rem' }}
+                            style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
                             zoomControl={false}
                         >
                             <TileLayer
@@ -264,37 +267,38 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                             />
                             <Marker position={[emergency.latitude, emergency.longitude]} icon={customMarkerIcon}>
                                 <Popup>
-                                    <div className="text-center">
-                                        <strong>{emergency.eventType.replace('_', ' ')}</strong><br/>
-                                        {emergency.severity}
+                                    <div className="text-center p-1">
+                                        <strong className="text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</strong><br/>
+                                        <span className="text-red-600 font-bold text-xs">{emergency.severity}</span>
                                     </div>
                                 </Popup>
                             </Marker>
                         </MapContainer>
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded shadow-sm z-[400] text-xs font-bold text-gray-700 border border-gray-200 flex items-center">
-                            <MapPin className="w-3.5 h-3.5 mr-1 text-red-500" /> Control Center View
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md shadow-md z-[400] text-xs font-bold text-gray-700 border border-gray-200/50 flex items-center">
+                            <MapPin className="w-3.5 h-3.5 mr-1.5 text-red-500 animate-pulse" /> SATELLITE FEED
                         </div>
                     </div>
                 </div>
 
                 {/* MIDDLE SECTION: Tickets di Escalation */}
                 {emergencyTickets.length > 0 && (
-                    <div className="bg-red-50 p-6 rounded-lg shadow-sm border border-red-200 w-full">
-                        <div className="flex items-center justify-between border-b border-red-200 pb-4 mb-5">
+                    <div className="bg-red-50 p-6 rounded-xl shadow-lg border border-red-200 w-full hover:shadow-xl transition-shadow relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
+                        <div className="flex items-center justify-between border-b border-red-200 pb-4 mb-5 bg-gradient-to-r from-red-50 to-white/50">
                             <h2 className="text-lg font-bold text-red-800 flex items-center">
-                                <AlertTriangle className="w-5 h-5 mr-2 text-red-600" /> Ticket di Escalation Aperti (Richiesta Intervento)
+                                <AlertTriangle className="w-5 h-5 mr-2 text-red-600 animate-pulse" /> Ticket di Escalation Aperti (Richiesta Intervento)
                             </h2>
-                            <span className="bg-red-200 text-red-800 px-2 py-1 text-[11px] font-bold rounded uppercase">
+                            <span className="bg-red-100 text-red-800 border border-red-200 px-2.5 py-1 text-[11px] font-bold rounded uppercase shadow-sm">
                                 {emergencyTickets.length} Attivi
                             </span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {emergencyTickets.map((ticket, idx) => (
-                                <div key={idx} className="bg-white p-4 rounded border border-red-100 shadow-sm border-l-4 border-l-red-500 flex flex-col justify-between">
+                                <div key={idx} className="bg-white p-4 rounded-xl border border-red-100 shadow-sm border-l-4 border-l-red-500 flex flex-col justify-between hover:shadow-md transition-shadow">
                                     <div>
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-bold text-gray-800">{ticket.taskName || ticket.name || 'Intervento Richiesto'}</h3>
-                                            <span className="text-[10px] font-mono bg-red-100 text-red-800 px-1.5 py-0.5 rounded">
+                                            <span className="text-[10px] font-mono bg-red-50 border border-red-100 text-red-800 px-1.5 py-0.5 rounded font-bold shadow-sm">
                                                 {ticket.taskId || ticket.id || ticket.ticketId}
                                             </span>
                                         </div>
@@ -310,10 +314,10 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                             onClick={() => setResolvingTicket(ticket)}
                                             disabled={isUser}
                                             title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
-                                            className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors ${
+                                            className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${
                                                 isUser 
                                                 ? 'bg-gray-400 cursor-not-allowed' 
-                                                : 'bg-red-600 hover:bg-red-700'
+                                                : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
                                             }`}
                                         >
                                             <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
@@ -326,22 +330,32 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                 )}
 
                 {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
-                <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 w-full flex flex-col h-full min-h-[600px]">
-                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
-                        <h2 className="text-xl font-bold text-[#0B1B32] flex items-center">
-                            <i className="fas fa-project-diagram text-gray-400 mr-3 text-[18px]"></i> Stato Esecuzione Workflow
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200/60 w-full flex flex-col h-full min-h-[600px] relative overflow-hidden hover:shadow-xl transition-shadow">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#0088cc]"></div>
+                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5 bg-gradient-to-r from-white to-gray-50/50">
+                        <h2 className="text-xl font-bold text-[#0B1B32] flex items-center tracking-wide">
+                            <i className="fas fa-project-diagram text-[#0088cc] mr-3 text-[18px]"></i> Stato Esecuzione Workflow
                         </h2>
                         <div className="flex items-center space-x-3">
                             {visualizationData && (
-                                <button 
-                                    onClick={() => setPlayTrigger(prev => prev + 1)}
-                                    className="w-[150px] justify-center bg-[#e3f2fd] hover:bg-[#bbdefb] text-[#1976d2] border border-[#bbdefb] px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-colors"
-                                    title="Riproduci animazione percorso BPMN"
-                                >
-                                    <Play className="w-3.5 h-3.5 mr-1.5" /> Play
-                                </button>
+                                <>
+                                    <button 
+                                        onClick={() => setRecenterTrigger(prev => prev + 1)}
+                                        className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
+                                        title="Centra diagramma BPMN"
+                                    >
+                                        <Maximize className="w-3.5 h-3.5 mr-1.5" /> Centra
+                                    </button>
+                                    <button 
+                                        onClick={() => setPlayTrigger(prev => prev + 1)}
+                                        className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
+                                        title="Riproduci animazione percorso BPMN"
+                                    >
+                                        <Play className="w-3.5 h-3.5 mr-1.5" /> Play
+                                    </button>
+                                </>
                             )}
-                            <span className="w-[150px] justify-center flex items-center bg-[#e3f2fd] text-[#1976d2] px-3 py-1.5 text-[11px] font-bold rounded border border-transparent">
+                            <span className="min-w-[150px] whitespace-nowrap justify-center flex items-center bg-[#e0f2fe] text-[#0284c7] px-3 py-1.5 text-[11px] font-bold rounded border border-[#bae6fd] shadow-sm">
                                 {visualizationData?.state === 'ACTIVE' ? 'Processo BPMN Attivo' : (visualizationData?.state || 'Attendere...')}
                             </span>
                         </div>
@@ -367,6 +381,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                     calledProcessInstances={visualizationData.calledProcessInstances}
                                     onChildProcessClick={(childKey) => setViewStack([...viewStack, childKey])}
                                     playTrigger={playTrigger}
+                                    recenterTrigger={recenterTrigger}
                                 />
                             </>
                         ) : (
@@ -381,6 +396,31 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                 )}
                             </div>
                         )}
+                    </div>
+
+                    <div className="mt-8 border-t border-gray-100 pt-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-[15px] font-bold text-[#0B1B32] flex items-center">
+                                <Terminal className="w-4 h-4 mr-2 text-gray-500" /> Log Servizi BPMN
+                            </h3>
+                        </div>
+
+                        <div className="bg-black rounded-lg border border-gray-800 p-4 font-mono text-xs text-green-400 overflow-y-auto flex flex-col max-h-[250px] shadow-inner">
+                            <div className="flex items-center text-gray-500 mb-3 border-b border-gray-800 pb-2">
+                                <Terminal className="w-4 h-4 mr-2" /> SYSTEM_LOG
+                            </div>
+                            <div className="space-y-1.5">
+                                {emergency.history && emergency.history.map((step, index) => (
+                                    <div key={index} className="flex items-start">
+                                        <span className="text-gray-500 mr-2">[{new Date().toLocaleTimeString()}]</span> 
+                                        <span>Transizione: {step} - Eseguita con successo</span>
+                                    </div>
+                                ))}
+                                {(!emergency.history || emergency.history.length === 0) && (
+                                    <div className="text-gray-500 italic">Nessun log disponibile.</div>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -580,7 +620,6 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     <p className="text-sm text-gray-500">Eseguita con successo</p>
                 </div>
             ))}
-
             {emergency.status === 'IN_PROGRESS' && !isMockDispatched && (
                 <div className="relative">
                     <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">

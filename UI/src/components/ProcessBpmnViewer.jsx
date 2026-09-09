@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 
-const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [], calledProcessInstances = {}, onChildProcessClick, playTrigger = 0, onAnimationComplete }) => {
+const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [], calledProcessInstances = {}, onChildProcessClick, playTrigger = 0, onAnimationComplete, recenterTrigger = 0 }) => {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
     const loadedXmlRef = useRef(null);
@@ -92,6 +92,19 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [bpmnXml]);
+
+    // Hande Recenter trigger
+    useEffect(() => {
+        if (!viewerRef.current || !recenterTrigger) return;
+        try {
+            const canvas = viewerRef.current.get('canvas');
+            canvas.zoom('fit-viewport', 'auto');
+            const currentZoom = canvas.zoom();
+            canvas.zoom(Math.min(currentZoom, 1.2) * 0.9, 'auto');
+        } catch (e) {
+            console.error("Error recentering BPMN", e);
+        }
+    }, [recenterTrigger]);
 
     const removeAllMarkers = () => {
         if (!viewerRef.current) return;

@@ -255,24 +255,24 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                     </div>
 
                     {/* RIGHT PANEL - MAIN ACTION AREA */}
-                    <div className="w-2/3 p-8 flex flex-col relative overflow-y-auto">
+                    <div className="w-2/3 p-6 flex flex-col relative overflow-hidden">
                         
                         {/* LEVEL 1 UI */}
                         {currentLevel === 1 && (
                             <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="text-center mb-10">
+                                <div className="text-center mb-6">
                                     <h2 className="text-3xl font-light mb-2">Broadcast Telematico</h2>
                                     <p className="text-gray-400 text-sm">Chiamata parallela a tutti i servizi del territorio registrati.</p>
                                 </div>
 
-                                <div className="grid grid-cols-3 gap-6 mb-12 px-8">
+                                <div className="grid grid-cols-3 gap-4 mb-6 px-4">
                                     {l1Nodes.map((node) => {
                                         const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
                                         const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
                                         
                                         return (
-                                            <div key={node.id} className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all duration-500 ${node.status === 'pending' ? 'border-gray-700 bg-gray-800/50' : (node.status === 'success' ? 'border-green-500/50 bg-green-900/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]' : 'border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]')}`}>
-                                                <Server className={`w-8 h-8 mb-3 transition-colors ${node.status === 'pending' ? 'text-gray-500' : (node.status === 'success' ? 'text-green-400' : 'text-red-400')}`} />
+                                            <div key={node.id} className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-500 ${node.status === 'pending' ? 'border-gray-700 bg-gray-800/50' : (node.status === 'success' ? 'border-green-500/50 bg-green-900/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]' : 'border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]')}`}>
+                                                <Server className={`w-8 h-8 mb-2 transition-colors ${node.status === 'pending' ? 'text-gray-500' : (node.status === 'success' ? 'text-green-400' : 'text-red-400')}`} />
                                                 <div className="text-xs font-mono text-gray-400 truncate max-w-full px-2" title={node.url}>{shortName}</div>
                                                 <div className={`text-[10px] mt-2 px-2 py-1 rounded transition-colors ${node.status === 'pending' ? 'bg-gray-800 text-gray-500' : (node.status === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}`}>
                                                     {node.status === 'pending' ? (levelStatus === 'running' ? 'PINGING...' : 'IDLE') : (node.status === 'success' ? 'ACCETTATO' : `FALLITO/${node.errorCode || 'ERR'}`)}
@@ -282,7 +282,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                     })}
                                 </div>
 
-                                <div className="flex justify-center mt-auto">
+                                <div className="flex justify-center mt-4">
                                     {levelStatus === 'idle' && (
                                         <button onClick={startLevel1} className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold tracking-wide transition-all overflow-hidden flex items-center">
                                             <div className="absolute inset-0 w-full h-full bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
@@ -312,9 +312,9 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                         {/* LEVEL 2 UI */}
                         {currentLevel === 2 && (
                             <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="text-center mb-10">
-                                    <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-4">
-                                        <Radio className="w-12 h-12 text-orange-500" />
+                                <div className="text-center mb-6">
+                                    <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
+                                        <Radio className="w-10 h-10 text-orange-500" />
                                     </div>
                                     <h2 className="text-3xl font-light mb-2 text-orange-50">Ingaggio Fuori Banda</h2>
                                     <p className="text-orange-200/70 text-sm max-w-md mx-auto">
@@ -322,13 +322,13 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                     </p>
                                 </div>
 
-                                <div className="bg-gray-800/50 p-8 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
+                                <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
                                     <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
                                     <input 
                                         type="text" 
                                         value={l2AuthCode}
                                         onChange={(e) => setL2AuthCode(e.target.value)}
-                                        className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-6"
+                                        className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
                                         placeholder="es. AUTH-TETRA-77X"
                                     />
 
@@ -350,9 +350,9 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                 {/* Red Alert Background Glow */}
                                 <div className="absolute inset-0 bg-red-900/10 blur-3xl pointer-events-none rounded-full"></div>
                                 
-                                <div className="text-center mb-10 relative z-10">
-                                    <div className="inline-block p-4 bg-red-500/20 rounded-full mb-4 animate-pulse border border-red-500/30">
-                                        <ShieldAlert className="w-16 h-16 text-red-500" />
+                                <div className="text-center mb-6 relative z-10">
+                                    <div className="inline-block p-4 bg-red-500/20 rounded-full mb-3 animate-pulse border border-red-500/30">
+                                        <ShieldAlert className="w-12 h-12 text-red-500" />
                                     </div>
                                     <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">ESCALATION ESTREMA</h2>
                                     <p className="text-red-200/80 text-sm max-w-lg mx-auto leading-relaxed">
@@ -360,9 +360,9 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                     </p>
                                 </div>
 
-                                <div className="bg-red-950/40 p-8 rounded-2xl border border-red-900/50 w-full max-w-md mx-auto relative z-10 backdrop-blur-sm shadow-2xl">
-                                    <div className="flex items-center justify-center p-4 bg-red-900/30 border border-red-500/30 rounded-lg mb-8">
-                                        <Shield className="w-6 h-6 text-red-400 mr-3" />
+                                <div className="bg-red-950/40 p-6 rounded-2xl border border-red-900/50 w-full max-w-md mx-auto relative z-10 backdrop-blur-sm shadow-2xl">
+                                    <div className="flex items-center justify-center p-3 bg-red-900/30 border border-red-500/30 rounded-lg mb-6">
+                                        <Shield className="w-5 h-5 text-red-400 mr-3" />
                                         <span className="text-red-200 font-mono text-sm tracking-widest">CAP_REQ: MILITARY_INTERVENTION</span>
                                     </div>
 

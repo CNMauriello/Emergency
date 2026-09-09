@@ -216,16 +216,16 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                                         <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-3">WORKFLOW STATUS</p>
                                         <div className="flex items-center justify-between relative px-2">
                                             {/* Linea di base grigia */}
-                                            <div className="absolute left-4 right-4 top-1/2 h-[2px] bg-gray-200 border-t border-b border-dashed border-gray-300 -z-10 transform -translate-y-1/2"></div>
+                                            <div className="absolute left-4 right-4 top-1/2 h-[2px] bg-gray-200 border-t border-b border-dashed border-gray-300 z-0 transform -translate-y-1/2"></div>
 
                                             {/* Linea di progresso blu */}
                                             <div
-                                                className="absolute left-4 top-1/2 h-[2px] bg-[#1976d2] -z-10 transform -translate-y-1/2 transition-all duration-500"
+                                                className="absolute left-4 top-1/2 h-[2px] bg-[#1976d2] z-0 transform -translate-y-1/2 transition-all duration-500"
                                                 style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 2rem)' }}
                                             ></div>
 
                                             {/* Step 1 */}
-                                            <div className="flex flex-col items-center">
+                                            <div className="flex flex-col items-center relative z-10">
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep > 1 ? 'bg-[#1976d2] text-white' : currentStep === 1 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
                                                     {currentStep > 1 ? <CheckCircle2 className="w-3.5 h-3.5" /> : currentStep === 1 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
@@ -233,7 +233,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                                             </div>
 
                                             {/* Step 2 */}
-                                            <div className="flex flex-col items-center">
+                                            <div className="flex flex-col items-center relative z-10">
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep > 2 ? 'bg-[#1976d2] text-white border-0' : currentStep === 2 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
                                                     {currentStep > 2 ? <CheckCircle2 className="w-3.5 h-3.5" /> : currentStep === 2 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
@@ -241,7 +241,7 @@ const ActiveEmergencies = ({ onViewDetail }) => {
                                             </div>
 
                                             {/* Step 3 */}
-                                            <div className="flex flex-col items-center">
+                                            <div className="flex flex-col items-center relative z-10">
                                                 <div className={`w-5 h-5 rounded-full flex items-center justify-center ${currentStep === 3 ? 'bg-white border-[3px] border-[#1976d2]' : 'bg-white border-2 border-gray-300'}`}>
                                                     {currentStep === 3 && <div className="w-1.5 h-1.5 rounded-full bg-[#1976d2]"></div>}
                                                 </div>
