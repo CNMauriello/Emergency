@@ -5,17 +5,17 @@ COPY . .
 RUN mvn clean package -pl OrchestratorService -am -DskipTests
 RUN mvn clean package -pl BinderService -am -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
 
-# Install bash and tar
-RUN apk add --no-cache bash curl tar
+# Install bash, curl and tar
+RUN apt-get update && apt-get install -y bash curl tar && rm -rf /var/lib/apt/lists/*
 
 # Download and extract Zeebe (Camunda 8 Engine)
-RUN curl -sL https://github.com/camunda/zeebe/releases/download/8.5.0/camunda-zeebe-8.5.0.tar.gz -o zeebe.tar.gz && \
+RUN curl -sL https://github.com/camunda/zeebe/releases/download/8.8.5/camunda-zeebe-8.8.5.tar.gz -o zeebe.tar.gz && \
     tar xzf zeebe.tar.gz && \
     rm zeebe.tar.gz && \
-    mv camunda-zeebe-8.5.0 zeebe
+    mv camunda-zeebe-8.8.5 zeebe
 
 # Copy microservices JARs
 COPY --from=build /app/OrchestratorService/target/*.jar orchestrator.jar
