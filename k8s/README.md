@@ -91,23 +91,36 @@ kubectl apply -f k8s/applications/db-seeder/
 ```
 Questo creerà un Job. Verifica il log del Job per assicurarti che il database sia stato popolato correttamente.
 
-## 6. Accesso all'Applicazione
+## 6. Accesso all'Applicazione (Architettura Ingress)
 
-Puoi utilizzare port-forwarding per accedere all'applicazione in locale, simulando un LoadBalancer o un Ingress:
+Tutti i microservizi (inclusi Gateway e UI) sono configurati come `ClusterIP` e non esposti direttamente all'esterno tramite NodePort o LoadBalancer. 
 
-**Interfaccia UI (Gateway):**
+L'accesso avviene esclusivamente tramite un Ingress Controller (es. Nginx). L'Ingress instrada il traffico nel seguente modo:
+- **Frontend (UI)**: Accessibile alla root `/` (inoltrato a `emergency-ui:5173`)
+- **Backend API (Gateway)**: Accessibile tramite il prefisso `/api` (inoltrato a `gateway-service:8090`)
+
+Per esporre l'applicazione, applica l'Ingress:
+
 ```bash
-kubectl port-forward svc/emergency-ui 5173:80 -n assd-orchestration
+kubectl apply -f k8s/ingress/ingress.yaml
 ```
-Accessibile all'indirizzo: `http://localhost:5173`
+
+**Verifica dell'Ingress:**
+```bash
+kubectl get ingress -n assd-orchestration
+```
+
+Una volta assegnato un indirizzo (es. l'IP del nodo Rancher), potrai accedere dal browser a:
+`http://<IP_DEL_NODO>/`
+
+*Nota*: Il frontend è stato configurato per utilizzare URL relativi, pertanto le chiamate alle API utilizzeranno in automatico lo stesso origin passando per `/api/...`. Kafka condiviso (su `kafka-shared`) e Camunda non subiscono modifiche o esposizioni.
 
 **Camunda Operate / Tasklist / API:**
+Camunda rimane interno al cluster. Per accedervi per finalità di debug/amministrazione usa il port-forward:
 ```bash
 kubectl port-forward svc/camunda 8080:8080 -n assd-orchestration
 ```
 Accessibile all'indirizzo: `http://localhost:8080` (Opera su `http://localhost:8080/operate`)
-
-In seguito, puoi creare un manifest **Ingress** su Rancher per esporre questi servizi con nomi a dominio veri.
 
 ## 7. Verifica e Troubleshooting
 
