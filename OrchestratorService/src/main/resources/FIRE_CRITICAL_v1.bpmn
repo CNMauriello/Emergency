@@ -90,24 +90,15 @@ and incident_context.has_injured = false</bpmn:conditionExpression>
     <bpmn:sequenceFlow id="Flow_00hpd0c" sourceRef="Activity_Fire_Handling_Providers" targetRef="Gateway_1n38nz2" />
     <bpmn:sequenceFlow id="Flow_1eeeug8" sourceRef="Activity_Traffic_Delimitation" targetRef="Gateway_1n38nz2" />
     <bpmn:sequenceFlow id="Flow_055sexm" sourceRef="Gateway_1n38nz2" targetRef="Gateway_Emergency_Context" />
-    <bpmn:serviceTask id="check_evacuation" name="Check If People Fully Evacuated" zeebe:modelerTemplate="io.camunda.connectors.HttpJson.v2" zeebe:modelerTemplateVersion="13" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjAzMzUgOC45OTk5N0MxNy4wMzM1IDEzLjQ0NzUgMTMuNDI4MSAxNy4wNTI5IDguOTgwNjUgMTcuMDUyOUM0LjUzMzE2IDE3LjA1MjkgMC45Mjc3NjUgMTMuNDQ3NSAwLjkyNzc2NSA4Ljk5OTk3QzAuOTI3NzY1IDQuNTUyNDggNC41MzMxNiAwLjk0NzA4MyA4Ljk4MDY1IDAuOTQ3MDgzQzEzLjQyODEgMC45NDcwODMgMTcuMDMzNSA0LjU1MjQ4IDE3LjAzMzUgOC45OTk5N1oiIGZpbGw9IiM1MDU1NjIiLz4KPHBhdGggZD0iTTQuOTMxMjYgMTQuMTU3MUw2Ljc4MTA2IDMuNzE0NzFIMTAuMTM3NUMxMS4xOTE3IDMuNzE0NzEgMTEuOTgyNCAzLjk4MzIzIDEyLjUwOTUgNC41MjAyN0MxMy4wNDY1IDUuMDQ3MzYgMTMuMzE1IDUuNzMzNTggMTMuMzE1IDYuNTc4OTJDMTMuMzE1IDcuNDQ0MTQgMTMuMDcxNCA4LjE1NTIyIDEyLjU4NDEgOC43MTIxNUMxMi4xMDY3IDkuMjU5MTMgMTEuNDU1MyA5LjYzNzA1IDEwLjYyOTggOS44NDU5TDEyLjA2MTkgMTQuMTU3MUgxMC4zMzE1TDkuMDMzNjQgMTAuMDI0OUg3LjI0MzUxTDYuNTEyNTQgMTQuMTU3MUg0LjkzMTI2Wk03LjQ5NzExIDguNTkyODFIOS4yNDI0OEM5Ljk5ODMyIDguNTkyODEgMTAuNTkwMSA4LjQyMzc0IDExLjAxNzcgOC4wODU2MUMxMS40NTUzIDcuNzM3NTMgMTEuNjc0MSA3LjI2NTEzIDExLjY3NDEgNi42Njg0MkMxMS42NzQxIDYuMTkxMDYgMTEuNTI0OSA1LjgxODExIDExLjIyNjUgNS41NDk1OUMxMC45MjgyIDUuMjcxMTMgMTAuNDU1OCA1LjEzMTkgOS44MDkzNiA1LjEzMTlIOC4xMDg3NEw3LjQ5NzExIDguNTkyODFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    <bpmn:serviceTask id="check_evacuation" name="Check If People Fully Evacuated">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
+        <zeebe:taskDefinition type="http-request" retries="3" />
         <zeebe:ioMapping>
-          <zeebe:input source="noAuth" target="authentication.type" />
-          <zeebe:input source="GET" target="method" />
-          <zeebe:input source="http://localhost:8090/api/evacuation_service" target="url" />
-          <zeebe:input source="=false" target="storeResponse" />
-          <zeebe:input source="=false" target="followRedirects" />
-          <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
-          <zeebe:input source="=20" target="readTimeoutInSeconds" />
+          <zeebe:input source="={&#10;  method: &#34;GET&#34;,&#10;  url: &#34;http://gateway-service:8090/api/evacuation_service&#34;&#10;}" target="http" />
+          <zeebe:output source="=httpResponse.body.areEvacuated" target="rEvacuated" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="elementTemplateVersion" value="13" />
-          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
-          <zeebe:header key="resultVariable" value="rEvacuated" />
-          <zeebe:header key="resultExpression" value="={&#10;rEvacuated:response.body.areEvacuated&#10;}&#10;" />
-          <zeebe:header key="retryBackoff" value="PT0S" />
+          <zeebe:header key="retryBackoff" value="PT30S" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0i2g68c</bpmn:incoming>
@@ -142,23 +133,14 @@ and incident_context.has_injured = false</bpmn:conditionExpression>
       <bpmn:outgoing>Flow_13fp7m8</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_13fp7m8" sourceRef="Activity_0gc36yu" targetRef="End_Emergency_Response" />
-    <bpmn:serviceTask id="Activity_16xhkgl" name="Ask For Evacuation" zeebe:modelerTemplate="io.camunda.connectors.HttpJson.v2" zeebe:modelerTemplateVersion="13" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHZpZXdCb3g9IjAgMCAxOCAxOCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE3LjAzMzUgOC45OTk5N0MxNy4wMzM1IDEzLjQ0NzUgMTMuNDI4MSAxNy4wNTI5IDguOTgwNjUgMTcuMDUyOUM0LjUzMzE2IDE3LjA1MjkgMC45Mjc3NjUgMTMuNDQ3NSAwLjkyNzc2NSA4Ljk5OTk3QzAuOTI3NzY1IDQuNTUyNDggNC41MzMxNiAwLjk0NzA4MyA4Ljk4MDY1IDAuOTQ3MDgzQzEzLjQyODEgMC45NDcwODMgMTcuMDMzNSA0LjU1MjQ4IDE3LjAzMzUgOC45OTk5N1oiIGZpbGw9IiM1MDU1NjIiLz4KPHBhdGggZD0iTTQuOTMxMjYgMTQuMTU3MUw2Ljc4MTA2IDMuNzE0NzFIMTAuMTM3NUMxMS4xOTE3IDMuNzE0NzEgMTEuOTgyNCAzLjk4MzIzIDEyLjUwOTUgNC41MjAyN0MxMy4wNDY1IDUuMDQ3MzYgMTMuMzE1IDUuNzMzNTggMTMuMzE1IDYuNTc4OTJDMTMuMzE1IDcuNDQ0MTQgMTMuMDcxNCA4LjE1NTIyIDEyLjU4NDEgOC43MTIxNUMxMi4xMDY3IDkuMjU5MTMgMTEuNDU1MyA5LjYzNzA1IDEwLjYyOTggOS44NDU5TDEyLjA2MTkgMTQuMTU3MUgxMC4zMzE1TDkuMDMzNjQgMTAuMDI0OUg3LjI0MzUxTDYuNTEyNTQgMTQuMTU3MUg0LjkzMTI2Wk03LjQ5NzExIDguNTkyODFIOS4yNDI0OEM5Ljk5ODMyIDguNTkyODEgMTAuNTkwMSA4LjQyMzc0IDExLjAxNzcgOC4wODU2MUMxMS40NTUzIDcuNzM3NTMgMTEuNjc0MSA3LjI2NTEzIDExLjY3NDEgNi42Njg0MkMxMS42NzQxIDYuMTkxMDYgMTEuNTI0OSA1LjgxODExIDExLjIyNjUgNS41NDk1OUMxMC45MjgyIDUuMjcxMTMgMTAuNDU1OCA1LjEzMTkgOS44MDkzNiA1LjEzMTlIOC4xMDg3NEw3LjQ5NzExIDguNTkyODFaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4K">
+    <bpmn:serviceTask id="Activity_16xhkgl" name="Ask For Evacuation">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="io.camunda:http-json:1" retries="3" />
+        <zeebe:taskDefinition type="http-request" retries="3" />
         <zeebe:ioMapping>
-          <zeebe:input source="noAuth" target="authentication.type" />
-          <zeebe:input source="GET" target="method" />
-          <zeebe:input source="http://localhost:8090/api/evacuation_service" target="url" />
-          <zeebe:input source="=false" target="storeResponse" />
-          <zeebe:input source="=false" target="followRedirects" />
-          <zeebe:input source="=20" target="connectionTimeoutInSeconds" />
-          <zeebe:input source="=20" target="readTimeoutInSeconds" />
+          <zeebe:input source="={&#10;  method: &#34;GET&#34;,&#10;  url: &#34;http://gateway-service:8090/api/evacuation_service&#34;&#10;}" target="http" />
         </zeebe:ioMapping>
         <zeebe:taskHeaders>
-          <zeebe:header key="elementTemplateVersion" value="13" />
-          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.HttpJson.v2" />
-          <zeebe:header key="resultExpression" value="={&#10; &#10;}" />
-          <zeebe:header key="retryBackoff" value="PT0S" />
+          <zeebe:header key="retryBackoff" value="PT30S" />
         </zeebe:taskHeaders>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_trapped_people</bpmn:incoming>

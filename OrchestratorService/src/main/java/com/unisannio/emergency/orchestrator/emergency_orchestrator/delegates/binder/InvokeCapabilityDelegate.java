@@ -74,9 +74,15 @@ public class InvokeCapabilityDelegate {
         }
 
         try {
+            // Resolve localhost to gateway-service for internal Docker routing
+            String resolvedEndpoint = endpoint;
+            if (resolvedEndpoint != null && resolvedEndpoint.contains("localhost")) {
+                resolvedEndpoint = resolvedEndpoint.replace("localhost", "gateway-service");
+            }
+            
             // Inoltro della richiesta di ingaggio reale al servizio del territorio
             ResponseEntity<Void> response = restClient.get()
-                    .uri(endpoint)
+                    .uri(resolvedEndpoint)
                     .retrieve()
                     .toBodilessEntity();
 
