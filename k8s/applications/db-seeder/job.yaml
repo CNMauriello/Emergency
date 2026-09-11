@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-seeder
+  namespace: assd-orchestration
+spec:
+  template:
+    metadata:
+      name: db-seeder
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-mysql
+          image: mysql:8.3.0
+          command:
+            - sh
+            - -c
+            - |
+              until mysqladmin ping -h mysql-db --silent; do
+                echo 'waiting for mysql...';
+                sleep 5;
+              done
+      containers:
+        - name: db-seeder
+          image: khondor/db-seeder:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: emergency-config
+            - secretRef:
+                name: emergency-secrets
+          env:
+            - name: DB_EXPOSED_HOST
+              value: "mysql-db"
+            - name: DB_EXPOSED_PORT
+              value: "3306"
+            - name: API_URL
+              value: "http://gateway-service:8090/api/auth/register"
+            - name: MYSQL_OPTS
+              value: "--skip-ssl"
+          command:
+            - sh
+            - -c
+            - |
+              apt-get update && \
+              apt-get install -y default-mysql-client curl && \
+              echo 'Waiting for microservices to create tables...' && \
+              until mysql -h "$DB_EXPOSED_HOST" -P "$DB_EXPOSED_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "DESCRIBE operator_db.operators;" > /dev/null 2>&1; do \
+                echo 'Waiting for operator_db.operators...'; \
+                sleep 5; \
+              done; \
+              until mysql -h "$DB_EXPOSED_HOST" -P "$DB_EXPOSED_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "DESCRIBE auth_db.users;" > /dev/null 2>&1; do \
+                echo 'Waiting for auth_db.users...'; \
+                sleep 5; \
+              done; \
+              echo 'Tables are ready! Executing seeder scripts...' && \
+              chmod +x run_scripts.sh && \
+              ./run_scripts.sh

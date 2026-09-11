@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator-binder
+  namespace: assd-orchestration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orchestrator-binder
+  template:
+    metadata:
+      labels:
+        app: orchestrator-binder
+    spec:
+      containers:
+        - name: orchestrator-binder
+          image: khondor/orchestrator-binder:latest
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: emergency-config
+            - secretRef:
+                name: emergency-secrets
+          env:
+            - name: CAMUNDA_CLIENT_MODE
+              value: "self-managed"
+            - name: CAMUNDA_CLIENT_GRPCADDRESS
+              value: "http://camunda:26500"
+            - name: CAMUNDA_CLIENT_RESTADDRESS
+              value: "http://camunda:8080"
+            - name: CAMUNDA_CLIENT_AUTH_METHOD
+              value: "none"
+          ports:
+            - containerPort: 8082
+              name: binder
+            - containerPort: 8083
+              name: orchestrator
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator-binder
+  namespace: assd-orchestration
+spec:
+  ports:
+    - port: 8082
+      targetPort: 8082
+      name: binder
+    - port: 8083
+      targetPort: 8083
+      name: orchestrator
+  selector:
+    app: orchestrator-binder

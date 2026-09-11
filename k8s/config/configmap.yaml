@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: emergency-config
+  namespace: assd-orchestration
+data:
+  DB_HOST: mysql-db
+  DB_PORT: "3306"
+  DB_EXPOSED_HOST: "127.0.0.1"
+  DB_EXPOSED_PORT: "3307"
+  JWT_EXPIRATION: "3600000"
+  CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://100.117.226.152:5173,http://100.115.146.177:5173"
+  REGISTRY_SERVICE_URL: "http://registry-service:8081"
+  BINDER_SERVICE_URL: "http://orchestrator-binder:8082"
+  ORCHESTRATOR_SERVICE_URL: "http://orchestrator-binder:8083"
+  EMERGENCY_SERVICE_URL: "http://emergency-service:8084"
+  OPERATOR_SERVICE_URL: "http://operator-service:8087"
+  AUTH_INTERNAL_URL: "http://auth-service:8088"
+  MOCK_SERVICE_URL: "http://mock-service:8089"
+  GATEWAY_URL: "http://gateway-service:8090"
+  BINDER_CANDIDATES_URL: "http://orchestrator-binder:8082/api/binder/candidates"
+  OPERATOR_ESCALATIONS_URL: "http://operator-service:8087/api/operators/escalations"
+  ESCALATION_WEBHOOK_URL: "http://orchestrator-binder:8083/api/escalations"
+  CAMUNDA_GRPC_ADDRESS: "http://camunda:26500"
+  CAMUNDA_REST_ADDRESS: "http://camunda:8080"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.kafka-shared:9092"
+  WORKFLOW_STORAGE_PATH: "/app/bpmns/"
