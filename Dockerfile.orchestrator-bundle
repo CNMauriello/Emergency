@@ -1,0 +1,19 @@
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
+
+# Install bash, curl, tar and netcat-openbsd for TCP checks
+RUN apt-get update && apt-get install -y bash curl tar netcat-openbsd && rm -rf /var/lib/apt/lists/*
+
+# Download and extract Zeebe (Camunda 8 Engine)
+RUN curl -sL https://github.com/camunda/zeebe/releases/download/8.8.5/camunda-zeebe-8.8.5.tar.gz -o zeebe.tar.gz && \
+    tar xzf zeebe.tar.gz && \
+    rm zeebe.tar.gz && \
+    mv camunda-zeebe-8.8.5 zeebe
+
+# Copy start script
+COPY start-bundle.sh .
+RUN chmod +x start-bundle.sh
+
+EXPOSE 26500 8080
+
+ENTRYPOINT ["./start-bundle.sh"]
