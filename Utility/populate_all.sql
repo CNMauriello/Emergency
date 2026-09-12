@@ -681,8 +681,8 @@ INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALU
 ('CAR_CRASH_CRITICAL', 'CAR_CRASH', 'CRITICAL', 1, true),
 ('CAR_CRASH_HIGH', 'CAR_CRASH', 'HIGH', 1, true),
 ('CAR_CRASH_MEDIUM', 'CAR_CRASH', 'MEDIUM', 1, true),
-('CAR_CRASH_LOW', 'CAR_CRASH', 'LOW', 1, true);
-('EARTHQUAKE_LOW', 'EARTHQUAKE', 'LOW', 1, true);
-('EARTHQUAKE_MEDIUM', 'EARTHQUAKE', 'MEDIUM', 1, true);
-('EARTHQUAKE_HIGH', 'EARTHQUAKE', 'HIGH', 1, true);
+('CAR_CRASH_LOW', 'CAR_CRASH', 'LOW', 1, true),
+('EARTHQUAKE_LOW', 'EARTHQUAKE', 'LOW', 1, true),
+('EARTHQUAKE_MEDIUM', 'EARTHQUAKE', 'MEDIUM', 1, true),
+('EARTHQUAKE_HIGH', 'EARTHQUAKE', 'HIGH', 1, true),
 ('EARTHQUAKE_CRITICAL', 'EARTHQUAKE', 'CRITICAL', 1, true);
