@@ -274,36 +274,137 @@ for DB in $DATABASES; do
 done
 
 echo ""
-echo "=== DELETE PREVIOUS DB SEEDER JOB ==="
+echo "=== POPULATE STATIC DATA ==="
 
-kubectl delete job db-seeder \
+kubectl exec mysql-db-0 \
   -n "$NAMESPACE" \
-  --ignore-not-found=true
+  -- mysql \
+  -u emergency \
+  -p'Emergency123456@' \
+  -e "
+
+USE registry_db;
+
+INSERT INTO capability (name) VALUES
+('SearchAndRescue'),
+('FireSuppression'),
+('MedicalEmergency'),
+('TraumaCare'),
+('Ambulance'),
+('PoliceIntervention'),
+('CrowdControl'),
+('DisasterResponse'),
+('WaterRescue'),
+('HelicopterRescue'),
+('HazmatResponse'),
+('Evacuation'),
+('EmergencyCommunication'),
+('MountainRescue'),
+('FloodResponse');
+
+INSERT INTO emergency_service
+    (avg_latency, current_load, endpoint, latitude, longitude, status, type)
+VALUES
+(18.5, 32.0, 'http://gateway-service:8090/fire-station-napoli.local/api', 40.8518, 14.2681, 'UP', 'FIRE_STATION'),
+(25.2, 45.0, 'http://gateway-service:8090/fire-station-salerno.local/api', 40.6824, 14.7681, 'UP', 'FIRE_STATION'),
+(41.7, 67.0, 'http://gateway-service:8090/fire-station-caserta.local/api', 41.0747, 14.3320, 'DEGRADED', 'FIRE_STATION'),
+(12.3, 28.0, 'http://gateway-service:8090/hospital-napoli.local/api', 40.8522, 14.2685, 'UP', 'HOSPITAL'),
+(35.8, 71.0, 'http://gateway-service:8090/hospital-salerno.local/api', 40.6782, 14.7653, 'DEGRADED', 'HOSPITAL'),
+(15.6, 19.0, 'http://gateway-service:8090/hospital-caserta.local/api', 41.0731, 14.3325, 'UP', 'HOSPITAL'),
+(22.4, 38.0, 'http://gateway-service:8090/police-napoli.local/api', 40.8467, 14.2516, 'UP', 'POLICE'),
+(19.8, 52.0, 'http://gateway-service:8090/police-salerno.local/api', 40.6810, 14.7680, 'UP', 'POLICE'),
+(55.4, 89.0, 'http://gateway-service:8090/police-caserta.local/api', 41.0745, 14.3328, 'DEGRADED', 'POLICE'),
+(8.7, 14.0, 'http://gateway-service:8090/fire-station-pozzuoli.local/api', 40.8231, 14.1216, 'UP', 'FIRE_STATION'),
+(29.3, 43.0, 'http://gateway-service:8090/hospital-pozzuoli.local/api', 40.8230, 14.1220, 'UP', 'HOSPITAL'),
+(17.1, 26.0, 'http://gateway-service:8090/police-pozzuoli.local/api', 40.8235, 14.1225, 'UP', 'POLICE'),
+(63.2, 92.0, 'http://gateway-service:8090/fire-station-avellino.local/api', 40.9140, 14.7920, 'DEGRADED', 'FIRE_STATION'),
+(14.9, 22.0, 'http://gateway-service:8090/hospital-avellino.local/api', 40.9150, 14.7915, 'UP', 'HOSPITAL'),
+(31.5, 61.0, 'http://gateway-service:8090/police-avellino.local/api', 40.9145, 14.7925, 'UP', 'POLICE'),
+(11.2, 17.0, 'http://gateway-service:8090/fire-station-benevento.local/api', 41.1297, 14.7826, 'UP', 'FIRE_STATION'),
+(27.6, 48.0, 'http://gateway-service:8090/hospital-benevento.local/api', 41.1298, 14.7820, 'UP', 'HOSPITAL'),
+(46.8, 76.0, 'http://gateway-service:8090/police-benevento.local/api', 41.1300, 14.7830, 'DEGRADED', 'POLICE'),
+(9.4, 12.0, 'http://gateway-service:8090/fire-station-sorrento.local/api', 40.6263, 14.3758, 'UP', 'FIRE_STATION'),
+(21.7, 34.0, 'http://gateway-service:8090/hospital-sorrento.local/api', 40.6268, 14.3762, 'UP', 'HOSPITAL');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 1, id FROM capability WHERE name IN ('FireSuppression','SearchAndRescue','HazmatResponse','DisasterResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 2, id FROM capability WHERE name IN ('FireSuppression','SearchAndRescue','WaterRescue','DisasterResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 3, id FROM capability WHERE name IN ('FireSuppression','HazmatResponse','DisasterResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 4, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','DisasterResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 5, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','Evacuation');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 6, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 7, id FROM capability WHERE name IN ('PoliceIntervention','CrowdControl','EmergencyCommunication');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 8, id FROM capability WHERE name IN ('PoliceIntervention','CrowdControl','EmergencyCommunication','Evacuation');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 9, id FROM capability WHERE name IN ('PoliceIntervention','CrowdControl','EmergencyCommunication');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 10, id FROM capability WHERE name IN ('FireSuppression','WaterRescue','SearchAndRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 11, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','WaterRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 12, id FROM capability WHERE name IN ('PoliceIntervention','CrowdControl','EmergencyCommunication');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 13, id FROM capability WHERE name IN ('FireSuppression','MountainRescue','SearchAndRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 14, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','MountainRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 15, id FROM capability WHERE name IN ('PoliceIntervention','EmergencyCommunication','MountainRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 16, id FROM capability WHERE name IN ('FireSuppression','DisasterResponse','FloodResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 17, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','DisasterResponse');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 18, id FROM capability WHERE name IN ('PoliceIntervention','CrowdControl','Evacuation');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 19, id FROM capability WHERE name IN ('FireSuppression','WaterRescue','SearchAndRescue');
+
+INSERT INTO emergency_service_capability (service_instance_id, capability_id)
+SELECT 20, id FROM capability WHERE name IN ('MedicalEmergency','TraumaCare','Ambulance','WaterRescue','HelicopterRescue');
+
+USE orchestrator_db;
+
+INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALUES
+('FIRE_CRITICAL', 'FIRE', 'CRITICAL', 1, true),
+('FLOOD_CRITICAL', 'FLOOD', 'CRITICAL', 1, true),
+('HEALTH_CRISIS_CRITICAL', 'HEALTH_CRISIS', 'CRITICAL', 1, true),
+('CAR_CRASH_CRITICAL', 'CAR_CRASH', 'CRITICAL', 1, true);
+
+USE registry_db;
+
+SELECT 'capability' AS table_name, COUNT(*) AS total FROM capability
+UNION ALL
+SELECT 'emergency_service', COUNT(*) FROM emergency_service
+UNION ALL
+SELECT 'emergency_service_capability', COUNT(*) FROM emergency_service_capability;
+"
 
 echo ""
-echo "=== APPLY DB SEEDER ==="
-
-kubectl apply \
-  -f k8s/applications/db-seeder/job.yaml \
-  -n "$NAMESPACE"
-
-echo ""
-echo "=== WAIT FOR DB SEEDER ==="
-
-kubectl wait \
-  --for=condition=complete \
-  job/db-seeder \
-  -n "$NAMESPACE" \
-  --timeout=10m
-
-echo ""
-echo "=== DB SEEDER COMPLETED ==="
-
-kubectl logs \
-  job/db-seeder \
-  -n "$NAMESPACE" \
-  --all-containers=true
-
+echo "=== STATIC DATA POPULATION COMPLETED ==="
 echo ""
 echo "=== WAIT FOR GATEWAY HTTP ==="
 
@@ -415,6 +516,25 @@ kubectl run debug-network \
   '
 
 echo ""
+echo "=== POPULATE OPERATOR RECORDS ==="
+
+kubectl exec mysql-db-0 \
+  -n "$NAMESPACE" \
+  -- mysql \
+  -u emergency \
+  -p'Emergency123456@' \
+  -e "
+USE operator_db;
+
+INSERT INTO operators (auth_user_id, nome, cognome, ruolo, stato) VALUES
+(1, 'Mario', 'Rossi', 'Supervisor', 'Offline'),
+(2, 'Luigi', 'Verdi', 'Dispatcher', 'Offline'),
+(3, 'Giulia', 'Bianchi', 'Operator', 'Offline');
+"
+
+echo "Operator records populated."
+
+echo ""
 echo "=== UPDATE OPERATOR ROLES ==="
 
 kubectl exec mysql-db-0 \
@@ -460,7 +580,7 @@ SELECT
   role
 FROM users
 WHERE surname IN ('Rossi', 'Verdi', 'Bianchi', 'Viola', 'Neri')
-ORDER BY id;
+ORDER BY id_user;
 "
 
 echo ""
