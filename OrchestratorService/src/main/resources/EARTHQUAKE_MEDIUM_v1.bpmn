@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Earthquake_Medium" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Earthquake_Response_Plan_Medium" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
   <bpmn:process id="EARTHQUAKE_MEDIUM" name="Earthquake Response Plan (Medium)" isExecutable="true">
-    <bpmn:startEvent id="Start_Earthquake_Plan" name="Start Earthquake Response">
+    <bpmn:startEvent id="Start_Emergency_Response_Plan" name="Start Earthquake Response">
       <bpmn:outgoing>Flow_Start</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:parallelGateway id="Gateway_Init_Split">
+    <bpmn:parallelGateway id="Gateway_Dispatch_Start">
       <bpmn:incoming>Flow_Start</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Fire</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_Police</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:callActivity id="Call_FireSuppression" name="Fire Dept (Structural Checks)">
+    <bpmn:callActivity id="Activity_Fire_Suppression" name="Fire Dept (Structural Checks)">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
         <zeebe:ioMapping>
@@ -19,7 +19,7 @@
       <bpmn:incoming>Flow_To_Fire</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Fire</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:callActivity id="Call_PoliceIntervention" name="Police (Crowd &#38; Traffic)">
+    <bpmn:callActivity id="Activity_Police_Intervention" name="Police (Crowd &#38; Traffic)">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
         <zeebe:ioMapping>
@@ -29,33 +29,33 @@
       <bpmn:incoming>Flow_To_Police</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Police</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:parallelGateway id="Gateway_Init_Join">
+    <bpmn:parallelGateway id="Gateway_Dispatch_End">
       <bpmn:incoming>Flow_From_Fire</bpmn:incoming>
       <bpmn:incoming>Flow_From_Police</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Context</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Situation" default="Flow_Safe">
+    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Earthquake Context" default="Flow_No_Injured_Trapped">
       <bpmn:incoming>Flow_To_Context</bpmn:incoming>
-      <bpmn:outgoing>Flow_Injured</bpmn:outgoing>
-      <bpmn:outgoing>Flow_Trapped</bpmn:outgoing>
-      <bpmn:outgoing>Flow_Safe</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Injured_People</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Trapped_People</bpmn:outgoing>
+      <bpmn:outgoing>Flow_No_Injured_Trapped</bpmn:outgoing>
     </bpmn:inclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_Injured" name="Minor injuries" sourceRef="Gateway_Emergency_Context" targetRef="Call_Ambulance">
+    <bpmn:sequenceFlow id="Flow_Injured_People" name="Minor Injuries" sourceRef="Gateway_Emergency_Context" targetRef="Call_Ambulance">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:callActivity id="Call_Ambulance" name="Request Ambulance">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
         <zeebe:ioMapping>
           <zeebe:input source="=&#34;Ambulance&#34;" target="requiredCapability" />
           <zeebe:input source="=coordinates.latitude" target="latitude" />
           <zeebe:input source="=coordinates.longitude" target="longitude" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_Injured</bpmn:incoming>
-      <bpmn:outgoing>Flow_Ambulance_Done</bpmn:outgoing>
+      <bpmn:incoming>Flow_Injured_People</bpmn:incoming>
+      <bpmn:outgoing>Flow_Ambulance_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_Trapped" name="Buildings to evacuate" sourceRef="Gateway_Emergency_Context" targetRef="Call_Evacuation">
+    <bpmn:sequenceFlow id="Flow_Trapped_People" name="Buildings to Evacuate" sourceRef="Gateway_Emergency_Context" targetRef="Call_Evacuation">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:callActivity id="Call_Evacuation" name="Execute Evacuation">
@@ -65,134 +65,122 @@
           <zeebe:input source="=&#34;Evacuation&#34;" target="requiredCapability" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_Trapped</bpmn:incoming>
-      <bpmn:outgoing>Flow_Evacuation_Done</bpmn:outgoing>
+      <bpmn:incoming>Flow_Trapped_People</bpmn:incoming>
+      <bpmn:outgoing>Flow_Evacuation_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_Safe" name="No injuries/evac" sourceRef="Gateway_Emergency_Context" targetRef="Gateway_Context_Join" />
-    <bpmn:inclusiveGateway id="Gateway_Context_Join">
-      <bpmn:incoming>Flow_Ambulance_Done</bpmn:incoming>
-      <bpmn:incoming>Flow_Evacuation_Done</bpmn:incoming>
-      <bpmn:incoming>Flow_Safe</bpmn:incoming>
-      <bpmn:outgoing>Flow_To_End</bpmn:outgoing>
-    </bpmn:inclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_No_Injured_Trapped" name="Safe (No Actions)" sourceRef="Gateway_Emergency_Context" targetRef="End_Emergency_Response" />
     <bpmn:endEvent id="End_Emergency_Response" name="Earthquake Response Completed">
-      <bpmn:incoming>Flow_To_End</bpmn:incoming>
+      <bpmn:incoming>Flow_No_Injured_Trapped</bpmn:incoming>
+      <bpmn:incoming>Flow_Ambulance_End</bpmn:incoming>
+      <bpmn:incoming>Flow_Evacuation_End</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_Start" sourceRef="Start_Earthquake_Plan" targetRef="Gateway_Init_Split" />
-    <bpmn:sequenceFlow id="Flow_To_Fire" sourceRef="Gateway_Init_Split" targetRef="Call_FireSuppression" />
-    <bpmn:sequenceFlow id="Flow_To_Police" sourceRef="Gateway_Init_Split" targetRef="Call_PoliceIntervention" />
-    <bpmn:sequenceFlow id="Flow_From_Fire" sourceRef="Call_FireSuppression" targetRef="Gateway_Init_Join" />
-    <bpmn:sequenceFlow id="Flow_From_Police" sourceRef="Call_PoliceIntervention" targetRef="Gateway_Init_Join" />
-    <bpmn:sequenceFlow id="Flow_To_Context" sourceRef="Gateway_Init_Join" targetRef="Gateway_Emergency_Context" />
-    <bpmn:sequenceFlow id="Flow_Ambulance_Done" sourceRef="Call_Ambulance" targetRef="Gateway_Context_Join" />
-    <bpmn:sequenceFlow id="Flow_Evacuation_Done" sourceRef="Call_Evacuation" targetRef="Gateway_Context_Join" />
-    <bpmn:sequenceFlow id="Flow_To_End" sourceRef="Gateway_Context_Join" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_Start" sourceRef="Start_Emergency_Response_Plan" targetRef="Gateway_Dispatch_Start" />
+    <bpmn:sequenceFlow id="Flow_To_Fire" sourceRef="Gateway_Dispatch_Start" targetRef="Activity_Fire_Suppression" />
+    <bpmn:sequenceFlow id="Flow_To_Police" sourceRef="Gateway_Dispatch_Start" targetRef="Activity_Police_Intervention" />
+    <bpmn:sequenceFlow id="Flow_From_Fire" sourceRef="Activity_Fire_Suppression" targetRef="Gateway_Dispatch_End" />
+    <bpmn:sequenceFlow id="Flow_From_Police" sourceRef="Activity_Police_Intervention" targetRef="Gateway_Dispatch_End" />
+    <bpmn:sequenceFlow id="Flow_To_Context" sourceRef="Gateway_Dispatch_End" targetRef="Gateway_Emergency_Context" />
+    <bpmn:sequenceFlow id="Flow_Ambulance_End" sourceRef="Call_Ambulance" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_Evacuation_End" sourceRef="Call_Evacuation" targetRef="End_Emergency_Response" />
   </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_Earthquake_Medium">
-    <bpmndi:BPMNPlane id="BPMNPlane_Earthquake_Medium" bpmnElement="EARTHQUAKE_MEDIUM">
-      <bpmndi:BPMNShape id="Start_Earthquake_Plan_di" bpmnElement="Start_Earthquake_Plan">
-        <dc:Bounds x="150" y="212" width="36" height="36" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Earthquake_Response_Plan_Medium">
+    <bpmndi:BPMNPlane id="BPMNPlane_Earthquake_Response_Plan_Medium" bpmnElement="EARTHQUAKE_MEDIUM">
+      <bpmndi:BPMNShape id="Start_Emergency_Response_Plan_di" bpmnElement="Start_Emergency_Response_Plan">
+        <dc:Bounds x="170" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="128" y="255" width="83" height="27" />
+          <dc:Bounds x="147" y="273" width="82" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_Init_Split_di" bpmnElement="Gateway_Init_Split">
-        <dc:Bounds x="250" y="205" width="50" height="50" />
+      <bpmndi:BPMNShape id="Gateway_Dispatch_Start_di" bpmnElement="Gateway_Dispatch_Start" isMarkerVisible="true">
+        <dc:Bounds x="355" y="230" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Call_FireSuppression_di" bpmnElement="Call_FireSuppression">
-        <dc:Bounds x="350" y="150" width="150" height="80" />
+      <bpmndi:BPMNShape id="Activity_Fire_Suppression_di" bpmnElement="Activity_Fire_Suppression">
+        <dc:Bounds x="570" y="80" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Call_PoliceIntervention_di" bpmnElement="Call_PoliceIntervention">
-        <dc:Bounds x="350" y="260" width="150" height="80" />
+      <bpmndi:BPMNShape id="Activity_Police_Intervention_di" bpmnElement="Activity_Police_Intervention">
+        <dc:Bounds x="570" y="380" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_Init_Join_di" bpmnElement="Gateway_Init_Join">
-        <dc:Bounds x="550" y="205" width="50" height="50" />
+      <bpmndi:BPMNShape id="Gateway_Dispatch_End_di" bpmnElement="Gateway_Dispatch_End" isMarkerVisible="true">
+        <dc:Bounds x="820" y="230" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
-        <dc:Bounds x="650" y="205" width="50" height="50" />
+        <dc:Bounds x="965" y="230" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="635" y="181" width="82" height="14" />
+          <dc:Bounds x="1001" y="280" width="57" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
-        <dc:Bounds x="800" y="80" width="150" height="80" />
+        <dc:Bounds x="1200" y="80" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Evacuation_di" bpmnElement="Call_Evacuation">
-        <dc:Bounds x="800" y="330" width="150" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_Context_Join_di" bpmnElement="Gateway_Context_Join">
-        <dc:Bounds x="1000" y="205" width="50" height="50" />
+        <dc:Bounds x="1200" y="380" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
-        <dc:Bounds x="1150" y="212" width="36" height="36" />
+        <dc:Bounds x="1420" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1140" y="255" width="57" height="40" />
+          <dc:Bounds x="1466" y="235" width="56" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Injured_People_di" bpmnElement="Flow_Injured_People">
+        <di:waypoint x="990" y="230" />
+        <di:waypoint x="990" y="120" />
+        <di:waypoint x="1200" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1015" y="143" width="90" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Trapped_People_di" bpmnElement="Flow_Trapped_People">
+        <di:waypoint x="990" y="280" />
+        <di:waypoint x="990" y="420" />
+        <di:waypoint x="1200" y="420" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1037" y="376" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_No_Injured_Trapped_di" bpmnElement="Flow_No_Injured_Trapped">
+        <di:waypoint x="1015" y="255" />
+        <di:waypoint x="1420" y="255" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1187" y="230" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Start_di" bpmnElement="Flow_Start">
-        <di:waypoint x="186" y="230" />
-        <di:waypoint x="250" y="230" />
+        <di:waypoint x="206" y="255" />
+        <di:waypoint x="355" y="255" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Fire_di" bpmnElement="Flow_To_Fire">
-        <di:waypoint x="275" y="205" />
-        <di:waypoint x="275" y="190" />
-        <di:waypoint x="350" y="190" />
+        <di:waypoint x="380" y="230" />
+        <di:waypoint x="380" y="120" />
+        <di:waypoint x="570" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Police_di" bpmnElement="Flow_To_Police">
-        <di:waypoint x="275" y="255" />
-        <di:waypoint x="275" y="300" />
-        <di:waypoint x="350" y="300" />
+        <di:waypoint x="380" y="280" />
+        <di:waypoint x="380" y="420" />
+        <di:waypoint x="570" y="420" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_From_Fire_di" bpmnElement="Flow_From_Fire">
-        <di:waypoint x="500" y="190" />
-        <di:waypoint x="575" y="190" />
-        <di:waypoint x="575" y="205" />
+        <di:waypoint x="720" y="120" />
+        <di:waypoint x="845" y="120" />
+        <di:waypoint x="845" y="230" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_From_Police_di" bpmnElement="Flow_From_Police">
-        <di:waypoint x="500" y="300" />
-        <di:waypoint x="575" y="300" />
-        <di:waypoint x="575" y="255" />
+        <di:waypoint x="720" y="420" />
+        <di:waypoint x="845" y="420" />
+        <di:waypoint x="845" y="280" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Context_di" bpmnElement="Flow_To_Context">
-        <di:waypoint x="600" y="230" />
-        <di:waypoint x="650" y="230" />
+        <di:waypoint x="870" y="255" />
+        <di:waypoint x="965" y="255" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Injured_di" bpmnElement="Flow_Injured">
-        <di:waypoint x="675" y="205" />
-        <di:waypoint x="675" y="120" />
-        <di:waypoint x="800" y="120" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="691" y="103" width="66" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNEdge id="Flow_Ambulance_End_di" bpmnElement="Flow_Ambulance_End">
+        <di:waypoint x="1350" y="120" />
+        <di:waypoint x="1438" y="120" />
+        <di:waypoint x="1438" y="237" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Trapped_di" bpmnElement="Flow_Trapped">
-        <di:waypoint x="675" y="255" />
-        <di:waypoint x="675" y="370" />
-        <di:waypoint x="800" y="370" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="692" y="336" width="57" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Safe_di" bpmnElement="Flow_Safe">
-        <di:waypoint x="700" y="230" />
-        <di:waypoint x="1000" y="230" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="821" y="212" width="79" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Ambulance_Done_di" bpmnElement="Flow_Ambulance_Done">
-        <di:waypoint x="950" y="120" />
-        <di:waypoint x="1025" y="120" />
-        <di:waypoint x="1025" y="205" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Evacuation_Done_di" bpmnElement="Flow_Evacuation_Done">
-        <di:waypoint x="950" y="370" />
-        <di:waypoint x="1025" y="370" />
-        <di:waypoint x="1025" y="255" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_To_End_di" bpmnElement="Flow_To_End">
-        <di:waypoint x="1050" y="230" />
-        <di:waypoint x="1150" y="230" />
+      <bpmndi:BPMNEdge id="Flow_Evacuation_End_di" bpmnElement="Flow_Evacuation_End">
+        <di:waypoint x="1350" y="420" />
+        <di:waypoint x="1438" y="420" />
+        <di:waypoint x="1438" y="273" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
