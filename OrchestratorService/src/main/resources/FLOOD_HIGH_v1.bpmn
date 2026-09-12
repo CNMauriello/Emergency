@@ -109,7 +109,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_To_Evacuation" name="Evacuation Needed" sourceRef="Gateway_Context_Split" targetRef="Call_Evacuation">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.needs_evacuation = true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_No_Additional_Action" name="No extra action" sourceRef="Gateway_Context_Split" targetRef="Gateway_Context_Join" />
     
