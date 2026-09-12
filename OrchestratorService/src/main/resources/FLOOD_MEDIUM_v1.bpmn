@@ -1,25 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Flood_Response_Medium" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
-  <bpmn:process id="FLOOD_MEDIUM" name="Flood Emergency Response Plan (Medium)" isExecutable="true">
-    <bpmn:startEvent id="Start_Flood_Emergency" name="Start Flood Plan">
-      <bpmn:outgoing>Flow_Start_To_Split1</bpmn:outgoing>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Flood_Response_Plan_Medium" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:process id="FLOOD_MEDIUM" name="Flood Response Plan (Medium)" isExecutable="true">
+    
+    <bpmn:startEvent id="Start_Emergency_Response_Plan" name="Start Flood Response">
+      <bpmn:outgoing>Flow_Start</bpmn:outgoing>
     </bpmn:startEvent>
+    
     <bpmn:parallelGateway id="Gateway_Dispatch_Start">
-      <bpmn:incoming>Flow_Start_To_Split1</bpmn:incoming>
-      <bpmn:outgoing>Flow_To_FloodResponse</bpmn:outgoing>
+      <bpmn:incoming>Flow_Start</bpmn:incoming>
+      <bpmn:outgoing>Flow_To_Flood</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_Police</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:callActivity id="Call_FloodResponse" name="Deploy Flood Response">
+    
+    <bpmn:callActivity id="Activity_Flood_Response" name="Call Flood Response">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
         <zeebe:ioMapping>
           <zeebe:input source="=&#34;FloodResponse&#34;" target="requiredCapability" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_To_FloodResponse</bpmn:incoming>
-      <bpmn:outgoing>Flow_FloodResponse_To_Join1</bpmn:outgoing>
+      <bpmn:incoming>Flow_To_Flood</bpmn:incoming>
+      <bpmn:outgoing>Flow_From_Flood</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:callActivity id="Call_PoliceIntervention" name="Request Police Intervention">
+    
+    <bpmn:callActivity id="Activity_Police_Intervention" name="Request Police Intervention">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
         <zeebe:ioMapping>
@@ -27,37 +31,43 @@
         </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_To_Police</bpmn:incoming>
-      <bpmn:outgoing>Flow_Police_To_Join1</bpmn:outgoing>
+      <bpmn:outgoing>Flow_From_Police</bpmn:outgoing>
     </bpmn:callActivity>
+    
     <bpmn:parallelGateway id="Gateway_Dispatch_End">
-      <bpmn:incoming>Flow_FloodResponse_To_Join1</bpmn:incoming>
-      <bpmn:incoming>Flow_Police_To_Join1</bpmn:incoming>
-      <bpmn:outgoing>Flow_Join1_To_Context</bpmn:outgoing>
+      <bpmn:incoming>Flow_From_Flood</bpmn:incoming>
+      <bpmn:incoming>Flow_From_Police</bpmn:incoming>
+      <bpmn:outgoing>Flow_To_Context</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Flood Context" default="Flow_No_Additional_Action">
-      <bpmn:incoming>Flow_Join1_To_Context</bpmn:incoming>
-      <bpmn:outgoing>Flow_To_Ambulance</bpmn:outgoing>
-      <bpmn:outgoing>Flow_To_Evacuation</bpmn:outgoing>
-      <bpmn:outgoing>Flow_No_Additional_Action</bpmn:outgoing>
+    
+    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Flood Context Flags" default="Flow_No_Injured_Trapped">
+      <bpmn:incoming>Flow_To_Context</bpmn:incoming>
+      <bpmn:outgoing>Flow_Injured_People</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Trapped_People</bpmn:outgoing>
+      <bpmn:outgoing>Flow_No_Injured_Trapped</bpmn:outgoing>
     </bpmn:inclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_To_Ambulance" name="People Injured" sourceRef="Gateway_Emergency_Context" targetRef="Call_Ambulance">
+    
+    <bpmn:sequenceFlow id="Flow_Injured_People" name="Injured People" sourceRef="Gateway_Emergency_Context" targetRef="Call_Ambulance">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    
     <bpmn:callActivity id="Call_Ambulance" name="Request Ambulance">
       <bpmn:extensionElements>
-        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
         <zeebe:ioMapping>
           <zeebe:input source="=&#34;Ambulance&#34;" target="requiredCapability" />
           <zeebe:input source="=coordinates.latitude" target="latitude" />
           <zeebe:input source="=coordinates.longitude" target="longitude" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_To_Ambulance</bpmn:incoming>
+      <bpmn:incoming>Flow_Injured_People</bpmn:incoming>
       <bpmn:outgoing>Flow_Ambulance_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_To_Evacuation" name="Evacuation Needed" sourceRef="Gateway_Emergency_Context" targetRef="Call_Evacuation">
+    
+    <bpmn:sequenceFlow id="Flow_Trapped_People" name="People in flooded building" sourceRef="Gateway_Emergency_Context" targetRef="Call_Evacuation">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    
     <bpmn:callActivity id="Call_Evacuation" name="Execute Evacuation">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
@@ -65,42 +75,53 @@
           <zeebe:input source="=&#34;Evacuation&#34;" target="requiredCapability" />
         </zeebe:ioMapping>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_To_Evacuation</bpmn:incoming>
+      <bpmn:incoming>Flow_Trapped_People</bpmn:incoming>
       <bpmn:outgoing>Flow_Evacuation_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_No_Additional_Action" name="No extra action" sourceRef="Gateway_Emergency_Context" targetRef="End_Flood_Emergency" />
-    <bpmn:endEvent id="End_Flood_Emergency" name="Flood Response Completed">
-      <bpmn:incoming>Flow_No_Additional_Action</bpmn:incoming>
+    
+    <bpmn:sequenceFlow id="Flow_No_Injured_Trapped" name="No injured or trapped" sourceRef="Gateway_Emergency_Context" targetRef="End_Emergency_Response" />
+    
+    <bpmn:endEvent id="End_Emergency_Response" name="Flood Response Completed">
+      <bpmn:incoming>Flow_No_Injured_Trapped</bpmn:incoming>
       <bpmn:incoming>Flow_Ambulance_End</bpmn:incoming>
       <bpmn:incoming>Flow_Evacuation_End</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_Start_To_Split1" sourceRef="Start_Flood_Emergency" targetRef="Gateway_Dispatch_Start" />
-    <bpmn:sequenceFlow id="Flow_To_FloodResponse" sourceRef="Gateway_Dispatch_Start" targetRef="Call_FloodResponse" />
-    <bpmn:sequenceFlow id="Flow_To_Police" sourceRef="Gateway_Dispatch_Start" targetRef="Call_PoliceIntervention" />
-    <bpmn:sequenceFlow id="Flow_FloodResponse_To_Join1" sourceRef="Call_FloodResponse" targetRef="Gateway_Dispatch_End" />
-    <bpmn:sequenceFlow id="Flow_Police_To_Join1" sourceRef="Call_PoliceIntervention" targetRef="Gateway_Dispatch_End" />
-    <bpmn:sequenceFlow id="Flow_Join1_To_Context" sourceRef="Gateway_Dispatch_End" targetRef="Gateway_Emergency_Context" />
-    <bpmn:sequenceFlow id="Flow_Ambulance_End" sourceRef="Call_Ambulance" targetRef="End_Flood_Emergency" />
-    <bpmn:sequenceFlow id="Flow_Evacuation_End" sourceRef="Call_Evacuation" targetRef="End_Flood_Emergency" />
+    
+    <bpmn:sequenceFlow id="Flow_Start" sourceRef="Start_Emergency_Response_Plan" targetRef="Gateway_Dispatch_Start" />
+    <bpmn:sequenceFlow id="Flow_To_Flood" sourceRef="Gateway_Dispatch_Start" targetRef="Activity_Flood_Response" />
+    <bpmn:sequenceFlow id="Flow_To_Police" sourceRef="Gateway_Dispatch_Start" targetRef="Activity_Police_Intervention" />
+    <bpmn:sequenceFlow id="Flow_From_Flood" sourceRef="Activity_Flood_Response" targetRef="Gateway_Dispatch_End" />
+    <bpmn:sequenceFlow id="Flow_From_Police" sourceRef="Activity_Police_Intervention" targetRef="Gateway_Dispatch_End" />
+    <bpmn:sequenceFlow id="Flow_To_Context" sourceRef="Gateway_Dispatch_End" targetRef="Gateway_Emergency_Context" />
+    <bpmn:sequenceFlow id="Flow_Ambulance_End" sourceRef="Call_Ambulance" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_Evacuation_End" sourceRef="Call_Evacuation" targetRef="End_Emergency_Response" />
+    
   </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_Flood_Response_Medium">
-    <bpmndi:BPMNPlane id="BPMNPlane_Flood_Response_Medium" bpmnElement="FLOOD_MEDIUM">
-      <bpmndi:BPMNShape id="Start_Flood_Emergency_di" bpmnElement="Start_Flood_Emergency">
+  
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Flood_Response_Plan_Medium">
+    <bpmndi:BPMNPlane id="BPMNPlane_Flood_Response_Plan_Medium" bpmnElement="FLOOD_MEDIUM">
+      <bpmndi:BPMNShape id="Start_Emergency_Response_Plan_di" bpmnElement="Start_Emergency_Response_Plan">
         <dc:Bounds x="170" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="148" y="287" width="79" height="14" />
+          <dc:Bounds x="147" y="273" width="82" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Dispatch_Start_di" bpmnElement="Gateway_Dispatch_Start" isMarkerVisible="true">
         <dc:Bounds x="355" y="230" width="50" height="50" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_Flood_Response_di" bpmnElement="Activity_Flood_Response">
+        <dc:Bounds x="570" y="80" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_Police_Intervention_di" bpmnElement="Activity_Police_Intervention">
+        <dc:Bounds x="570" y="380" width="150" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Dispatch_End_di" bpmnElement="Gateway_Dispatch_End" isMarkerVisible="true">
         <dc:Bounds x="820" y="230" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
-        <dc:Bounds x="1020" y="230" width="50" height="50" />
+        <dc:Bounds x="965" y="230" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="946" y="280" width="67" height="27" />
+          <dc:Bounds x="956" y="280" width="68" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
@@ -109,68 +130,63 @@
       <bpmndi:BPMNShape id="Call_Evacuation_di" bpmnElement="Call_Evacuation">
         <dc:Bounds x="1200" y="380" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="End_Flood_Emergency_di" bpmnElement="End_Flood_Emergency">
+      <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
         <dc:Bounds x="1420" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1459" y="266" width="81" height="27" />
+          <dc:Bounds x="1466" y="235" width="56" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Call_PoliceIntervention_di" bpmnElement="Call_PoliceIntervention">
-        <dc:Bounds x="515" y="380" width="150" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Call_FloodResponse_di" bpmnElement="Call_FloodResponse">
-        <dc:Bounds x="515" y="80" width="150" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_To_Ambulance_di" bpmnElement="Flow_To_Ambulance">
-        <di:waypoint x="1045" y="230" />
-        <di:waypoint x="1045" y="120" />
+      
+      <bpmndi:BPMNEdge id="Flow_Injured_People_di" bpmnElement="Flow_Injured_People">
+        <di:waypoint x="990" y="230" />
+        <di:waypoint x="990" y="120" />
         <di:waypoint x="1200" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1054" y="133" width="71" height="14" />
+          <dc:Bounds x="1015" y="143" width="90" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_To_Evacuation_di" bpmnElement="Flow_To_Evacuation">
-        <di:waypoint x="1045" y="280" />
-        <di:waypoint x="1045" y="420" />
+      <bpmndi:BPMNEdge id="Flow_Trapped_People_di" bpmnElement="Flow_Trapped_People">
+        <di:waypoint x="990" y="280" />
+        <di:waypoint x="990" y="420" />
         <di:waypoint x="1200" y="420" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1072" y="386" width="78" height="27" />
+          <dc:Bounds x="1037" y="376" width="65" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_No_Additional_Action_di" bpmnElement="Flow_No_Additional_Action">
-        <di:waypoint x="1070" y="255" />
+      <bpmndi:BPMNEdge id="Flow_No_Injured_Trapped_di" bpmnElement="Flow_No_Injured_Trapped">
+        <di:waypoint x="1015" y="255" />
         <di:waypoint x="1420" y="255" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1208" y="230" width="74" height="14" />
+          <dc:Bounds x="1187" y="230" width="63" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Start_To_Split1_di" bpmnElement="Flow_Start_To_Split1">
+      <bpmndi:BPMNEdge id="Flow_Start_di" bpmnElement="Flow_Start">
         <di:waypoint x="206" y="255" />
         <di:waypoint x="355" y="255" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_To_FloodResponse_di" bpmnElement="Flow_To_FloodResponse">
+      <bpmndi:BPMNEdge id="Flow_To_Flood_di" bpmnElement="Flow_To_Flood">
         <di:waypoint x="380" y="230" />
         <di:waypoint x="380" y="120" />
-        <di:waypoint x="515" y="120" />
+        <di:waypoint x="570" y="120" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Police_di" bpmnElement="Flow_To_Police">
         <di:waypoint x="380" y="280" />
         <di:waypoint x="380" y="420" />
-        <di:waypoint x="515" y="420" />
+        <di:waypoint x="570" y="420" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_FloodResponse_To_Join1_di" bpmnElement="Flow_FloodResponse_To_Join1">
-        <di:waypoint x="665" y="120" />
+      <bpmndi:BPMNEdge id="Flow_From_Flood_di" bpmnElement="Flow_From_Flood">
+        <di:waypoint x="720" y="120" />
         <di:waypoint x="845" y="120" />
         <di:waypoint x="845" y="230" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Police_To_Join1_di" bpmnElement="Flow_Police_To_Join1">
-        <di:waypoint x="665" y="420" />
+      <bpmndi:BPMNEdge id="Flow_From_Police_di" bpmnElement="Flow_From_Police">
+        <di:waypoint x="720" y="420" />
         <di:waypoint x="845" y="420" />
         <di:waypoint x="845" y="280" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Join1_To_Context_di" bpmnElement="Flow_Join1_To_Context">
+      <bpmndi:BPMNEdge id="Flow_To_Context_di" bpmnElement="Flow_To_Context">
         <di:waypoint x="870" y="255" />
-        <di:waypoint x="1020" y="255" />
+        <di:waypoint x="965" y="255" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Ambulance_End_di" bpmnElement="Flow_Ambulance_End">
         <di:waypoint x="1350" y="120" />
