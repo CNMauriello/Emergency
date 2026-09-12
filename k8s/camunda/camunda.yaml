@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: camunda
+  namespace: assd-orchestration
+spec:
+  serviceName: camunda
+  replicas: 1
+  selector:
+    matchLabels:
+      app: camunda
+  template:
+    metadata:
+      labels:
+        app: camunda
+    spec:
+      containers:
+        - name: camunda
+          image: camunda/camunda:8.8.5
+          env:
+            - name: CAMUNDA_DATA_SECONDARYSTORAGE_TYPE
+              value: "elasticsearch"
+            - name: CAMUNDA_DATA_SECONDARYSTORAGE_ELASTICSEARCH_URL
+              value: "http://elasticsearch:9200"
+            - name: CAMUNDA_DATA_SECONDARYSTORAGE_ELASTICSEARCH_CLUSTERNAME
+              value: "elasticsearch"
+            - name: CAMUNDA_DATA_SECONDARYSTORAGE_ELASTICSEARCH_SECURITY_ENABLED
+              value: "false"
+            - name: CAMUNDA_SECURITY_AUTHENTICATION_UNPROTECTEDAPI
+              value: "true"
+            - name: ZEEBE_BROKER_GATEWAY_SECURITY_AUTHENTICATION_MODE
+              value: "none"
+            - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_CLASSNAME
+              value: "io.camunda.zeebe.exporter.ElasticsearchExporter"
+            - name: ZEEBE_BROKER_EXPORTERS_ELASTICSEARCH_ARGS_URL
+              value: "http://elasticsearch:9200"
+          ports:
+            - containerPort: 26500
+              name: grpc
+            - containerPort: 8080
+              name: rest
+            - containerPort: 9600
+              name: management
+          volumeMounts:
+            - name: camunda-data
+              mountPath: /usr/local/zeebe/data
+          readinessProbe:
+            exec:
+              command:
+                - "sh"
+                - "-c"
+                - "timeout 10s bash -c ':> /dev/tcp/127.0.0.1/9600' || exit 1"
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1000m"
+  volumeClaimTemplates:
+    - metadata:
+        name: camunda-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: camunda
+  namespace: assd-orchestration
+spec:
+  ports:
+    - port: 26500
+      targetPort: 26500
+      name: grpc
+    - port: 8080
+      targetPort: 8080
+      name: rest
+  selector:
+    app: camunda
