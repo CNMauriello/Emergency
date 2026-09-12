@@ -39,7 +39,7 @@ public class EventAnalysisDelegate {
 
             case "FIRE" -> switch (severity) {
                 case "LOW" -> "FIRE_LOW";
-                case "MEDIUM" -> "FIRE_STANDARD";
+                case "MEDIUM" -> "FIRE_MEDIUM";
                 case "HIGH" -> "FIRE_HIGH";
                 case "CRITICAL" -> "FIRE_CRITICAL";
                 default -> "UNKNOWN";
@@ -47,7 +47,7 @@ public class EventAnalysisDelegate {
 
             case "FLOOD" -> switch (severity) {
                 case "LOW" -> "FLOOD_LOW";
-                case "MEDIUM" -> "FLOOD_STANDARD";
+                case "MEDIUM" -> "FLOOD_MEDIUM";
                 case "HIGH" -> "FLOOD_HIGH";
                 case "CRITICAL" -> "FLOOD_CRITICAL";
                 default -> "UNKNOWN";
@@ -55,7 +55,7 @@ public class EventAnalysisDelegate {
 
             case "CAR_CRASH" -> switch (severity) {
                 case "LOW" -> "CAR_CRASH_LOW";
-                case "MEDIUM" -> "CAR_CRASH_STANDARD";
+                case "MEDIUM" -> "CAR_CRASH_MEDIUM";
                 case "HIGH" -> "CAR_CRASH_HIGH";
                 case "CRITICAL" -> "CAR_CRASH_CRITICAL";
                 default -> "UNKNOWN";
@@ -63,11 +63,20 @@ public class EventAnalysisDelegate {
 
             case "HEALTH_CRISIS" -> switch (severity) {
                 case "LOW" -> "HEALTH_CRISIS_LOW";
-                case "MEDIUM" -> "HEALTH_CRISIS_STANDARD";
+                case "MEDIUM" -> "HEALTH_CRISIS_MEDIUM";
                 case "HIGH" -> "HEALTH_CRISIS_HIGH";
                 case "CRITICAL" -> "HEALTH_CRISIS_CRITICAL";
                 default -> "UNKNOWN";
             };
+
+            case "EARTHQUAKE" -> switch (severity) {
+                case "LOW" -> "EARTHQUAKE_LOW";
+                case "MEDIUM" -> "EARTHQUAKE_MEDIUM";
+                case "HIGH" -> "EARTHQUAKE_HIGH";
+                case "CRITICAL" -> "EARTHQUAKE_CRITICAL";
+                default -> "UNKNOWN";
+            };
+
 
             case "UNKNOWN" -> "GENERIC_RESPONSE";
 

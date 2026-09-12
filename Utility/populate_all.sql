@@ -665,8 +665,24 @@ CREATE TABLE IF NOT EXISTS workflows (
     PRIMARY KEY (id)
 );
 
-INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALUES 
+INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALUES
 ('FIRE_CRITICAL', 'FIRE', 'CRITICAL', 1, true),
+('FIRE_HIGH', 'FIRE', 'HIGH', 1, true),
+('FIRE_MEDIUM', 'FIRE', 'MEDIUM', 1, true),
+('FIRE_LOW', 'FIRE', 'LOW', 1, true),
 ('FLOOD_CRITICAL', 'FLOOD', 'CRITICAL', 1, true),
+('FLOOD_HIGH', 'FLOOD', 'HIGH', 1, true),
+('FLOOD_MEDIUM', 'FLOOD', 'MEDIUM', 1, true),
+('FLOOD_LOW', 'FLOOD', 'LOW', 1, true),
 ('HEALTH_CRISIS_CRITICAL', 'HEALTH_CRISIS', 'CRITICAL', 1, true),
-('CAR_CRASH_CRITICAL', 'CAR_CRASH', 'CRITICAL', 1, true);
+('HEALTH_CRISIS_HIGH', 'HEALTH_CRISIS', 'HIGH', 1, true),
+('HEALTH_CRISIS_MEDIUM', 'HEALTH_CRISIS', 'MEDIUM', 1, true),
+('HEALTH_CRISIS_LOW', 'HEALTH_CRISIS', 'LOW', 1, true),
+('CAR_CRASH_CRITICAL', 'CAR_CRASH', 'CRITICAL', 1, true),
+('CAR_CRASH_HIGH', 'CAR_CRASH', 'HIGH', 1, true),
+('CAR_CRASH_MEDIUM', 'CAR_CRASH', 'MEDIUM', 1, true),
+('CAR_CRASH_LOW', 'CAR_CRASH', 'LOW', 1, true);
+('EARTHQUAKE_LOW', 'EARTHQUAKE', 'LOW', 1, true);
+('EARTHQUAKE_MEDIUM', 'EARTHQUAKE', 'MEDIUM', 1, true);
+('EARTHQUAKE_HIGH', 'EARTHQUAKE', 'HIGH', 1, true);
+('EARTHQUAKE_CRITICAL', 'EARTHQUAKE', 'CRITICAL', 1, true);
