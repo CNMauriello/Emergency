@@ -34,7 +34,7 @@
       <bpmn:incoming>Flow_Police_To_Join1</bpmn:incoming>
       <bpmn:outgoing>Flow_Join1_To_Context</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Flood Context">
+    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Assess Flood Context" default="Flow_No_Additional_Action">
       <bpmn:incoming>Flow_Join1_To_Context</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Ambulance</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_Evacuation</bpmn:outgoing>
@@ -56,7 +56,7 @@
       <bpmn:outgoing>Flow_Ambulance_End</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:sequenceFlow id="Flow_To_Evacuation" name="Evacuation Needed" sourceRef="Gateway_Emergency_Context" targetRef="Call_Evacuation">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.needs_evacuation</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:callActivity id="Call_Evacuation" name="Execute Evacuation">
       <bpmn:extensionElements>
@@ -68,9 +68,7 @@
       <bpmn:incoming>Flow_To_Evacuation</bpmn:incoming>
       <bpmn:outgoing>Flow_Evacuation_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_No_Additional_Action" name="No extra action" sourceRef="Gateway_Emergency_Context" targetRef="End_Flood_Emergency">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured = false and incident_context.needs_evacuation = false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_No_Additional_Action" name="No extra action" sourceRef="Gateway_Emergency_Context" targetRef="End_Flood_Emergency" />
     <bpmn:endEvent id="End_Flood_Emergency" name="Flood Response Completed">
       <bpmn:incoming>Flow_No_Additional_Action</bpmn:incoming>
       <bpmn:incoming>Flow_Ambulance_End</bpmn:incoming>
@@ -90,14 +88,11 @@
       <bpmndi:BPMNShape id="Start_Flood_Emergency_di" bpmnElement="Start_Flood_Emergency">
         <dc:Bounds x="170" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="149" y="273" width="79" height="14" />
+          <dc:Bounds x="148" y="287" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Dispatch_Start_di" bpmnElement="Gateway_Dispatch_Start" isMarkerVisible="true">
         <dc:Bounds x="355" y="230" width="50" height="50" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Call_FloodResponse_di" bpmnElement="Call_FloodResponse">
-        <dc:Bounds x="570" y="80" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Dispatch_End_di" bpmnElement="Gateway_Dispatch_End" isMarkerVisible="true">
         <dc:Bounds x="820" y="230" width="50" height="50" />
@@ -105,7 +100,7 @@
       <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
         <dc:Bounds x="1020" y="230" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1012" y="280" width="67" height="27" />
+          <dc:Bounds x="946" y="280" width="67" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
@@ -121,42 +116,17 @@
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_PoliceIntervention_di" bpmnElement="Call_PoliceIntervention">
-        <dc:Bounds x="570" y="380" width="150" height="80" />
+        <dc:Bounds x="515" y="380" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_Start_To_Split1_di" bpmnElement="Flow_Start_To_Split1">
-        <di:waypoint x="206" y="255" />
-        <di:waypoint x="355" y="255" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_To_FloodResponse_di" bpmnElement="Flow_To_FloodResponse">
-        <di:waypoint x="380" y="230" />
-        <di:waypoint x="380" y="120" />
-        <di:waypoint x="570" y="120" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_To_Police_di" bpmnElement="Flow_To_Police">
-        <di:waypoint x="380" y="280" />
-        <di:waypoint x="380" y="420" />
-        <di:waypoint x="570" y="420" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_FloodResponse_To_Join1_di" bpmnElement="Flow_FloodResponse_To_Join1">
-        <di:waypoint x="720" y="120" />
-        <di:waypoint x="845" y="120" />
-        <di:waypoint x="845" y="230" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Police_To_Join1_di" bpmnElement="Flow_Police_To_Join1">
-        <di:waypoint x="720" y="420" />
-        <di:waypoint x="845" y="420" />
-        <di:waypoint x="845" y="280" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Join1_To_Context_di" bpmnElement="Flow_Join1_To_Context">
-        <di:waypoint x="870" y="255" />
-        <di:waypoint x="1020" y="255" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Call_FloodResponse_di" bpmnElement="Call_FloodResponse">
+        <dc:Bounds x="515" y="80" width="150" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_To_Ambulance_di" bpmnElement="Flow_To_Ambulance">
         <di:waypoint x="1045" y="230" />
         <di:waypoint x="1045" y="120" />
         <di:waypoint x="1200" y="120" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1025" y="165" width="71" height="14" />
+          <dc:Bounds x="1054" y="133" width="71" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Evacuation_di" bpmnElement="Flow_To_Evacuation">
@@ -164,7 +134,7 @@
         <di:waypoint x="1045" y="420" />
         <di:waypoint x="1200" y="420" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1033" y="340" width="55" height="27" />
+          <dc:Bounds x="1072" y="386" width="78" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_No_Additional_Action_di" bpmnElement="Flow_No_Additional_Action">
@@ -173,6 +143,34 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1208" y="230" width="74" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Start_To_Split1_di" bpmnElement="Flow_Start_To_Split1">
+        <di:waypoint x="206" y="255" />
+        <di:waypoint x="355" y="255" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_To_FloodResponse_di" bpmnElement="Flow_To_FloodResponse">
+        <di:waypoint x="380" y="230" />
+        <di:waypoint x="380" y="120" />
+        <di:waypoint x="515" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_To_Police_di" bpmnElement="Flow_To_Police">
+        <di:waypoint x="380" y="280" />
+        <di:waypoint x="380" y="420" />
+        <di:waypoint x="515" y="420" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_FloodResponse_To_Join1_di" bpmnElement="Flow_FloodResponse_To_Join1">
+        <di:waypoint x="665" y="120" />
+        <di:waypoint x="845" y="120" />
+        <di:waypoint x="845" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Police_To_Join1_di" bpmnElement="Flow_Police_To_Join1">
+        <di:waypoint x="665" y="420" />
+        <di:waypoint x="845" y="420" />
+        <di:waypoint x="845" y="280" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Join1_To_Context_di" bpmnElement="Flow_Join1_To_Context">
+        <di:waypoint x="870" y="255" />
+        <di:waypoint x="1020" y="255" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Ambulance_End_di" bpmnElement="Flow_Ambulance_End">
         <di:waypoint x="1350" y="120" />

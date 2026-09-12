@@ -34,7 +34,7 @@
       <bpmn:incoming>Flow_From_Police</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Context</bpmn:outgoing>
     </bpmn:parallelGateway>
-    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Emergency Context Flags">
+    <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Emergency Context Flags" default="Flow_No_Injured_Trapped">
       <bpmn:incoming>Flow_To_Context</bpmn:incoming>
       <bpmn:outgoing>Flow_Injured_People</bpmn:outgoing>
       <bpmn:outgoing>Flow_Trapped_People</bpmn:outgoing>
@@ -68,9 +68,7 @@
       <bpmn:incoming>Flow_Trapped_People</bpmn:incoming>
       <bpmn:outgoing>Flow_Evacuation_End</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:sequenceFlow id="Flow_No_Injured_Trapped" name="No injured or trapped" sourceRef="Gateway_Emergency_Context" targetRef="End_Emergency_Response">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped = false and incident_context.has_injured = false</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_No_Injured_Trapped" name="No injured or trapped" sourceRef="Gateway_Emergency_Context" targetRef="End_Emergency_Response" />
     <bpmn:endEvent id="End_Emergency_Response" name="Emergency Response Completed">
       <bpmn:incoming>Flow_No_Injured_Trapped</bpmn:incoming>
       <bpmn:incoming>Flow_Ambulance_End</bpmn:incoming>
@@ -105,6 +103,12 @@
       <bpmndi:BPMNShape id="Gateway_Dispatch_End_di" bpmnElement="Gateway_Dispatch_End" isMarkerVisible="true">
         <dc:Bounds x="820" y="230" width="50" height="50" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
+        <dc:Bounds x="965" y="230" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="956" y="280" width="68" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
         <dc:Bounds x="1200" y="80" width="150" height="80" />
       </bpmndi:BPMNShape>
@@ -115,12 +119,6 @@
         <dc:Bounds x="1420" y="237" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1466" y="235" width="56" height="40" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
-        <dc:Bounds x="965" y="230" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="956" y="280" width="68" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_Injured_People_di" bpmnElement="Flow_Injured_People">
