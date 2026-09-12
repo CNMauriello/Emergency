@@ -105,6 +105,13 @@ public class WorkflowStorageService {
                 case "CRITICAL" -> "HEALTH_CRISIS_CRITICAL";
                 default -> "UNKNOWN";
             };
+            case "EARTHQUAKE" -> switch (severity) {
+                case "LOW" -> "EARTHQUAKE_LOW";
+                case "MEDIUM" -> "EARTHQUAKE_MEDIUM";
+                case "HIGH" -> "EARTHQUAKE_HIGH";
+                case "CRITICAL" -> "EARTHQUAKE_CRITICAL";
+                default -> "UNKNOWN";
+            };
             case "UNKNOWN" -> "GENERIC_RESPONSE";
             default -> "UNKNOWN";
         };

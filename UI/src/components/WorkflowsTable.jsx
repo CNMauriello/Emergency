@@ -113,10 +113,10 @@ export default function WorkflowsTable() {
     const workflowGroups = Object.values(groupedWorkflows);
 
     return (
-        <div className="flex-1 flex gap-6 p-8 bg-transparent">
+        <div className="flex-1 flex gap-6 p-8 bg-transparent min-h-0">
             {/* Table Area */}
-            <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-fit overflow-hidden">
-                <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100">
+            <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col min-h-0 overflow-hidden">
+                <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 shrink-0">
                     <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
                         <i className="fas fa-project-diagram text-[#1976d2]"></i>
                         Gestione Processi BPMN
@@ -148,9 +148,10 @@ export default function WorkflowsTable() {
                     </div>
                 )}
 
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200 bg-gray-50/50">
+                <div className="overflow-y-auto flex-1">
+                    <table className="w-full text-left relative">
+                        <thead className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 shadow-sm">
+                            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200">
                             <th className="px-6 py-4">Process Key</th>
                             <th className="px-6 py-4">Event Type</th>
                             <th className="px-6 py-4">Gravity</th>
@@ -208,7 +209,8 @@ export default function WorkflowsTable() {
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
 
             {isWorkflowModalOpen && (

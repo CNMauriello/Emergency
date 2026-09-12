@@ -110,10 +110,10 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Header */}
-        <div className="bg-[#0B1B32] p-5 flex justify-between items-center text-white">
+        <div className="bg-[#0B1B32] p-5 flex justify-between items-center text-white shrink-0">
           <div>
             <h2 className="text-lg font-bold flex items-center gap-2">
               <i className="fas fa-project-diagram text-[#6ea8fe]"></i> Registra Nuovo Piano
@@ -132,7 +132,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6">
+        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto">
           <div className="space-y-6">
             
             {/* File Upload Box */}
