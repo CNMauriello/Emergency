@@ -23,7 +23,7 @@ spec:
       containers:
         - name: db-seeder
           image: khondor/db-seeder:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: emergency-config
@@ -53,6 +53,13 @@ spec:
                 echo 'Waiting for auth_db.users...'; \
                 sleep 5; \
               done; \
-              echo 'Tables are ready! Executing seeder scripts...' && \
+              echo 'Tables are ready!'; \
+              echo 'Waiting for gateway-service...'; \
+              until curl -sf --max-time 5 http://gateway-service:8090/ > /dev/null 2>&1; do \
+                echo 'Waiting for gateway-service:8090...'; \
+                sleep 5; \
+              done; \
+              echo 'Gateway is ready!'; \
+              echo 'Executing seeder scripts...'; \
               chmod +x run_scripts.sh && \
               ./run_scripts.sh
