@@ -113,7 +113,7 @@ export default function WorkflowsTable() {
     const workflowGroups = Object.values(groupedWorkflows);
 
     return (
-        <div className="flex-1 flex gap-6 p-8 bg-transparent min-h-0">
+        <div className="flex-1 flex gap-6 p-8 bg-transparent min-h-0 h-full overflow-hidden">
             {/* Table Area */}
             <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col min-h-0 overflow-hidden">
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 shrink-0">

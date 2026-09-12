@@ -173,6 +173,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
                   <option value="FLOOD">FLOOD (Allagamento)</option>
                   <option value="CAR_CRASH">CAR_CRASH (Incidente)</option>
                   <option value="HEALTH_CRISIS">HEALTH_CRISIS (Sanitaria)</option>
+                  <option value="EARTHQUAKE">EARTHQUAKE (Terremoto)</option>
                 </select>
               </div>
 
