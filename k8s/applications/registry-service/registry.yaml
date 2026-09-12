@@ -16,7 +16,7 @@ spec:
       containers:
         - name: registry-service
           image: khondor/registry-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: emergency-config

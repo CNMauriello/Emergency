@@ -16,7 +16,7 @@ spec:
       containers:
         - name: operator-service
           image: khondor/operator-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: emergency-config

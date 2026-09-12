@@ -305,26 +305,26 @@ INSERT INTO capability (name) VALUES
 INSERT INTO emergency_service
     (avg_latency, current_load, endpoint, latitude, longitude, status, type)
 VALUES
-(18.5, 32.0, 'http://gateway-service:8090/fire-station-napoli.local/api', 40.8518, 14.2681, 'UP', 'FIRE_STATION'),
-(25.2, 45.0, 'http://gateway-service:8090/fire-station-salerno.local/api', 40.6824, 14.7681, 'UP', 'FIRE_STATION'),
-(41.7, 67.0, 'http://gateway-service:8090/fire-station-caserta.local/api', 41.0747, 14.3320, 'DEGRADED', 'FIRE_STATION'),
-(12.3, 28.0, 'http://gateway-service:8090/hospital-napoli.local/api', 40.8522, 14.2685, 'UP', 'HOSPITAL'),
-(35.8, 71.0, 'http://gateway-service:8090/hospital-salerno.local/api', 40.6782, 14.7653, 'DEGRADED', 'HOSPITAL'),
-(15.6, 19.0, 'http://gateway-service:8090/hospital-caserta.local/api', 41.0731, 14.3325, 'UP', 'HOSPITAL'),
-(22.4, 38.0, 'http://gateway-service:8090/police-napoli.local/api', 40.8467, 14.2516, 'UP', 'POLICE'),
-(19.8, 52.0, 'http://gateway-service:8090/police-salerno.local/api', 40.6810, 14.7680, 'UP', 'POLICE'),
-(55.4, 89.0, 'http://gateway-service:8090/police-caserta.local/api', 41.0745, 14.3328, 'DEGRADED', 'POLICE'),
-(8.7, 14.0, 'http://gateway-service:8090/fire-station-pozzuoli.local/api', 40.8231, 14.1216, 'UP', 'FIRE_STATION'),
-(29.3, 43.0, 'http://gateway-service:8090/hospital-pozzuoli.local/api', 40.8230, 14.1220, 'UP', 'HOSPITAL'),
-(17.1, 26.0, 'http://gateway-service:8090/police-pozzuoli.local/api', 40.8235, 14.1225, 'UP', 'POLICE'),
-(63.2, 92.0, 'http://gateway-service:8090/fire-station-avellino.local/api', 40.9140, 14.7920, 'DEGRADED', 'FIRE_STATION'),
-(14.9, 22.0, 'http://gateway-service:8090/hospital-avellino.local/api', 40.9150, 14.7915, 'UP', 'HOSPITAL'),
-(31.5, 61.0, 'http://gateway-service:8090/police-avellino.local/api', 40.9145, 14.7925, 'UP', 'POLICE'),
-(11.2, 17.0, 'http://gateway-service:8090/fire-station-benevento.local/api', 41.1297, 14.7826, 'UP', 'FIRE_STATION'),
-(27.6, 48.0, 'http://gateway-service:8090/hospital-benevento.local/api', 41.1298, 14.7820, 'UP', 'HOSPITAL'),
-(46.8, 76.0, 'http://gateway-service:8090/police-benevento.local/api', 41.1300, 14.7830, 'DEGRADED', 'POLICE'),
-(9.4, 12.0, 'http://gateway-service:8090/fire-station-sorrento.local/api', 40.6263, 14.3758, 'UP', 'FIRE_STATION'),
-(21.7, 34.0, 'http://gateway-service:8090/hospital-sorrento.local/api', 40.6268, 14.3762, 'UP', 'HOSPITAL');
+(18.5, 32.0, 'http://172.31.0.110:8090/fire-station-napoli.local/api', 40.8518, 14.2681, 'UP', 'FIRE_STATION'),
+(25.2, 45.0, 'http://172.31.0.110:8090/fire-station-salerno.local/api', 40.6824, 14.7681, 'UP', 'FIRE_STATION'),
+(41.7, 67.0, 'http://172.31.0.110:8090/fire-station-caserta.local/api', 41.0747, 14.3320, 'DEGRADED', 'FIRE_STATION'),
+(12.3, 28.0, 'http://172.31.0.110:8090/hospital-napoli.local/api', 40.8522, 14.2685, 'UP', 'HOSPITAL'),
+(35.8, 71.0, 'http://172.31.0.110:8090/hospital-salerno.local/api', 40.6782, 14.7653, 'DEGRADED', 'HOSPITAL'),
+(15.6, 19.0, 'http://172.31.0.110:8090/hospital-caserta.local/api', 41.0731, 14.3325, 'UP', 'HOSPITAL'),
+(22.4, 38.0, 'http://172.31.0.110:8090/police-napoli.local/api', 40.8467, 14.2516, 'UP', 'POLICE'),
+(19.8, 52.0, 'http://172.31.0.110:8090/police-salerno.local/api', 40.6810, 14.7680, 'UP', 'POLICE'),
+(55.4, 89.0, 'http://172.31.0.110:8090/police-caserta.local/api', 41.0745, 14.3328, 'DEGRADED', 'POLICE'),
+(8.7, 14.0, 'http://172.31.0.110:8090/fire-station-pozzuoli.local/api', 40.8231, 14.1216, 'UP', 'FIRE_STATION'),
+(29.3, 43.0, 'http://172.31.0.110:8090/hospital-pozzuoli.local/api', 40.8230, 14.1220, 'UP', 'HOSPITAL'),
+(17.1, 26.0, 'http://172.31.0.110:8090/police-pozzuoli.local/api', 40.8235, 14.1225, 'UP', 'POLICE'),
+(63.2, 92.0, 'http://172.31.0.110:8090/fire-station-avellino.local/api', 40.9140, 14.7920, 'DEGRADED', 'FIRE_STATION'),
+(14.9, 22.0, 'http://172.31.0.110:8090/hospital-avellino.local/api', 40.9150, 14.7915, 'UP', 'HOSPITAL'),
+(31.5, 61.0, 'http://172.31.0.110:8090/police-avellino.local/api', 40.9145, 14.7925, 'UP', 'POLICE'),
+(11.2, 17.0, 'http://172.31.0.110:8090/fire-station-benevento.local/api', 41.1297, 14.7826, 'UP', 'FIRE_STATION'),
+(27.6, 48.0, 'http://172.31.0.110:8090/hospital-benevento.local/api', 41.1298, 14.7820, 'UP', 'HOSPITAL'),
+(46.8, 76.0, 'http://172.31.0.110:8090/police-benevento.local/api', 41.1300, 14.7830, 'DEGRADED', 'POLICE'),
+(9.4, 12.0, 'http://172.31.0.110:8090/fire-station-sorrento.local/api', 40.6263, 14.3758, 'UP', 'FIRE_STATION'),
+(21.7, 34.0, 'http://172.31.0.110:8090/hospital-sorrento.local/api', 40.6268, 14.3762, 'UP', 'HOSPITAL');
 
 INSERT INTO emergency_service_capability (service_instance_id, capability_id)
 SELECT 1, id FROM capability WHERE name IN ('FireSuppression','SearchAndRescue','HazmatResponse','DisasterResponse');

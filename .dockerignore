@@ -1,9 +1,0 @@
-target/
-*/target/
-.git/
-.idea/
-*.iml
-.DS_Store
-.env
-UI/node_modules/
-UI/dist/

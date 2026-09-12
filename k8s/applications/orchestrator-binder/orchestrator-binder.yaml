@@ -16,7 +16,7 @@ spec:
       containers:
         - name: orchestrator-binder
           image: khondor/orchestrator-binder:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: emergency-config

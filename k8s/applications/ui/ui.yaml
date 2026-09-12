@@ -16,7 +16,7 @@ spec:
       containers:
         - name: emergency-ui
           image: khondor/ui:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           readinessProbe:

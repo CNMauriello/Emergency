@@ -16,7 +16,7 @@ spec:
       containers:
         - name: mock-service
           image: khondor/mock-service:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: emergency-config

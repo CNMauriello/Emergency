@@ -3,18 +3,29 @@ kind: Ingress
 metadata:
   name: emergency-ingress
   namespace: assd-orchestration
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
     - http:
         paths:
-          - path: /api
-            pathType: Prefix
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: gateway-service
                 port:
                   number: 8090
+
+          - path: /[a-zA-Z0-9-]+\.local/api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 8090
+
           - path: /
             pathType: Prefix
             backend:
