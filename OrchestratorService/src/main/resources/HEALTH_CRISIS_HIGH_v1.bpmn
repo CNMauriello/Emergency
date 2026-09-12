@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Health_Emergency_High" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
+  <bpmn:process id="HEALTH_CRISIS_HIGH" name="Health Emergency Plan (High)" isExecutable="true">
+    <bpmn:startEvent id="Start_Emergency_Response_Plan" name="Start Health Emergency">
+      <bpmn:outgoing>Flow_Start</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:callActivity id="Call_PoliceIntervention" name="Police (Clear Area &#38; Escort)">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;PoliceIntervention&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Start</bpmn:incoming>
+      <bpmn:outgoing>Flow_To_Context</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:exclusiveGateway id="Gateway_Health_Context" name="Patient Status">
+      <bpmn:incoming>Flow_To_Context</bpmn:incoming>
+      <bpmn:outgoing>Flow_Unconscious</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Injured</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Safe</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_Unconscious" name="Unconscious (Critical)" sourceRef="Gateway_Health_Context" targetRef="Call_TraumaCare">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_unconscious = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:callActivity id="Call_TraumaCare" name="Dispatch ALS (Trauma Care)">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;TraumaCare&#34;" target="requiredCapability" />
+          <zeebe:input source="=coordinates.latitude" target="latitude" />
+          <zeebe:input source="=coordinates.longitude" target="longitude" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Unconscious</bpmn:incoming>
+      <bpmn:outgoing>Flow_Trauma_To_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Injured" name="Injured / Conscious" sourceRef="Gateway_Health_Context" targetRef="Call_Ambulance">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_unconscious = false and incident_context.has_injured = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:callActivity id="Call_Ambulance" name="Dispatch BLS (Ambulance)">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;Ambulance&#34;" target="requiredCapability" />
+          <zeebe:input source="=coordinates.latitude" target="latitude" />
+          <zeebe:input source="=coordinates.longitude" target="longitude" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Injured</bpmn:incoming>
+      <bpmn:outgoing>Flow_Ambulance_To_End</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Safe" name="No medical need" sourceRef="Gateway_Health_Context" targetRef="End_Emergency_Response">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_unconscious = false and incident_context.has_injured = false</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="End_Emergency_Response" name="Response Completed">
+      <bpmn:incoming>Flow_Trauma_To_End</bpmn:incoming>
+      <bpmn:incoming>Flow_Ambulance_To_End</bpmn:incoming>
+      <bpmn:incoming>Flow_Safe</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Start" sourceRef="Start_Emergency_Response_Plan" targetRef="Call_PoliceIntervention" />
+    <bpmn:sequenceFlow id="Flow_To_Context" sourceRef="Call_PoliceIntervention" targetRef="Gateway_Health_Context" />
+    <bpmn:sequenceFlow id="Flow_Trauma_To_End" sourceRef="Call_TraumaCare" targetRef="End_Emergency_Response" />
+    <bpmn:sequenceFlow id="Flow_Ambulance_To_End" sourceRef="Call_Ambulance" targetRef="End_Emergency_Response" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Health_Emergency_High">
+    <bpmndi:BPMNPlane id="BPMNPlane_Health_Emergency_High" bpmnElement="HEALTH_CRISIS_HIGH">
+      <bpmndi:BPMNShape id="Start_Emergency_Response_Plan_di" bpmnElement="Start_Emergency_Response_Plan">
+        <dc:Bounds x="150" y="232" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="139" y="275" width="59" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_PoliceIntervention_di" bpmnElement="Call_PoliceIntervention">
+        <dc:Bounds x="250" y="210" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_TraumaCare_di" bpmnElement="Call_TraumaCare">
+        <dc:Bounds x="650" y="80" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
+        <dc:Bounds x="650" y="340" width="150" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
+        <dc:Bounds x="900" y="232" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="946" y="236" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Health_Context_di" bpmnElement="Gateway_Health_Context" isMarkerVisible="true">
+        <dc:Bounds x="435" y="225" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="425" y="285" width="69" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Unconscious_di" bpmnElement="Flow_Unconscious">
+        <di:waypoint x="460" y="225" />
+        <di:waypoint x="460" y="120" />
+        <di:waypoint x="650" y="120" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="478" y="86" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Injured_di" bpmnElement="Flow_Injured">
+        <di:waypoint x="460" y="275" />
+        <di:waypoint x="460" y="380" />
+        <di:waypoint x="650" y="380" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="477" y="386" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Safe_di" bpmnElement="Flow_Safe">
+        <di:waypoint x="485" y="250" />
+        <di:waypoint x="900" y="250" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="546" y="232" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Start_di" bpmnElement="Flow_Start">
+        <di:waypoint x="186" y="250" />
+        <di:waypoint x="250" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_To_Context_di" bpmnElement="Flow_To_Context">
+        <di:waypoint x="400" y="250" />
+        <di:waypoint x="435" y="250" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Trauma_To_End_di" bpmnElement="Flow_Trauma_To_End">
+        <di:waypoint x="800" y="120" />
+        <di:waypoint x="918" y="120" />
+        <di:waypoint x="918" y="232" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Ambulance_To_End_di" bpmnElement="Flow_Ambulance_To_End">
+        <di:waypoint x="800" y="380" />
+        <di:waypoint x="918" y="380" />
+        <di:waypoint x="918" y="268" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
