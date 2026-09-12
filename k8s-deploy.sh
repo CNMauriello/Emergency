@@ -453,7 +453,7 @@ kubectl exec mysql-db-0 \
 USE auth_db;
 
 SELECT
-  id,
+  id_user,
   username,
   name,
   surname,
