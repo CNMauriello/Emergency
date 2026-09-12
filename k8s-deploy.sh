@@ -305,6 +305,165 @@ kubectl logs \
   --all-containers=true
 
 echo ""
+echo "=== WAIT FOR GATEWAY HTTP ==="
+
+kubectl run gateway-wait \
+  --rm -i \
+  --restart=Never \
+  -n "$NAMESPACE" \
+  --image=curlimages/curl:8.10.1 \
+  -- sh -c '
+    echo "Waiting for gateway-service:8090..."
+
+    until curl -sS --max-time 5 http://gateway-service:8090/ > /dev/null 2>&1; do
+      echo "Gateway not ready yet..."
+      sleep 5
+    done
+
+    echo "Gateway HTTP endpoint is ready!"
+  '
+
+echo ""
+echo "=== WAIT FOR AUTH SERVICE ==="
+
+kubectl run auth-wait \
+  --rm -i \
+  --restart=Never \
+  -n "$NAMESPACE" \
+  --image=curlimages/curl:8.10.1 \
+  -- sh -c '
+    echo "Waiting for auth-service:8088..."
+
+    until curl -sS --max-time 5 http://auth-service:8088/actuator > /dev/null 2>&1; do
+      echo "AuthService not ready yet..."
+      sleep 5
+    done
+
+    echo "AuthService HTTP endpoint is ready!"
+  '
+
+echo ""
+echo "=== REGISTER OPERATORS ==="
+
+kubectl run debug-network \
+  --rm -i \
+  --restart=Never \
+  -n "$NAMESPACE" \
+  --image=curlimages/curl:8.10.1 \
+  -- sh -c '
+    register_operator() {
+      NAME="$1"
+      PAYLOAD="$2"
+
+      echo ""
+      echo "=== REGISTER $NAME ==="
+
+      ATTEMPT=1
+
+      while [ "$ATTEMPT" -le 10 ]; do
+        echo "Attempt $ATTEMPT/10..."
+
+        HTTP_CODE=$(curl -sS \
+          -o /tmp/response.txt \
+          -w "%{http_code}" \
+          -X POST "http://gateway-service:8090/api/auth/register" \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" || true)
+
+        if [ "$HTTP_CODE" = "200" ]; then
+          cat /tmp/response.txt
+          echo ""
+          echo "$NAME registrato"
+          return 0
+        fi
+
+        echo "HTTP $HTTP_CODE"
+        cat /tmp/response.txt
+        echo ""
+        echo "Registration failed, retrying in 5 seconds..."
+        sleep 5
+
+        ATTEMPT=$((ATTEMPT + 1))
+      done
+
+      echo "ERROR: impossibile registrare $NAME dopo 10 tentativi"
+      return 1
+    }
+
+    register_operator \
+      "MARIO ROSSI" \
+      "{\"username\":\"mario.rossi\",\"email\":\"mario.rossi@emergency.com\",\"password\":\"Password123!\",\"name\":\"Mario\",\"surname\":\"Rossi\"}"
+
+    register_operator \
+      "LUIGI VERDI" \
+      "{\"username\":\"luigi.verdi\",\"email\":\"luigi.verdi@emergency.com\",\"password\":\"Password123!\",\"name\":\"Luigi\",\"surname\":\"Verdi\"}"
+
+    register_operator \
+      "GIULIA BIANCHI" \
+      "{\"username\":\"giulia.bianchi\",\"email\":\"giulia.bianchi@emergency.com\",\"password\":\"Password123!\",\"name\":\"Giulia\",\"surname\":\"Bianchi\"}"
+
+    register_operator \
+      "MARIA VIOLA" \
+      "{\"username\":\"maria.viola\",\"email\":\"maria.viola@emergency.com\",\"password\":\"Password123!\",\"name\":\"Maria\",\"surname\":\"Viola\"}"
+
+    register_operator \
+      "GIACOMO NERI" \
+      "{\"username\":\"giacomo.neri\",\"email\":\"giacomo.neri@emergency.com\",\"password\":\"Password123!\",\"name\":\"Giacomo\",\"surname\":\"Neri\"}"
+
+    echo ""
+    echo "=== ALL OPERATORS REGISTERED ==="
+  '
+
+echo ""
+echo "=== UPDATE OPERATOR ROLES ==="
+
+kubectl exec mysql-db-0 \
+  -n "$NAMESPACE" \
+  -- mysql \
+  -u emergency \
+  -p'Emergency123456@' \
+  -e "
+USE auth_db;
+
+UPDATE users
+SET role = 'ROLE_ROOM_OPERATOR'
+WHERE name IN ('Mario', 'Luigi', 'Giulia')
+  AND surname IN ('Rossi', 'Verdi', 'Bianchi');
+
+UPDATE users
+SET role = 'ROLE_WORKFLOW_EXPERT'
+WHERE name = 'Maria'
+  AND surname = 'Viola';
+
+UPDATE users
+SET role = 'ROLE_SERVICE_OPERATOR'
+WHERE name = 'Giacomo'
+  AND surname = 'Neri';
+"
+
+echo ""
+echo "=== VERIFY OPERATORS AND ROLES ==="
+
+kubectl exec mysql-db-0 \
+  -n "$NAMESPACE" \
+  -- mysql \
+  -u emergency \
+  -p'Emergency123456@' \
+  -e "
+USE auth_db;
+
+SELECT
+  id,
+  username,
+  name,
+  surname,
+  role
+FROM users
+WHERE surname IN ('Rossi', 'Verdi', 'Bianchi', 'Viola', 'Neri')
+ORDER BY id;
+"
+
+echo ""
 echo "=== APPLY INGRESS ==="
 
 kubectl apply \

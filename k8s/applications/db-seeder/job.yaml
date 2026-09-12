@@ -17,8 +17,8 @@ spec:
             - -c
             - |
               until mysqladmin ping -h mysql-db --silent; do
-                echo 'waiting for mysql...';
-                sleep 5;
+                echo 'waiting for mysql...'
+                sleep 5
               done
       containers:
         - name: db-seeder
@@ -34,8 +34,6 @@ spec:
               value: "mysql-db"
             - name: DB_EXPOSED_PORT
               value: "3306"
-            - name: API_URL
-              value: "http://gateway-service:8090/api/auth/register"
             - name: MYSQL_OPTS
               value: "--skip-ssl"
           command:
@@ -43,7 +41,7 @@ spec:
             - -c
             - |
               apt-get update && \
-              apt-get install -y default-mysql-client curl && \
+              apt-get install -y default-mysql-client && \
               echo 'Waiting for microservices to create tables...' && \
               until mysql -h "$DB_EXPOSED_HOST" -P "$DB_EXPOSED_PORT" -u "$DB_USERNAME" -p"$DB_PASSWORD" -e "DESCRIBE operator_db.operators;" > /dev/null 2>&1; do \
                 echo 'Waiting for operator_db.operators...'; \
@@ -54,12 +52,6 @@ spec:
                 sleep 5; \
               done; \
               echo 'Tables are ready!'; \
-              echo 'Waiting for gateway-service...'; \
-              until curl -sf --max-time 5 http://gateway-service:8090/ > /dev/null 2>&1; do \
-                echo 'Waiting for gateway-service:8090...'; \
-                sleep 5; \
-              done; \
-              echo 'Gateway is ready!'; \
-              echo 'Executing seeder scripts...'; \
-              chmod +x run_scripts.sh && \
-              ./run_scripts.sh
+              echo 'Executing populate...'; \
+              chmod +x /app/run_scripts.sh && \
+              /app/run_scripts.sh
