@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { API_BASE_URL, fetchWithAuth } from '../config.js';
-import { FileText } from 'lucide-react';
+import { FileText, Network } from 'lucide-react';
 import WorkflowModal from './WorkflowModal.jsx';
 import BpmnViewerModal from './BpmnViewerModal.jsx';
 
-export default function WorkflowsTable() {
+export default function WorkflowsTable({ searchQuery }) {
     const [workflows, setWorkflows] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -82,7 +82,15 @@ export default function WorkflowsTable() {
     };
 
     // Group workflows by processKey
-    const groupedWorkflows = workflows.reduce((acc, wf) => {
+    const filteredWorkflows = workflows.filter(wf => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (wf.processKey || '').toLowerCase().includes(q) ||
+               (wf.eventType || '').toLowerCase().includes(q) ||
+               (wf.gravity || '').toLowerCase().includes(q);
+    });
+
+    const groupedWorkflows = filteredWorkflows.reduce((acc, wf) => {
         if (!acc[wf.processKey]) {
             acc[wf.processKey] = {
                 processKey: wf.processKey,
@@ -113,13 +121,22 @@ export default function WorkflowsTable() {
     const workflowGroups = Object.values(groupedWorkflows);
 
     return (
-        <div className="flex-1 flex gap-6 p-8 bg-transparent min-h-0 h-full overflow-hidden">
+        <div className="flex-1 flex flex-col p-8 bg-transparent min-h-0 h-full overflow-hidden">
+            <div className="mb-6 flex justify-between items-end flex-shrink-0">
+                <div>
+                    <h1 className="text-[28px] font-bold text-[#0B1B32] flex items-center gap-2">
+                        <Network className="w-6 h-6 text-[#6ea8fe]" /> BPMN Process Management
+                    </h1>
+                    <p className="text-gray-500 mt-1">Configuration and monitoring of operational workflows for emergencies.</p>
+                </div>
+            </div>
+
             {/* Table Area */}
             <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col min-h-0 overflow-hidden">
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 shrink-0">
                     <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
-                        <i className="fas fa-project-diagram text-[#1976d2]"></i>
-                        Gestione Processi BPMN
+                        <i className="fas fa-list text-[#0B1B32]"></i>
+                        Lista Processi
                     </h2>
                     <div className="flex items-center gap-3">
                         <button 
@@ -181,9 +198,21 @@ export default function WorkflowsTable() {
                                 <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32]">{group.processKey}</td>
                                 <td className="px-6 py-4 text-[13px] text-gray-600">{group.eventType}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`px-2.5 py-1 text-[10px] font-bold text-white rounded ${group.gravity === 'CRITICA' ? 'bg-[#d32f2f]' : group.gravity === 'ALTA' ? 'bg-[#ed6c02]' : 'bg-[#fbc02d]'}`}>
-                                        {group.gravity}
-                                    </span>
+                                    {(() => {
+                                        const derivedGravity = group.gravity || (group.processKey.includes('_') ? group.processKey.split('_').pop() : 'UNKNOWN');
+                                        const severityUpper = derivedGravity.toUpperCase();
+                                        let severityBg = 'bg-gray-400';
+                                        if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') severityBg = 'bg-[#d32f2f]';
+                                        else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') severityBg = 'bg-[#ef5350]';
+                                        else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') severityBg = 'bg-[#ed6c02]';
+                                        else if (severityUpper === 'BASSA' || severityUpper === 'LOW') severityBg = 'bg-[#eab308]';
+                                        
+                                        return (
+                                            <span className={`px-2.5 py-1 text-[10px] font-bold text-white rounded ${severityBg}`}>
+                                                {derivedGravity}
+                                            </span>
+                                        );
+                                    })()}
                                 </td>
                                 <td className="px-6 py-4 text-[13px] font-mono text-gray-500">
                                     <select 

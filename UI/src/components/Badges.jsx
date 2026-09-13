@@ -9,8 +9,8 @@ export function CategoryBadge({ category }) {
 export function StatusBadge({ status }) {
   if (status === 'UP' || status === 'ACTIVE') {
     return (
-      <span className="text-[#3b82f6] font-medium text-xs flex items-center gap-1.5 uppercase tracking-wide">
-        <i className="fas fa-circle text-[8px]"></i> ACTIVE
+      <span className="text-green-500 font-medium text-xs flex items-center gap-1.5 uppercase tracking-wide">
+        <i className="fas fa-circle text-[8px] animate-pulse"></i> ACTIVE
       </span>
     )
   }
@@ -22,7 +22,7 @@ export function StatusBadge({ status }) {
     )
   }
   return (
-    <span className="text-gray-400 font-medium text-xs flex items-center gap-1.5 uppercase tracking-wide">
+    <span className="text-red-500 font-medium text-xs flex items-center gap-1.5 uppercase tracking-wide">
       <i className="fas fa-circle text-[8px]"></i> OFFLINE
     </span>
   )

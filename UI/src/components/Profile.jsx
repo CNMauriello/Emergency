@@ -38,26 +38,26 @@ export default function Profile() {
         {/* Corpo Profilo */}
         <div className="p-8">
           <h2 className="text-lg font-bold text-[#0B1B32] mb-6 flex items-center gap-2 border-b border-gray-100 pb-3">
-            <UserCircle className="w-5 h-5 text-[#1976d2]" /> Informazioni Operatore
+            <UserCircle className="w-5 h-5 text-[#1976d2]" /> Operator Information
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 flex items-start gap-4">
                <Hash className="w-5 h-5 text-gray-400 mt-0.5" />
                <div>
-                 <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Matricola / ID</p>
+                 <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Employee ID</p>
                  <p className="text-[#0B1B32] font-semibold text-lg">{user.id || user.matricola || 'N/A'}</p>
                </div>
             </div>
           </div>
 
           <h2 className="text-lg font-bold text-[#0B1B32] mb-6 flex items-center gap-2 border-b border-gray-100 pb-3 mt-8">
-            <Activity className="w-5 h-5 text-[#1976d2]" /> Stato Operativo
+            <Activity className="w-5 h-5 text-[#1976d2]" /> Operational Status
           </h2>
 
           <div className="flex gap-4">
             <div className="flex-1 py-3 px-4 rounded-lg font-bold text-sm border-2 border-green-500 bg-green-50 text-green-700 flex items-center justify-center gap-2 cursor-default">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div> Online / Attivo
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div> Online / Active
             </div>
           </div>
         </div>

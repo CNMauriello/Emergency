@@ -1,4 +1,4 @@
-import { UserCircle } from 'lucide-react';
+import { UserCircle, TriangleAlert, History, FolderOpen, Network, LogOut } from 'lucide-react';
 
 export default function Sidebar({ currentView, setCurrentView, user, onLogout }) {
   const role = (user?.ruolo || user?.role || '').toString().toUpperCase();
@@ -8,48 +8,46 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
   const isWorkflowExpert = role.includes('WORKFLOW_EXPERT');
 
   return (
-    <aside className="w-[280px] bg-[#0B1B32] text-white flex flex-col h-full flex-shrink-0 shadow-lg z-10 font-sans">
+    <aside className="w-[280px] bg-gradient-to-b from-[#0B1B32] to-[#12233f] text-white flex flex-col h-full flex-shrink-0 shadow-lg z-10 font-sans border-r border-slate-800/50">
       {/* Profilo Utente / Logo */}
-      <div className="p-6 pt-10 border-b border-white/5 flex flex-col items-center gap-3">
-        {/* Avatar Placeholder */}
-        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border-2 border-white/10 shadow-sm bg-gray-600 flex items-center justify-center">
-          <UserCircle className="w-10 h-10 text-gray-300" strokeWidth={1.5} />
+      <div className="p-6 pt-10 flex flex-col items-center gap-3">
+        {/* Logo */}
+        <div className="h-16 flex items-center justify-center mb-2">
+          <img src="/logo-bianco.png" alt="FARO Logo" className="h-full w-auto object-contain" />
         </div>
         <div className="text-center">
-          <h1 className="font-bold text-lg tracking-wide text-white">Sala Operativa</h1>
+          <h1 className="font-bold text-lg tracking-wide text-white">Operations Center</h1>
           <p className="text-[10px] text-[#6ea8fe] uppercase tracking-wider leading-tight mt-1 font-semibold">Centralized Emergency Mgmt</p>
         </div>
       </div>
-      
+
       {/* Navigazione */}
-      <nav className="flex-1 py-8 space-y-1">
+      <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
         {(isRoomOperator || isUser) && (
           <a
             href="#"
             onClick={(e) => { e.preventDefault(); setCurrentView('active'); }}
-            className={`flex items-center gap-4 px-6 py-3 transition-colors ${
-              currentView === 'active' || currentView === 'detail'
-                ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold'
-                : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-            }`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === 'active' || currentView === 'detail'
+                ? 'bg-[#6ea8fe]/15 text-[#6ea8fe] font-bold shadow-sm'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+              }`}
           >
-            <i className="fas fa-exclamation-triangle w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">Emergencies</span>
+            <TriangleAlert className={`w-5 h-5 ${currentView === 'active' || currentView === 'detail' ? 'text-[#6ea8fe]' : 'opacity-70'}`} />
+            <span className="text-[14px]">Emergencies</span>
           </a>
         )}
 
         {isRoomOperator && (
-          <a 
-            href="#" 
+          <a
+            href="#"
             onClick={(e) => { e.preventDefault(); setCurrentView('history'); }}
-            className={`flex items-center gap-4 px-6 py-3 transition-colors ${
-              currentView === 'history'
-                ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold'
-                : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-            }`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === 'history'
+                ? 'bg-[#6ea8fe]/15 text-[#6ea8fe] font-bold shadow-sm'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+              }`}
           >
-            <i className="fas fa-history w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">History</span>
+            <History className={`w-5 h-5 ${currentView === 'history' ? 'text-[#6ea8fe]' : 'opacity-70'}`} />
+            <span className="text-[14px]">History</span>
           </a>
         )}
 
@@ -57,14 +55,13 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
           <a
             href="#"
             onClick={(e) => { e.preventDefault(); setCurrentView('directory'); }}
-            className={`flex items-center gap-4 px-6 py-3 transition-colors ${
-              currentView === 'directory'
-                ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold' 
-                : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-            }`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === 'directory'
+                ? 'bg-[#6ea8fe]/15 text-[#6ea8fe] font-bold shadow-sm'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+              }`}
           >
-            <i className="fas fa-folder-open w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">Resource Directory</span>
+            <FolderOpen className={`w-5 h-5 ${currentView === 'directory' ? 'text-[#6ea8fe]' : 'opacity-70'}`} />
+            <span className="text-[14px]">Resource Directory</span>
           </a>
         )}
 
@@ -72,63 +69,64 @@ export default function Sidebar({ currentView, setCurrentView, user, onLogout })
           <a
             href="#"
             onClick={(e) => { e.preventDefault(); setCurrentView('workflows'); }}
-            className={`flex items-center gap-4 px-6 py-3 transition-colors ${
-              currentView === 'workflows'
-                ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold' 
-                : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-            }`}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === 'workflows'
+                ? 'bg-[#6ea8fe]/15 text-[#6ea8fe] font-bold shadow-sm'
+                : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+              }`}
           >
-            <i className="fas fa-project-diagram w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">Workflows</span>
+            <Network className={`w-5 h-5 ${currentView === 'workflows' ? 'text-[#6ea8fe]' : 'opacity-70'}`} />
+            <span className="text-[14px]">Workflows</span>
           </a>
         )}
 
         {isRoomOperator && (
-          <a 
-            href="#" 
-            onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}
-            className={`flex items-center gap-4 px-6 py-3 transition-colors mt-6 ${
-              currentView === 'profile'
-                ? 'border-l-4 border-[#6ea8fe] bg-white/5 text-white font-semibold'
-                : 'border-l-4 border-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-            }`}
-          >
-            <i className="far fa-user-circle w-5 text-center text-[15px]"></i> 
-            <span className="text-[15px]">Profile</span>
-          </a>
+          <>
+            <div className="h-px bg-slate-700/50 my-4 mx-2"></div>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); setCurrentView('profile'); }}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${currentView === 'profile'
+                  ? 'bg-[#6ea8fe]/15 text-[#6ea8fe] font-bold shadow-sm'
+                  : 'text-gray-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+                }`}
+            >
+              <UserCircle className={`w-5 h-5 ${currentView === 'profile' ? 'text-[#6ea8fe]' : 'opacity-70'}`} />
+              <span className="text-[14px]">Profile</span>
+            </a>
+          </>
         )}
       </nav>
 
       {/* Footer Area */}
-      <div className="p-6 mt-auto">
+      <div className="p-4 mt-auto">
         {!isRoomOperator ? (
-          <button 
-            onClick={onLogout} 
-            className="w-full flex items-center justify-center gap-2 bg-[#071324] hover:bg-white/5 text-gray-300 hover:text-white py-3 rounded-lg border border-white/5 transition-colors font-semibold text-sm"
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center justify-center gap-2 bg-[#071324] hover:bg-white/5 text-gray-300 hover:text-white py-3 rounded-xl border border-white/5 transition-colors font-semibold text-sm"
           >
-            <i className="fas fa-sign-out-alt"></i> Logout
+            <LogOut className="w-4 h-4" /> Logout
           </button>
         ) : (
-          <div className="flex items-center gap-3 bg-[#071324] p-3 rounded-lg border border-white/5">
-            <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center bg-gray-600 shrink-0">
-               <UserCircle className="w-6 h-6 text-gray-300" strokeWidth={1.5} />
+          <div className="flex items-center gap-3 bg-[#0a1526]/80 p-3 rounded-xl border border-white/5 backdrop-blur-sm">
+            <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center bg-slate-700 shrink-0 shadow-inner">
+              <UserCircle className="w-5 h-5 text-gray-300" strokeWidth={2} />
             </div>
-            <div>
-              <div className="text-xs text-white font-bold tracking-wide truncate max-w-[140px]" title={user?.nome ? `${user.nome} ${user.cognome}` : 'Operatore'}>
-                {user?.nome ? `${user.nome} ${user.cognome}` : 'Operatore'}
+            <div className="flex-1 min-w-0">
+              <div className="text-sm text-white font-bold tracking-wide truncate" title={user?.nome ? `${user.nome} ${user.cognome}` : 'Operator'}>
+                {user?.nome ? `${user.nome} ${user.cognome}` : 'Operator'}
               </div>
-              <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-                <span className={`w-1 h-1 rounded-full ${user?.stato?.toLowerCase() === 'online' ? 'bg-green-500' : user?.stato?.toLowerCase() === 'occupato' ? 'bg-yellow-500' : 'bg-gray-500'}`}></span> 
+              <div className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1.5">
+                <span className={`w-1.5 h-1.5 rounded-full ${user?.stato?.toLowerCase() === 'online' ? 'bg-green-500 animate-pulse shadow-[0_0_5px_rgba(34,197,94,0.5)]' : user?.stato?.toLowerCase() === 'occupato' ? 'bg-yellow-500' : 'bg-gray-500'}`}></span>
                 {user?.stato || 'Offline'}
               </div>
             </div>
-            <button onClick={onLogout} className="ml-auto text-gray-400 hover:text-white" title="Esci (Logout)">
-              <i className="fas fa-sign-out-alt text-xs"></i>
+            <button onClick={onLogout} className="text-gray-400 hover:text-red-400 transition-colors p-1" title="Logout">
+              <LogOut className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
     </aside>
-  )
+  );
 }
 

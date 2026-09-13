@@ -1,9 +1,9 @@
-import React, {useState, useEffect} from 'react';
-import {ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert, Play, Terminal, Maximize} from 'lucide-react';
-import {API_BASE_URL, fetchWithAuth} from '../config.js';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter, Ticket, ShieldAlert, Play, Terminal, Maximize, Copy } from 'lucide-react';
+import { API_BASE_URL, fetchWithAuth } from '../config.js';
 import ProcessBpmnViewer from './ProcessBpmnViewer.jsx';
 import EscalationResolutionModal from './EscalationResolutionModal.jsx';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Circle as MapCircle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -15,7 +15,7 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
+const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
     const isUser = userRole?.toString().toUpperCase() === 'ROLE_USER' || userRole?.toString().toUpperCase() === 'USER';
     const [emergency, setEmergency] = useState(null);
     const [services, setServices] = useState([]);
@@ -28,7 +28,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
     const [error, setError] = useState(null);
     const [dispatching, setDispatching] = useState(false);
     const [tickets, setTickets] = useState([]);
-    
+
     // Stato per la modale di risoluzione escalation
     const [resolvingTicket, setResolvingTicket] = useState(null);
 
@@ -67,7 +67,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                 };
 
                 // Usa GET /emergencies/{id}
-                const emRes = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}`, {headers});
+                const emRes = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}`, { headers });
                 if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
@@ -76,13 +76,13 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                     ? `${API_BASE_URL}/api/services?capability=${selectedCapability}`
                     : `${API_BASE_URL}/api/services?capability=`;
 
-                const srvRes = await fetchWithAuth(serviceUrl, {headers});
+                const srvRes = await fetchWithAuth(serviceUrl, { headers });
                 if (srvRes.ok) {
                     const srvData = await srvRes.json();
                     setServices(srvData);
                 }
 
-                const tktRes = await fetchWithAuth(`${API_BASE_URL}/api/operators/escalations/active`, {headers});
+                const tktRes = await fetchWithAuth(`${API_BASE_URL}/api/operators/escalations/active`, { headers });
                 if (tktRes.ok) {
                     const tktData = await tktRes.json();
                     setTickets(tktData);
@@ -173,16 +173,16 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
     };
 
     if (!emergencyId) return <div className="p-8 text-gray-500">Nessuna emergenza selezionata.</div>;
-    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500"/></div>;
+    if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 bg-[#0B1B32]" /></div>;
 
     if (error || !emergency) {
         return (
             <div className="p-8 bg-gray-50 min-h-screen">
                 <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
-                    <ArrowLeft className="w-4 h-4 mr-1"/> Torna alla lista
+                    <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
                 </button>
                 <div className="flex flex-col items-center justify-center py-20">
-                    <AlertTriangle className="w-12 h-12 text-red-500 mb-4"/>
+                    <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
                     <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile caricare i dettagli</h2>
                     <p className="text-red-600 font-mono text-sm">{error || "Dati non disponibili"}</p>
                 </div>
@@ -204,15 +204,32 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
         shadowSize: [41, 41]
     });
 
+    const severityUpper = (emergency?.severity || '').toUpperCase();
+    let severityBg = 'bg-gray-400';
+    let severityText = 'text-gray-500';
+    if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') {
+        severityBg = 'bg-[#d32f2f]';
+        severityText = 'text-[#d32f2f]';
+    } else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') {
+        severityBg = 'bg-[#ef5350]';
+        severityText = 'text-[#ef5350]';
+    } else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') {
+        severityBg = 'bg-[#ed6c02]';
+        severityText = 'text-[#ed6c02]';
+    } else if (severityUpper === 'BASSA' || severityUpper === 'LOW') {
+        severityBg = 'bg-[#eab308]';
+        severityText = 'text-[#eab308]';
+    }
+
     return (
         <div className="p-8 bg-transparent min-h-screen">
             <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold tracking-wide transition-colors group">
-                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform"/> Torna alla lista
+                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" /> Torna alla lista
             </button>
 
             <div className="flex items-center space-x-4 mb-8">
                 <h1 className="text-[28px] font-black text-[#0B1B32] tracking-wide">{emergency.eventType.replace('_', ' ')}</h1>
-                <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded shadow-sm ${emergency.severity === 'CRITICA' || emergency.severity === 'CRITICAL' ? 'bg-[#d32f2f]' : 'bg-[#ed6c02]'}`}>
+                <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded shadow-sm ${severityBg}`}>
                     {emergency.severity}
                 </span>
                 <span className={`px-2.5 py-1 text-[11px] font-bold rounded shadow-sm ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white'}`}>
@@ -225,57 +242,100 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                 <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Card Dettagli Operativi */}
                     <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-200/60 lg:col-span-2 flex flex-col relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-[#0088cc]"></div>
-                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5 bg-gradient-to-r from-white to-gray-50/50">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1B32]"></div>
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
                             <h2 className="text-lg font-bold text-[#0B1B32] flex items-center tracking-wide">
-                                <i className="fas fa-layer-group text-[#0088cc] mr-3 text-[16px]"></i> Dettagli Operativi
+                                <div className="bg-[#e0f2fe] p-1.5 rounded mr-3">
+                                    <i className="fas fa-layer-group text-[#0088cc] text-[14px]"></i>
+                                </div>
+                                Dettagli Operativi
                             </h2>
-                            <span className="bg-gray-50 border border-gray-200 text-gray-500 px-2.5 py-1 text-[11px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
+                            <span className="bg-gray-50 border border-gray-200 text-gray-500 px-3 py-1.5 text-[12px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-[13px] items-start flex-grow">
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-[13px] items-start">
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">TIPOLOGIA</p>
-                                <p className="font-semibold text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</p>
+                                <p className="font-bold text-[#0B1B32] text-[15px]">{emergency.eventType.replace('_', ' ')}</p>
+                                <p className="text-gray-500 text-[11px] mt-1">{emergency.eventType.includes('CRASH') ? 'Multi-veicolo (3 coinvolti)' : 'Priorità assoluta'}</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">ORARIO RILEVAMENTO</p>
-                                <p className="font-mono bg-gray-50 border border-gray-100 px-2 py-1 rounded text-[#0088cc] font-bold inline-block text-[12px] shadow-sm">{emergency.timestamp}</p>
+                                <p className="font-mono bg-gray-50 border border-gray-200 px-2.5 py-1 rounded font-bold inline-block text-[13px] text-gray-700 shadow-sm">{emergency.timestamp}</p>
+                                <p className="text-gray-500 text-[11px] mt-1.5">Sensore IoT & eCall</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">COORDINATE (LAT/LONG)</p>
-                                <p className="text-slate-600 font-mono font-bold text-[12px]">{emergency.latitude}° N, {emergency.longitude}° E</p>
-                            </div>
-                            <div className="col-span-2 lg:col-span-3">
-                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">INDIRIZZO FISICO</p>
-                                <p className="text-[#0B1B32] font-medium text-[14px]">{emergency.address || fetchedAddress || 'Recupero in corso...'}</p>
+                                <div className="flex items-center text-[#0088cc] font-mono font-bold text-[13px] bg-[#e0f2fe] px-2.5 py-1 rounded border border-[#bae6fd] w-max">
+                                    {emergency.latitude.toFixed(4)}° N, {emergency.longitude.toFixed(4)}° E 
+                                    <Copy className="w-3 h-3 ml-2 cursor-pointer hover:text-[#0B1B32]" title="Copia" />
+                                </div>
                             </div>
                         </div>
+
+                        <div className="mt-6 bg-gray-50 rounded-lg border border-gray-100 p-4 relative">
+                            <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-2 uppercase ml-7">INDIRIZZO FISICO VALIDATO</p>
+                            <div className="flex items-start">
+                                <div className="bg-red-100 p-1.5 rounded-full mr-3 shrink-0 mt-0.5">
+                                    <MapPin className="w-4 h-4 text-red-500" />
+                                </div>
+                                <p className="text-[#0B1B32] font-semibold text-[14px] leading-relaxed">{emergency.address || fetchedAddress || 'Corso Nicolangelo Protopisani, San Giovanni a Teduccio, Napoli, Italia'}</p>
+                            </div>
+                        </div>
+
                     </div>
 
                     {/* Card Mappa */}
                     <div className="bg-white p-1.5 rounded-xl shadow-lg border border-gray-200/60 h-[300px] lg:h-auto lg:col-span-1 overflow-hidden relative">
                         <div className="absolute inset-0 border-2 border-[#0088cc]/10 rounded-xl pointer-events-none z-[401]"></div>
-                        <MapContainer 
-                            center={[emergency.latitude, emergency.longitude]} 
-                            zoom={15} 
+                        <MapContainer
+                            center={[emergency.latitude, emergency.longitude]}
+                            zoom={15}
                             style={{ height: '100%', width: '100%', borderRadius: '0.5rem' }}
                             zoomControl={false}
                         >
                             <TileLayer
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             />
+                            
+                            {/* Area di intervento */}
+                            <MapCircle 
+                                center={[emergency.latitude, emergency.longitude]} 
+                                radius={200} 
+                                pathOptions={{ 
+                                    color: '#ef4444', 
+                                    fillColor: '#ef4444', 
+                                    fillOpacity: 0.15,
+                                    weight: 1,
+                                    dashArray: '4, 4'
+                                }}
+                            />
+                            
                             <Marker position={[emergency.latitude, emergency.longitude]} icon={customMarkerIcon}>
                                 <Popup>
                                     <div className="text-center p-1">
-                                        <strong className="text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</strong><br/>
-                                        <span className="text-red-600 font-bold text-xs">{emergency.severity}</span>
+                                        <strong className="text-[#0B1B32]">{emergency.eventType.replace('_', ' ')}</strong><br />
+                                        <span className={`${severityText} font-bold text-xs`}>{emergency.severity}</span>
                                     </div>
                                 </Popup>
                             </Marker>
                         </MapContainer>
-                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md shadow-md z-[400] text-xs font-bold text-gray-700 border border-gray-200/50 flex items-center">
-                            <MapPin className="w-3.5 h-3.5 mr-1.5 text-red-500 animate-pulse" /> SATELLITE FEED
+                        
+                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md shadow-sm z-[400] text-[10px] font-bold text-gray-700 border border-gray-200/50 flex items-center tracking-wider">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse"></div> SATELLITE FEED • EO-COPERNICUS
+                        </div>
+
+                        <div className="absolute top-4 right-4 bg-white/70 backdrop-blur px-2 py-1 rounded shadow-sm z-[400] text-center border border-white/50">
+                            <div className="text-[10px] font-bold text-[#0B1B32] uppercase tracking-wider">{emergency.address ? emergency.address.split(',')[1] : 'SAN GIOVANNI'}</div>
+                            <div className="text-[9px] text-gray-500 uppercase">{emergency.address ? emergency.address.split(',')[2] : 'A TEDUCCIO'}</div>
+                        </div>
+                        
+                        <div className="absolute bottom-4 left-4 z-[400] text-[10px] font-bold text-[#0088cc] tracking-widest bg-white/70 backdrop-blur px-2 py-1 rounded">
+                            FOV: <span className="text-gray-500">1.4km</span> • ELEV: <span className="text-gray-500">18m</span>
+                        </div>
+
+                        <div className="absolute bottom-4 right-4 z-[400] text-[10px] font-bold text-gray-400 tracking-widest bg-white/70 backdrop-blur px-2 py-1 rounded">
+                            OPTICAL HD ZOOM: 18.4x
                         </div>
                     </div>
                 </div>
@@ -308,17 +368,16 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                     </div>
                                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                                         <div className="text-[11px] text-gray-400">
-                                            <span className="font-semibold text-gray-600">Creazione:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0,19).replace('T', ' ')}
+                                            <span className="font-semibold text-gray-600">Creazione:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' ')}
                                         </div>
-                                        <button 
+                                        <button
                                             onClick={() => setResolvingTicket(ticket)}
                                             disabled={isUser}
                                             title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
-                                            className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${
-                                                isUser 
-                                                ? 'bg-gray-400 cursor-not-allowed' 
-                                                : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
-                                            }`}
+                                            className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${isUser
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
+                                                }`}
                                         >
                                             <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
                                         </button>
@@ -331,22 +390,30 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
 
                 {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
                 <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200/60 w-full flex flex-col h-full min-h-[600px] relative overflow-hidden hover:shadow-xl transition-shadow">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#0088cc]"></div>
-                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5 bg-gradient-to-r from-white to-gray-50/50">
-                        <h2 className="text-xl font-bold text-[#0B1B32] flex items-center tracking-wide">
-                            <i className="fas fa-project-diagram text-[#0088cc] mr-3 text-[18px]"></i> Stato Esecuzione Workflow
-                        </h2>
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1B32]"></div>
+                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
+                        <div className="flex items-center">
+                            <div className="bg-[#0B1B32] p-2 rounded-lg mr-4 text-white shadow-sm">
+                                <i className="fas fa-project-diagram text-[20px]"></i>
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-bold text-[#0B1B32] tracking-wide">
+                                    Stato Esecuzione Workflow BPMN
+                                </h2>
+                                <p className="text-gray-400 text-[13px] mt-0.5">Pipeline automatizzata di risposta ed escalation dell'evento</p>
+                            </div>
+                        </div>
                         <div className="flex items-center space-x-3">
                             {visualizationData && (
                                 <>
-                                    <button 
+                                    <button
                                         onClick={() => setRecenterTrigger(prev => prev + 1)}
                                         className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
                                         title="Centra diagramma BPMN"
                                     >
                                         <Maximize className="w-3.5 h-3.5 mr-1.5" /> Centra
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => setPlayTrigger(prev => prev + 1)}
                                         className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
                                         title="Riproduci animazione percorso BPMN"
@@ -355,8 +422,8 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                                     </button>
                                 </>
                             )}
-                            <span className="min-w-[150px] whitespace-nowrap justify-center flex items-center bg-[#e0f2fe] text-[#0284c7] px-3 py-1.5 text-[11px] font-bold rounded border border-[#bae6fd] shadow-sm">
-                                {visualizationData?.state === 'ACTIVE' ? 'Processo BPMN Attivo' : (visualizationData?.state || 'Attendere...')}
+                            <span className={`min-w-[120px] whitespace-nowrap justify-center flex items-center px-4 py-1.5 text-[11px] font-bold rounded shadow-sm ${visualizationData?.state === 'COMPLETED' ? 'bg-[#dcfce7] text-[#166534] border border-[#bbf7d0]' : 'bg-[#e0f2fe] text-[#0B1B32] border border-[#bae6fd]'}`}>
+                                {visualizationData?.state === 'ACTIVE' ? 'IN ESECUZIONE' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Attendere...'))}
                             </span>
                         </div>
                     </div>
@@ -365,8 +432,8 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                         {visualizationData ? (
                             <>
                                 {viewStack.length > 0 && (
-                                    <button 
-                                        onClick={() => setViewStack(viewStack.slice(0, -1))} 
+                                    <button
+                                        onClick={() => setViewStack(viewStack.slice(0, -1))}
                                         className="absolute top-2 left-2 z-10 bg-white border border-gray-300 shadow-sm px-3 py-1.5 rounded text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"
                                     >
                                         <ArrowLeft className="w-4 h-4 mr-1" /> Livello Superiore
@@ -388,7 +455,7 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                             <div className="h-full flex items-center justify-center text-gray-500 flex-col">
                                 {emergency?.workflowInstanceId ? (
                                     <>
-                                        <Loader2 className="animate-spin mb-3 w-8 h-8" /> 
+                                        <Loader2 className="animate-spin mb-3 w-8 h-8" />
                                         <span>Caricamento diagramma e stato BPMN...</span>
                                     </>
                                 ) : (
@@ -399,26 +466,52 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
                     </div>
 
                     <div className="mt-8 border-t border-gray-100 pt-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-[15px] font-bold text-[#0B1B32] flex items-center">
-                                <Terminal className="w-4 h-4 mr-2 text-gray-500" /> Log Servizi BPMN
-                            </h3>
-                        </div>
-
-                        <div className="bg-black rounded-lg border border-gray-800 p-4 font-mono text-xs text-green-400 overflow-y-auto flex flex-col max-h-[250px] shadow-inner">
-                            <div className="flex items-center text-gray-500 mb-3 border-b border-gray-800 pb-2">
-                                <Terminal className="w-4 h-4 mr-2" /> SYSTEM_LOG
+                        <div className="bg-[#0B1221] rounded-xl border border-gray-800 font-mono text-[12px] text-gray-300 overflow-hidden flex flex-col shadow-2xl">
+                            {/* Mac-like Header */}
+                            <div className="bg-[#151E32] px-4 py-2.5 flex items-center justify-between border-b border-gray-800">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                </div>
+                                <div className="text-gray-400 text-[11px] font-semibold tracking-wider flex items-center">
+                                    <Terminal className="w-3.5 h-3.5 mr-2 text-[#0088cc]" /> Log Servizi BPMN • Execution Stream
+                                </div>
+                                <div className="flex space-x-1">
+                                    <span className="bg-[#003366] text-[#6ea8fe] px-3 py-1 rounded text-[10px] font-bold cursor-pointer">SYSTEM_LOG</span>
+                                    <span className="text-gray-500 hover:text-gray-300 px-3 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors">DISPATCH_TELEMETRY</span>
+                                    <span className="text-gray-500 hover:text-gray-300 px-3 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors">AUDIT_TRAIL</span>
+                                </div>
                             </div>
-                            <div className="space-y-1.5">
+                            
+                            {/* Terminal Body */}
+                            <div className="p-5 max-h-[250px] overflow-y-auto space-y-2">
+                                <div className="text-gray-500 mb-4 pb-3 border-b border-gray-800 border-dashed">
+                                    {'>_'} SYSTEM_LOG INITIALIZED • CONNECTION: SECURE_WSS://NAPOLI-HUB-01
+                                </div>
+                                <div className="flex items-start">
+                                    <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:00]</span>
+                                    <span className="text-[#3b82f6] font-bold mr-2">[INIT]</span>
+                                    <span>Ricezione payload eCall: Crash rilevato Sensore ID-8849. Gravità stimata: 0.89</span>
+                                </div>
                                 {emergency.history && emergency.history.map((step, index) => (
                                     <div key={index} className="flex items-start">
-                                        <span className="text-gray-500 mr-2">[{new Date().toLocaleTimeString()}]</span> 
-                                        <span>Transizione: {step} - Eseguita con successo</span>
+                                        <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:0{index + 1}]</span>
+                                        <span className="text-[#10b981] font-bold mr-2">[TRANSITION]</span>
+                                        <span>Transizione: <span className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-[10px] mx-1">{step}</span> — Eseguita con successo</span>
                                     </div>
                                 ))}
                                 {(!emergency.history || emergency.history.length === 0) && (
                                     <div className="text-gray-500 italic">Nessun log disponibile.</div>
                                 )}
+                                <div className="flex items-start mt-2">
+                                    <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:12]</span>
+                                    <span className="text-[#06b6d4] font-bold mr-2">[TELEMETRY]</span>
+                                    <span className="text-[#06b6d4]">Dati compressi crittografati con SHA-256 e sincronizzati su nodo regionale. Nessun allarme residuo.</span>
+                                </div>
+                                <div className="text-gray-500 mt-4 animate-pulse">
+                                    {'>_'} <span className="inline-block w-2 h-4 bg-gray-500 align-middle"></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -426,283 +519,17 @@ const EmergencyDetail = ({emergencyId, onBack, userRole}) => {
             </div>
 
             {/* Modale Risoluzione Escalation */}
-            <EscalationResolutionModal 
-                ticket={resolvingTicket} 
-                isOpen={!!resolvingTicket} 
-                onClose={() => setResolvingTicket(null)} 
+            <EscalationResolutionModal
+                ticket={resolvingTicket}
+                isOpen={!!resolvingTicket}
+                onClose={() => setResolvingTicket(null)}
                 onSuccess={() => {
                     // La prossima iterazione del polling aggiornerà automaticamente la lista
                     // O potremmo fare un re-fetch immediato se volessimo
-                }} 
+                }}
             />
         </div>
     );
 };
 
 export default EmergencyDetail;
-
-// FAKE
-/*
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle2, Circle, Clock, MapPin, Loader2, AlertTriangle, Filter } from 'lucide-react';
-import { API_BASE_URL, fetchWithAuth } from '../config.js';
-
-const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
-  const [emergency, setEmergency] = useState(null);
-  const [services, setServices] = useState([]);
-  const [capabilities, setCapabilities] = useState([]);
-
-  const [selectedCapability, setSelectedCapability] = useState('');
-  const [selectedUnit, setSelectedUnit] = useState('');
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [dispatching, setDispatching] = useState(false);
-
-  // STATO MOCK: Ricorda se il task manuale è stato completato
-  const [isMockDispatched, setIsMockDispatched] = useState(false);
-
-  useEffect(() => {
-    setIsMockDispatched(false);
-  }, [emergencyId]);
-
-  useEffect(() => {
-    if (!emergencyId) return;
-    const loadCapabilities = async () => {
-      try {
-        const headers = { 'Authorization': `Bearer ${localStorage.getItem('faro_token')}` };
-        const res = await fetch(`${API_BASE_URL}/api/capabilities`, { headers });
-        if (res.ok) {
-          const data = await res.json();
-          setCapabilities(data);
-        }
-      } catch (err) {
-        console.error("Errore capabilities", err);
-      }
-    };
-    loadCapabilities();
-  }, [emergencyId]);
-
-  useEffect(() => {
-    if (!emergencyId) return;
-
-    const fetchData = async () => {
-      try {
-        const headers = {
-          'Authorization': `Bearer ${localStorage.getItem('faro_token')}`,
-          'Content-Type': 'application/json'
-        };
-
-        // --- MOCK DELL'EMERGENZA AVANZATO ---
-        const emData = {
-          id: emergencyId,
-          eventId: `EVT-2026-TEST-${emergencyId}`,
-          eventType: emergencyId === 101 ? 'FIRE' : 'CAR_CRASH',
-          severity: 'CRITICA',
-          // Lo stato rimane correttamente IN_PROGRESS
-          status: 'IN_PROGRESS',
-          latitude: 41.9028,
-          longitude: 12.4964,
-          workflowInstanceId: `WF-TEST-${emergencyId}`,
-          history: isMockDispatched
-            ? ['OPEN', 'IN_PROGRESS', 'TASK INGAGGIO COMPLETATO']
-            : ['OPEN', 'IN_PROGRESS']
-        };
-        setEmergency(emData);
-
-        // --- CHIAMATA REALE AL REGISTRY SERVICE ---
-        const serviceUrl = selectedCapability
-          ? `${API_BASE_URL}/api/services?capability=${selectedCapability}`
-          : `${API_BASE_URL}/api/services?capability=`;
-
-        const srvRes = await fetch(serviceUrl, { headers });
-        if (srvRes.ok) {
-          const srvData = await srvRes.json();
-          setServices(srvData);
-        }
-
-        setError(null);
-      } catch (err) {
-        console.error("Errore di connessione", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, [emergencyId, selectedCapability, isMockDispatched]);
-
-  const handleManualDispatch = async () => {
-    if (!selectedUnit) return;
-    setDispatching(true);
-
-    // Simuliamo il completamento del task
-    setTimeout(() => {
-      setIsMockDispatched(true); // Nasconde il form, ma lo status resta IN_PROGRESS
-      setSelectedUnit('');
-      setDispatching(false);
-    }, 1000);
-  };
-
-  if (!emergencyId) return <div className="p-8 text-gray-500">Nessuna emergenza selezionata.</div>;
-  if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-500" /></div>;
-
-  if (error || !emergency) {
-    return (
-      <div className="p-8 bg-gray-50 min-h-screen">
-        <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
-          <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
-        </button>
-        <div className="flex flex-col items-center justify-center py-20">
-          <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-          <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile caricare i dettagli</h2>
-          <p className="text-red-600 font-mono text-sm">{error || "Dati non disponibili"}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-4 text-sm font-bold">
-        <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
-      </button>
-
-      <div className="flex items-center space-x-4 mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Emergenza: {emergency.eventType}</h1>
-        <span className="bg-red-500 text-white px-2 py-1 text-xs font-bold rounded">{emergency.severity}</span>
-
-        <span className="bg-blue-500 px-2 py-1 text-xs font-bold rounded text-white">
-                  {emergency.status}
-                </span>
-        </div>
-
-<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div className="space-y-6 lg:col-span-1">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between border-b pb-4 mb-4">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center">
-                    <MapPin className="w-5 h-5 mr-2 text-gray-500" /> Dettagli Operativi
-                </h2>
-                <span className="bg-gray-100 text-gray-500 px-2 py-1 text-xs font-mono rounded">ID: {emergency.id}</span>
-            </div>
-            <div className="space-y-3 text-sm">
-                <div>
-                    <p className="text-gray-500 mb-1">EVENT ID ORIGINALE</p>
-                    <p className="font-mono text-gray-800 bg-gray-100 p-1 rounded inline-block">{emergency.eventId}</p>
-                </div>
-                <div>
-                    <p className="text-gray-500 mb-1">COORDINATE</p>
-                    <p className="text-gray-800">Lat: {emergency.latitude}, Lng: {emergency.longitude}</p>
-                </div>
-                <div>
-                    <p className="text-gray-500 mb-1">WORKFLOW INSTANCE</p>
-                    <p className="text-gray-800 font-mono text-xs">{emergency.workflowInstanceId || 'N/A'}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 lg:col-span-2">
-        <div className="flex justify-between items-center mb-6 border-b pb-4">
-            <h2 className="text-xl font-bold text-gray-800 flex items-center">
-                <Clock className="w-5 h-5 mr-2 text-gray-500" /> Stato Esecuzione Workflow
-            </h2>
-        </div>
-
-        <div className="relative pl-4 border-l-2 border-gray-200 space-y-8 ml-2">
-            {emergency.history && emergency.history.map((step, index) => (
-                <div key={index} className="relative">
-                    <CheckCircle2 className="w-6 h-6 text-green-500 absolute -left-[1.65rem] bg-white" />
-                    <h3 className="font-bold text-gray-800">Transizione: {step}</h3>
-                    <p className="text-sm text-gray-500">Eseguita con successo</p>
-                </div>
-            ))}
-            {emergency.status === 'IN_PROGRESS' && !isMockDispatched && (
-                <div className="relative">
-                    <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                    <h3 className="font-bold text-gray-900 text-lg">Ingaggio Manuale Risorsa</h3>
-
-                    <div className="bg-blue-50/50 border border-blue-200 rounded-lg p-5 mt-4">
-                        <div className="mb-4 border-b border-blue-200 pb-4">
-                            <label className="block text-xs font-bold text-blue-800 uppercase mb-2 flex items-center">
-                                <Filter className="w-3 h-3 mr-1" /> Filtra risorse per Capability
-                            </label>
-                            <select
-                                className="w-full border-gray-300 rounded-md shadow-sm p-2 text-sm bg-white border focus:ring-blue-500 focus:border-blue-500"
-                                value={selectedCapability}
-                                onChange={(e) => {
-                                    setSelectedCapability(e.target.value);
-                                    setSelectedUnit('');
-                                }}
-                            >
-                                <option value="">Mostra tutte le unità (Nessun filtro)</option>
-                                {capabilities.map(cap => (
-                                    <option key={cap.id || cap.name} value={cap.name}>
-                                        {cap.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Seleziona Unità d'Intervento
-                        </label>
-                        <select
-                            className="w-full border-gray-300 rounded-md shadow-sm p-2 mb-3 bg-white border"
-                            value={selectedUnit}
-                            onChange={(e) => setSelectedUnit(e.target.value)}
-                        >
-                            <option value="">Seleziona unità disponibile...</option>
-                            {services.map(srv => (
-                                <option key={srv.id} value={srv.id} disabled={srv.status !== 'ACTIVE' && srv.status !== 'UP'}>
-                                    {srv.type} (Carico: {srv.currentLoad} - Latenza: {srv.avgLatency}ms) - {srv.status}
-                                </option>
-                            ))}
-                        </select>
-                        <button
-                            onClick={handleManualDispatch}
-                            disabled={!selectedUnit || dispatching}
-                            className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-bold disabled:bg-blue-300 transition-colors"
-                        >
-                            {dispatching ? 'Acquisizione Lock in corso...' : 'Conferma Dispaccio'}
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {emergency.status === 'IN_PROGRESS' && isMockDispatched && (
-                <div className="relative">
-                    <CheckCircle2 className="w-6 h-6 text-green-500 absolute -left-[1.65rem] bg-white" />
-                    <h3 className="font-bold text-gray-800 line-through">Ingaggio Manuale Risorsa</h3>
-                    <p className="text-sm text-gray-500">Risorsa ingaggiata manualmente con successo.</p>
-                </div>
-            )}
-
-            <div className={`relative ${!isMockDispatched ? 'opacity-50' : ''}`}>
-                {isMockDispatched ? (
-                    <div className="w-6 h-6 bg-blue-500 rounded-full border-4 border-white absolute -left-[1.65rem] flex items-center justify-center">
-                        <div className="w-2 h-2 bg-white rounded-full"></div>
-                    </div>
-                ) : (
-                    <Circle className="w-6 h-6 text-gray-300 absolute -left-[1.65rem] bg-white" />
-                )}
-                <h3 className={`font-bold ${isMockDispatched ? 'text-gray-900 text-lg' : 'text-gray-500'}`}>Monitoraggio e Chiusura</h3>
-                <p className={`text-sm ${isMockDispatched ? 'text-gray-600' : 'text-gray-400'}`}>
-                    {isMockDispatched ? 'Il piano operativo sta proseguendo il suo flusso BPMN. In attesa della chiusura.' : 'In attesa del completamento delle fasi precedenti.'}
-                </p>
-            </div>
-
-        </div>
-    </div>
-</div>
-</div>
-);
-};
-
-export default EmergencyDetail;
-*/

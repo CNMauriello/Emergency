@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react';
 import { OPERATOR_SERVICE_URL, fetchWithAuth } from '../config.js';
 import { Download, Search, CheckCircle2, AlertTriangle, ShieldAlert, Info } from 'lucide-react';
 
-export default function History() {
+export default function History({ searchQuery }) {
     const [auditLogs, setAuditLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState('');
 
     const loadAuditLogs = async () => {
         try {
@@ -36,11 +35,15 @@ export default function History() {
         }
     };
 
-    const filteredLogs = auditLogs.filter(log => 
-        String(log.emergencyId || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-        String(log.operator || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        String(log.action || '').toLowerCase().includes(searchTerm.toLowerCase())
-    ).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const filteredLogs = auditLogs.filter(log => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return String(log.emergencyId || '').toLowerCase().includes(q) || 
+               String(log.operator || '').toLowerCase().includes(q) ||
+               String(log.action || '').toLowerCase().includes(q) ||
+               String(log.details || '').toLowerCase().includes(q) ||
+               String(log.outcome || '').toLowerCase().includes(q);
+    }).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     const exportToCSV = () => {
         if (!filteredLogs || filteredLogs.length === 0) return;
@@ -76,9 +79,9 @@ export default function History() {
             <div className="mb-6 flex justify-between items-end flex-shrink-0">
                 <div>
                     <h1 className="text-[28px] font-bold text-[#0B1B32] flex items-center gap-2">
-                        <ShieldAlert className="w-6 h-6 text-[#6ea8fe]" /> Storico Audit Log
+                        <ShieldAlert className="w-6 h-6 text-[#6ea8fe]" /> Audit Log History
                     </h1>
-                    <p className="text-gray-500 mt-1">Registro immutabile di tutte le operazioni e azioni eseguite nel sistema.</p>
+                    <p className="text-gray-500 mt-1">Immutable record of all operations and actions performed in the system.</p>
                 </div>
                 <div className="flex gap-3">
                     <button onClick={exportToCSV} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded text-[13px] font-bold shadow-sm transition-colors flex items-center gap-2">
@@ -89,16 +92,7 @@ export default function History() {
 
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden min-h-0">
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
-                    <div className="relative w-72">
-                        <input 
-                            type="text" 
-                            placeholder="Cerca per ID, Operatore o Azione..." 
-                            className="w-full pl-9 pr-4 py-2 text-[13px] border border-gray-300 rounded outline-none focus:border-[#1976d2] focus:ring-1 focus:ring-[#1976d2]"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" />
-                    </div>
+
                     
                     <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
                         {filteredLogs.length} Log Registrati

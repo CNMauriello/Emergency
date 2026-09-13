@@ -120,7 +120,7 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f4f7f6]">
+    <div className="min-h-screen flex items-center justify-center bg-[#0B1B32]">
       <div className="bg-white p-10 rounded-xl shadow-xl w-[400px] border border-gray-100 flex flex-col items-center max-h-[90vh] overflow-y-auto">
 
         {/* Toggle tabs */}
@@ -155,14 +155,14 @@ export default function Login({ onLoginSuccess }) {
           </button>
         </div>
 
-        <div className={`w-16 h-16 shrink-0 ${activeTab === 'operator' ? 'bg-[#0B1B32]' : 'bg-[#1976d2]'} rounded-2xl flex items-center justify-center shadow-lg mb-6 transition-colors duration-300`}>
-          <i className={`fas ${activeTab === 'operator' ? 'fa-shield-alt' : (isRegistering ? 'fa-user-plus' : 'fa-user')} text-white text-3xl`}></i>
+        <div className="w-auto h-16 shrink-0 flex items-center justify-center mb-6">
+          <img src="/logo-blu.png" alt="FARO Logo" className="h-full w-auto object-contain" />
         </div>
 
         <h1 className="text-2xl font-bold text-[#0B1B32] mb-1 tracking-wide text-center">
           {activeTab === 'operator' ? 'Sala Operativa' : (activeTab === 'service_operator' ? (isRegistering ? 'Registrazione' : 'Operatore Servizi') : (activeTab === 'workflow_expert' ? (isRegistering ? 'Registrazione' : 'Esperto Workflow') : (isRegistering ? 'Registrazione' : 'Consultazione')))}
         </h1>
-        <p className={`text-xs ${activeTab === 'operator' ? 'text-[#1976d2]' : 'text-gray-500'} uppercase font-bold tracking-widest mb-6 transition-colors text-center`}>
+        <p className={`text-xs ${activeTab === 'operator' ? 'text-[#0B1B32]' : 'text-gray-500'} uppercase font-bold tracking-widest mb-6 transition-colors text-center`}>
           {activeTab === 'operator' ? 'Accesso Autorizzato' : (isRegistering ? 'Crea un Account' : 'Accesso Esterno')}
         </p>
 
@@ -240,7 +240,7 @@ export default function Login({ onLoginSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-[#1976d2] hover:bg-[#1565c0] text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full bg-[#0B1B32] hover:bg-[#0B1B32] text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className={activeTab === 'user' && isRegistering ? "fas fa-user-plus" : "fas fa-sign-in-alt"}></i>}
             {loading ? 'Attendere...' : (activeTab === 'user' && isRegistering ? 'Registrati' : 'Accedi al Sistema')}

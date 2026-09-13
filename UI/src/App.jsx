@@ -27,6 +27,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState(() => getInitialView(user?.ruolo)); 
   const [selectedEmergencyId, setSelectedEmergencyId] = useState(null)
   const [isServiceFormVisible, setIsServiceFormVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const loadServices = useCallback(async () => {
     setLoading(true)
@@ -47,6 +48,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    setSearchQuery('') // Clear search on view change
     if (currentView === 'directory') {
       loadServices()
     }
@@ -104,33 +106,36 @@ export default function App() {
       <Sidebar currentView={currentView} setCurrentView={setCurrentView} user={user} onLogout={handleLogout} />
 
       <main className="flex-1 flex flex-col h-full overflow-hidden">
-        <Header />
+        <Header currentView={currentView} user={user} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
         {currentView === 'directory' && (
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-8 py-6 flex justify-between items-end shrink-0">
               <div>
-                <div className="text-gray-500 text-sm mb-1.5 flex items-center gap-2">
-                  <span className="hover:underline cursor-pointer" onClick={() => setCurrentView('active')}>FARO</span>
-                  <i className="fas fa-chevron-right text-[10px]"></i>
-                  <span className="text-gray-700">Risorse</span>
-                </div>
-                <h2 className="text-[28px] font-bold text-[#0B1B32]">Registro Servizi Territoriali</h2>
-                <p className="text-gray-500 mt-1">Gestione delle unità operative e monitoraggio dello stato dei servizi.</p>
+
+                <h2 className="text-[28px] font-bold text-[#0B1B32]">Territorial Services Registry</h2>
+                <p className="text-gray-500 mt-1">Management of operational units and monitoring of service status.</p>
               </div>
               <button
                 onClick={() => setIsServiceFormVisible(!isServiceFormVisible)}
                 className="bg-[#0B1B32] hover:bg-slate-800 text-white px-5 py-2.5 rounded text-sm font-medium shadow flex items-center gap-2 transition-colors"
               >
                 <i className={`fas ${isServiceFormVisible ? 'fa-minus' : 'fa-plus'}`}></i>
-                {isServiceFormVisible ? 'Chiudi Form' : 'Registra Nuovo Servizio'}
+                {isServiceFormVisible ? 'Close Form' : 'Register New Service'}
               </button>
             </div>
 
             <div className="px-8 pb-8 flex-1 overflow-y-auto flex gap-6">
               <div className="flex-1 flex flex-col gap-6">
                 <ServicesTable
-                  services={services}
+                  services={services.filter(s => {
+                    if (!searchQuery) return true;
+                    const q = searchQuery.toLowerCase();
+                    return (s.name || '').toLowerCase().includes(q) ||
+                           (s.type || '').toLowerCase().includes(q) ||
+                           (s.status || '').toLowerCase().includes(q) ||
+                           String(s.id || '').toLowerCase().includes(q);
+                  })}
                   loading={loading}
                   error={error}
                   onRefresh={loadServices}
@@ -149,16 +154,16 @@ export default function App() {
 
         {currentView === 'active' && (
           <div className="flex-1 overflow-y-auto">
-            <ActiveEmergencies onViewDetail={handleViewDetail} />
+            <ActiveEmergencies onViewDetail={handleViewDetail} searchQuery={searchQuery} />
           </div>
         )}
 
         {currentView === 'history' && (
-          <History />
+          <History searchQuery={searchQuery} />
         )}
 
         {currentView === 'workflows' && (
-          <WorkflowsTable />
+          <WorkflowsTable searchQuery={searchQuery} />
         )}
 
         {currentView === 'detail' && (
