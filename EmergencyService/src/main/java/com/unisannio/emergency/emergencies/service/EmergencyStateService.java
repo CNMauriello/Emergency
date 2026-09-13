@@ -7,6 +7,9 @@ import com.unisannio.emergency.emergencies.model.IncomingEventDto;
 import com.unisannio.emergency.emergencies.persistance.Emergency;
 import com.unisannio.emergency.emergencies.persistance.repository.EmergencyRepository;
 import com.unisannio.emergency.emergencies.utility.EmergencyMapper;
+import org.springframework.dao.DataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,11 @@ public class EmergencyStateService {
                 .map(emergencyMapper::toDto);
     }
 
+    @Retryable(
+            retryFor = DataAccessException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000)
+    )
     @Transactional
     public void handleIncomingEvent(IncomingEventDto event) {
         if (emergencyRepository.findByEventId(event.getEventId()).isPresent()) {
@@ -77,6 +85,11 @@ public class EmergencyStateService {
     }
     }
 
+    @Retryable(
+            retryFor = DataAccessException.class,
+            maxAttempts = 5,
+            backoff = @Backoff(delay = 1000)
+    )
     @Transactional
     public boolean updateStatus(String id, String newStatus, String workflowInstanceId) {
         Optional<Emergency> optionalEmergency = emergencyRepository.findByEventId(id);
