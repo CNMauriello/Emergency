@@ -9,8 +9,11 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     
     // States for specific levels
     const [l1Nodes, setL1Nodes] = useState([]);
+    const [l2Nodes, setL2Nodes] = useState([]);
     const [l2AuthCode, setL2AuthCode] = useState('');
     const [submitting, setSubmitting] = useState(false);
+
+    const isLowMed = ticket?.severity === 'LOW' || ticket?.severity === 'MEDIUM';
 
     useEffect(() => {
         if (isOpen) {
@@ -22,8 +25,10 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             const eps = ticket?.failedEndpoints || [];
             if (eps.length > 0) {
                 setL1Nodes(eps.map((ep, i) => ({ id: i, url: ep, status: 'pending' })));
+                setL2Nodes(eps.map((ep, i) => ({ id: i, url: ep, status: 'idle' })));
             } else {
                 setL1Nodes(Array.from({length: 6}).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'pending' })));
+                setL2Nodes(Array.from({length: 6}).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'idle' })));
             }
         }
     }, [isOpen, ticket]);
@@ -116,7 +121,46 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     const proceedToLevel2 = () => {
         setCurrentLevel(2);
         setLevelStatus('idle');
-        addLog("Passaggio al Livello 2: Ingaggio Fuori Banda attivato.");
+        addLog(`Passaggio al Livello 2: ${isLowMed ? 'Ping Manuale' : 'Ingaggio Fuori Banda attivato.'}`);
+    };
+
+    const pingManualNode = async (index) => {
+        const node = l2Nodes[index];
+        setL2Nodes(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], status: 'pinging' };
+            return next;
+        });
+        addLog(`Avvio ping manuale verso ${node.url}...`);
+
+        try {
+            const delay = Math.random() * 1000 + 500;
+            await new Promise(r => setTimeout(r, delay));
+
+            const response = await fetchWithAuth(node.url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if (response.ok) {
+                setL2Nodes(prev => {
+                    const next = [...prev];
+                    next[index] = { ...next[index], status: 'success' };
+                    return next;
+                });
+                addLog(`Nodo ${node.url} - Risposta POSITIVA ricevuta (Manuale)`);
+                resolveEscalation("LEVEL_2_MANUAL_PING", `Risolto tramite Ping manuale sul nodo ${node.url}`);
+            } else {
+                throw new Error(`HTTP ${response.status}`);
+            }
+        } catch (err) {
+            setL2Nodes(prev => {
+                const next = [...prev];
+                next[index] = { ...next[index], status: 'failed', errorCode: err.message.replace('HTTP ', '') };
+                return next;
+            });
+            addLog(`Nodo ${node.url} - Ping Manuale Fallito: ${err.message}`);
+        }
     };
 
     const handleLevel2Success = async () => {
@@ -127,18 +171,28 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         
         setSubmitting(true);
         try {
+            const payload = { authorizationCode: l2AuthCode };
+            if (isLowMed) {
+                payload.severity = ticket.severity;
+            }
+
             const response = await fetchWithAuth(`${API_BASE_URL}/api/dispatch`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ authorizationCode: l2AuthCode })
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
                 addLog(`Autorizzazione vocale ricevuta. Codice: ${l2AuthCode}`);
-                await resolveEscalation("LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
+                await resolveEscalation(isLowMed ? "LEVEL_3_OUT_OF_BAND" : "LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
             } else if (response.status === 404) {
                 addLog("Risorse non disponibili al momento.");
-                handleLevel2Fail();
+                if (isLowMed) {
+                    addLog("Contatto radio fallito.");
+                    alert("Nessun ente disponibile al contatto radio.");
+                } else {
+                    handleLevel2Fail();
+                }
             } else if (response.status === 401) {
                 addLog("Codice autorizzazione non valido.");
                 alert("Codice non valido.");
@@ -220,10 +274,14 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                             {/* LEVEL 2 INDICATOR */}
                             <div className={`relative p-4 rounded-xl border transition-colors ${currentLevel === 2 ? 'border-orange-500 bg-orange-900/20' : 'border-gray-800 opacity-50'}`}>
                                 <div className="flex items-center space-x-3">
-                                    <Radio className={`w-6 h-6 ${currentLevel === 2 ? 'text-orange-400' : 'text-gray-500'}`} />
+                                    {isLowMed ? (
+                                        <Wifi className={`w-6 h-6 ${currentLevel === 2 ? 'text-orange-400' : 'text-gray-500'}`} />
+                                    ) : (
+                                        <Radio className={`w-6 h-6 ${currentLevel === 2 ? 'text-orange-400' : 'text-gray-500'}`} />
+                                    )}
                                     <div>
                                         <h3 className="font-bold text-sm">Livello 2</h3>
-                                        <p className="text-xs text-gray-400">Fuori Banda (TETRA)</p>
+                                        <p className="text-xs text-gray-400">{isLowMed ? 'Ping Manuale' : 'Fuori Banda (TETRA)'}</p>
                                     </div>
                                 </div>
                                 {currentLevel === 2 && levelStatus === 'failed' && <X className="absolute right-4 top-5 text-red-500 w-5 h-5" />}
@@ -232,10 +290,14 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                             {/* LEVEL 3 INDICATOR */}
                             <div className={`relative p-4 rounded-xl border transition-all ${currentLevel === 3 ? 'border-red-500 bg-red-900/20 shadow-[0_0_15px_rgba(239,68,68,0.2)] scale-105' : 'border-gray-800 opacity-50'}`}>
                                 <div className="flex items-center space-x-3">
-                                    <ShieldAlert className={`w-6 h-6 ${currentLevel === 3 ? 'text-red-400 animate-pulse' : 'text-gray-500'}`} />
+                                    {isLowMed ? (
+                                        <Radio className={`w-6 h-6 ${currentLevel === 3 ? 'text-red-400 animate-pulse' : 'text-gray-500'}`} />
+                                    ) : (
+                                        <ShieldAlert className={`w-6 h-6 ${currentLevel === 3 ? 'text-red-400 animate-pulse' : 'text-gray-500'}`} />
+                                    )}
                                     <div>
                                         <h3 className="font-bold text-sm">Livello 3</h3>
-                                        <p className="text-xs text-gray-400">Escalation Estrema</p>
+                                        <p className="text-xs text-gray-400">{isLowMed ? 'Contatto Radio' : 'Escalation Estrema'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -311,70 +373,148 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                         {/* LEVEL 2 UI */}
                         {currentLevel === 2 && (
-                            <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="text-center mb-6">
-                                    <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
-                                        <Radio className="w-10 h-10 text-orange-500" />
+                            isLowMed ? (
+                                <div className="flex flex-col h-full py-4 animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden">
+                                    <div className="text-center mb-4 flex-shrink-0">
+                                        <h2 className="text-3xl font-light mb-2">Ping Manuale Servizi</h2>
+                                        <p className="text-gray-400 text-sm">Seleziona un servizio specifico da ingaggiare manualmente. Puoi riprovare più volte.</p>
                                     </div>
-                                    <h2 className="text-3xl font-light mb-2 text-orange-50">Ingaggio Fuori Banda</h2>
-                                    <p className="text-orange-200/70 text-sm max-w-md mx-auto">
-                                        Contattare direttamente un comando tramite rete radio (es. TETRA) e ottenere autorizzazione verbale per l'impiego di una squadra.
-                                    </p>
-                                </div>
-
-                                <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
-                                    <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
-                                    <input 
-                                        type="text" 
-                                        value={l2AuthCode}
-                                        onChange={(e) => setL2AuthCode(e.target.value)}
-                                        className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
-                                        placeholder="es. AUTH-TETRA-77X"
-                                    />
-
-                                    <div className="flex flex-col space-y-3">
-                                        <button onClick={handleLevel2Success} disabled={submitting} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors shadow-lg shadow-orange-900/20">
-                                            {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INIETTA FORZATURA NEL BPMN</>}
-                                        </button>
-                                        <button onClick={handleLevel2Fail} disabled={submitting} className="w-full py-3 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 rounded-lg font-bold transition-colors">
-                                            NESSUNA RISPOSTA RADIO (FALLIMENTO)
+                            
+                                    <div className="flex-1 overflow-y-auto px-4 mb-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            {l2Nodes.map((node, index) => {
+                                                const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
+                                                const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
+                                                
+                                                return (
+                                                    <div key={node.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${node.status === 'pinging' ? 'border-blue-500 bg-blue-900/20' : node.status === 'success' ? 'border-green-500/50 bg-green-900/20' : node.status === 'failed' ? 'border-red-500/50 bg-red-900/20' : 'border-gray-700 bg-gray-800/50'}`}>
+                                                        <div className="flex items-center space-x-3 overflow-hidden">
+                                                            <Server className={`w-5 h-5 flex-shrink-0 ${node.status === 'pinging' ? 'text-blue-400' : node.status === 'success' ? 'text-green-400' : node.status === 'failed' ? 'text-red-400' : 'text-gray-500'}`} />
+                                                            <div className="flex flex-col overflow-hidden">
+                                                                <span className="text-sm font-mono text-gray-300 truncate" title={node.url}>{shortName}</span>
+                                                                {node.status === 'failed' && <span className="text-[10px] text-red-400 truncate">{node.errorCode}</span>}
+                                                            </div>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => pingManualNode(index)}
+                                                            disabled={node.status === 'pinging' || node.status === 'success'}
+                                                            className={`px-3 py-1.5 rounded text-xs font-bold transition-colors ${node.status === 'pinging' ? 'bg-blue-600 text-white cursor-wait' : node.status === 'success' ? 'bg-green-600 text-white cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+                                                        >
+                                                            {node.status === 'pinging' ? 'PING...' : node.status === 'success' ? 'OK' : 'PING'}
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                            
+                                    <div className="flex justify-center flex-shrink-0">
+                                        <button onClick={() => {
+                                            setCurrentLevel(3);
+                                            setLevelStatus('idle');
+                                            addLog("Passaggio al Livello 3: Contatto Radio.");
+                                        }} className="px-8 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full font-bold transition-all flex items-center shadow-lg">
+                                            PASSA AL LIVELLO 3 (CONTATTO RADIO) <ChevronRight className="w-5 h-5 ml-2" />
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
+                                    <div className="text-center mb-6">
+                                        <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
+                                            <Radio className="w-10 h-10 text-orange-500" />
+                                        </div>
+                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Ingaggio Fuori Banda</h2>
+                                        <p className="text-orange-200/70 text-sm max-w-md mx-auto">
+                                            Contattare direttamente un comando tramite rete radio (es. TETRA) e ottenere autorizzazione verbale per l'impiego di una squadra.
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
+                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
+                                        <input 
+                                            type="text" 
+                                            value={l2AuthCode}
+                                            onChange={(e) => setL2AuthCode(e.target.value)}
+                                            className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
+                                            placeholder="es. AUTH-TETRA-77X"
+                                        />
+
+                                        <div className="flex flex-col space-y-3">
+                                            <button onClick={handleLevel2Success} disabled={submitting} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors shadow-lg shadow-orange-900/20">
+                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INIETTA FORZATURA NEL BPMN</>}
+                                            </button>
+                                            <button onClick={handleLevel2Fail} disabled={submitting} className="w-full py-3 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 rounded-lg font-bold transition-colors">
+                                                NESSUNA RISPOSTA RADIO (FALLIMENTO)
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
                         )}
 
                         {/* LEVEL 3 UI */}
                         {currentLevel === 3 && (
-                            <div className="flex flex-col h-full justify-center relative animate-in zoom-in-95 duration-500">
-                                {/* Red Alert Background Glow */}
-                                <div className="absolute inset-0 bg-red-900/10 blur-3xl pointer-events-none rounded-full"></div>
-                                
-                                <div className="text-center mb-6 relative z-10">
-                                    <div className="inline-block p-4 bg-red-500/20 rounded-full mb-3 animate-pulse border border-red-500/30">
-                                        <ShieldAlert className="w-12 h-12 text-red-500" />
-                                    </div>
-                                    <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">ESCALATION ESTREMA</h2>
-                                    <p className="text-red-200/80 text-sm max-w-lg mx-auto leading-relaxed">
-                                        Forze ordinarie collassate. Forza la transizione del processo BPMN su un ramo dedicato alle calamità estreme attivando gli endpoint di Prefettura o Comando Militare.
-                                    </p>
-                                </div>
-
-                                <div className="bg-red-950/40 p-6 rounded-2xl border border-red-900/50 w-full max-w-md mx-auto relative z-10 backdrop-blur-sm shadow-2xl">
-                                    <div className="flex items-center justify-center p-3 bg-red-900/30 border border-red-500/30 rounded-lg mb-6">
-                                        <Shield className="w-5 h-5 text-red-400 mr-3" />
-                                        <span className="text-red-200 font-mono text-sm tracking-widest">CAP_REQ: MILITARY_INTERVENTION</span>
+                            isLowMed ? (
+                                <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
+                                    <div className="text-center mb-6">
+                                        <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
+                                            <Radio className="w-10 h-10 text-orange-500" />
+                                        </div>
+                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Contatto Radio</h2>
+                                        <p className="text-orange-200/70 text-sm max-w-md mx-auto">
+                                            Contattare direttamente un comando tramite rete radio e ottenere autorizzazione verbale.
+                                        </p>
                                     </div>
 
-                                    <button onClick={handleLevel3Resolve} disabled={submitting} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-lg font-black tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] flex items-center justify-center transition-all group">
-                                        {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
-                                            <>
-                                                AUTORIZZA INTERVENTO MILITARE <ChevronRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
-                                            </>
-                                        )}
-                                    </button>
+                                    <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
+                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
+                                        <input 
+                                            type="text" 
+                                            value={l2AuthCode}
+                                            onChange={(e) => setL2AuthCode(e.target.value)}
+                                            className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
+                                            placeholder="es. AUTH-TETRA-77X"
+                                        />
+
+                                        <div className="flex flex-col space-y-3">
+                                            <button onClick={handleLevel2Success} disabled={submitting} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors shadow-lg shadow-orange-900/20">
+                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INIETTA FORZATURA NEL BPMN</>}
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <div className="flex flex-col h-full justify-center relative animate-in zoom-in-95 duration-500">
+                                    {/* Red Alert Background Glow */}
+                                    <div className="absolute inset-0 bg-red-900/10 blur-3xl pointer-events-none rounded-full"></div>
+                                    
+                                    <div className="text-center mb-6 relative z-10">
+                                        <div className="inline-block p-4 bg-red-500/20 rounded-full mb-3 animate-pulse border border-red-500/30">
+                                            <ShieldAlert className="w-12 h-12 text-red-500" />
+                                        </div>
+                                        <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">ESCALATION ESTREMA</h2>
+                                        <p className="text-red-200/80 text-sm max-w-lg mx-auto leading-relaxed">
+                                            Forze ordinarie collassate. Forza la transizione del processo BPMN su un ramo dedicato alle calamità estreme attivando gli endpoint di Prefettura o Comando Militare.
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-red-950/40 p-6 rounded-2xl border border-red-900/50 w-full max-w-md mx-auto relative z-10 backdrop-blur-sm shadow-2xl">
+                                        <div className="flex items-center justify-center p-3 bg-red-900/30 border border-red-500/30 rounded-lg mb-6">
+                                            <Shield className="w-5 h-5 text-red-400 mr-3" />
+                                            <span className="text-red-200 font-mono text-sm tracking-widest">CAP_REQ: MILITARY_INTERVENTION</span>
+                                        </div>
+
+                                        <button onClick={handleLevel3Resolve} disabled={submitting} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-lg font-black tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] flex items-center justify-center transition-all group">
+                                            {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
+                                                <>
+                                                    AUTORIZZA INTERVENTO MILITARE <ChevronRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                </>
+                                            )}
+                                        </button>
+                                    </div>
+                                </div>
+                            )
                         )}
 
                     </div>

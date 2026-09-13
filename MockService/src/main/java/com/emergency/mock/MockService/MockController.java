@@ -75,12 +75,14 @@ public class MockController {
         logger.info("Method: {}", request.getMethod());
         logger.info("URL: {}", request.getRequestURI());
         String authorizationCode = code.get("authorizationCode");
+        String severity = code.get("severity");
         if (authorizationCode != null && validCodes.contains(authorizationCode)) {
-            logger.info("Result: 200 OK");
             boolean success = new java.util.Random().nextBoolean();
-            if(success){
+            if(success || severity.equals("LOW") || severity.equals("MEDIUM")) {
+                logger.info("Result: 200 OK");
                 return ResponseEntity.ok(Map.of("message", "Risorse mobilitate"));
             } else {
+                logger.info("Result: 404 Not Found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "Nessuna risorsa disponibile"));
             }
         } else {
