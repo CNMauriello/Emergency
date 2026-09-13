@@ -20,7 +20,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         if (isOpen) {
             setCurrentLevel(1);
             setLevelStatus('idle');
-            const tid = ticket?.taskId || ticket?.ticketId || ticket?.id || 'Sconosciuto';
+            const tid = ticket?.taskId || ticket?.ticketId || ticket?.id || 'Unknown';
             setLogs([`Started resolution procedure for ticket ${tid}`]);
 
             const eps = ticket?.failedEndpoints || [];
@@ -72,11 +72,11 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     const startLevel1 = () => {
         if (levelStatus === 'running') return;
         setLevelStatus('running');
-        addLog("Avvio Broadcast Alert parallelo verso i nodi telematici...");
+        addLog("Starting parallel Broadcast Alert to telematic nodes...");
 
         Promise.all(l1Nodes.map(async (node, i) => {
             try {
-                // Addamo un leggero ritardo casuale per visualizzare l'animazione di broadcast
+                // Add a slight random delay to display the broadcast animation
                 const delay = Math.random() * 1000 + 500;
                 await new Promise(r => setTimeout(r, delay));
 
@@ -91,7 +91,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                         next[i] = { ...next[i], status: 'success' };
                         return next;
                     });
-                    addLog(`Nodo ${node.url} - Risposta POSITIVA ricevuta`);
+                    addLog(`Node ${node.url} - POSITIVE response received`);
                     return true;
                 } else {
                     throw new Error(`HTTP ${response.status}`);
@@ -102,15 +102,15 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                     next[i] = { ...next[i], status: 'failed', errorCode: err.message.replace('HTTP ', '') };
                     return next;
                 });
-                addLog(`Nodo ${node.url} - Fallito: ${err.message}`);
+                addLog(`Node ${node.url} - Failed: ${err.message}`);
                 return false;
             }
         })).then(results => {
             const anySuccess = results.some(r => r);
             if (anySuccess) {
                 setLevelStatus('success');
-                addLog("Broadcast completato con successo: almeno un ente ha accettato l'ingaggio in parallelo!");
-                // Resolveamo l'escalation automaticamente dato che il broadcast è andato a buon fine
+                addLog("Broadcast completed successfully: at least one node accepted the parallel engagement!");
+                // Resolve the escalation automatically since the broadcast was successful
                 resolveEscalation("LEVEL_1_BROADCAST", "Automatically resolved via Parallel Broadcast on telematic network.");
             } else {
                 setLevelStatus('failed');
@@ -122,7 +122,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     const proceedToLevel2 = () => {
         setCurrentLevel(2);
         setLevelStatus('idle');
-        addLog(`Passaggio al Livello 2: ${isLowMed ? 'Ping Manuale' : 'Ingaggio Fuori Banda attivato.'}`);
+        addLog(`Moving to Level 2: ${isLowMed ? "Manual Ping" : "Out-of-band engagement activated."}`);
     };
 
     const pingManualNode = async (index) => {
@@ -132,7 +132,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             next[index] = { ...next[index], status: 'pinging' };
             return next;
         });
-        addLog(`Avvio ping manuale verso ${node.url}...`);
+        addLog(`Starting manual ping to ${node.url}...`);
 
         try {
             const delay = Math.random() * 1000 + 500;
@@ -149,8 +149,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                     next[index] = { ...next[index], status: 'success' };
                     return next;
                 });
-                addLog(`Nodo ${node.url} - Risposta POSITIVA ricevuta (Manuale)`);
-                resolveEscalation("LEVEL_2_MANUAL_PING", `Risolto tramite Ping manuale sul nodo ${node.url}`);
+                addLog(`Node ${node.url} - POSITIVE response received (Manual)`);
+                resolveEscalation("LEVEL_2_MANUAL_PING", `Resolved via Manual Ping on node ${node.url}`);
             } else {
                 throw new Error(`HTTP ${response.status}`);
             }
@@ -160,7 +160,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 next[index] = { ...next[index], status: 'failed', errorCode: err.message.replace('HTTP ', '') };
                 return next;
             });
-            addLog(`Nodo ${node.url} - Ping Manuale Fallito: ${err.message}`);
+            addLog(`Node ${node.url} - Manual Ping Failed: ${err.message}`);
         }
     };
 
@@ -184,19 +184,19 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             });
 
             if (response.ok) {
-                addLog(`Autorizzazione vocale ricevuta. Codice: ${l2AuthCode}`);
-                await resolveEscalation(isLowMed ? "LEVEL_3_OUT_OF_BAND" : "LEVEL_2_OUT_OF_BAND", `Risolto tramite contatto radio TETRA. Codice: ${l2AuthCode}`);
+                addLog(`Voice authorization received. Code: ${l2AuthCode}`);
+                await resolveEscalation(isLowMed ? "LEVEL_3_OUT_OF_BAND" : "LEVEL_2_OUT_OF_BAND", `Resolved via TETRA radio contact. Code: ${l2AuthCode}`);
             } else if (response.status === 404) {
-                addLog("Risorse non disponibili al momento.");
+                addLog("Resources currently unavailable.");
                 if (isLowMed) {
-                    addLog("Contatto radio fallito.");
-                    alert("No ente disponibile al contatto radio.");
+                    addLog("Radio contact failed.");
+                    alert("No entity available for radio contact.");
                 } else {
                     handleLevel2Fail();
                 }
             } else if (response.status === 401) {
-                addLog("Codice autorizzazione non valido.");
-                alert("Codice non valido.");
+                addLog("Invalid authorization code.");
+                alert("Invalid code.");
                 setL2AuthCode("");
             } else {
                 addLog(`Unexpected error: ${response.status}`);
@@ -210,10 +210,10 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     };
 
     const handleLevel2Fail = () => {
-        addLog("Contatto radio fallito. No ente disponibile fisicamente.");
+        addLog("Radio contact failed. No physical entity available.");
         setCurrentLevel(3);
         setLevelStatus('idle');
-        addLog("Passaggio al Livello 3: Escalation Estrema.");
+        addLog("Moving to Level 3: Extreme Escalation.");
     };
 
     const handleLevel3Resolve = async () => {
@@ -224,8 +224,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 headers: { 'Content-Type': 'application/json' }
             });
             if (response.ok) {
-                addLog("Autorizzazione Militare confermata.");
-                resolveEscalation("LEVEL_3_EXTREME_MILITARY", "Risolto tramite intervento Forze Armate / Prefettura, bypass discovery.");
+                addLog("Military Authorization confirmed.");
+                resolveEscalation("LEVEL_3_EXTREME_MILITARY", "Resolved via Armed Forces / Prefecture intervention, bypassing discovery.");
             } else {
                 addLog(`Error during military authorization: ${response.status}`);
             }
@@ -265,7 +265,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                 <div className="flex items-center space-x-3">
                                     <Wifi className={`w-6 h-6 ${currentLevel === 1 ? 'text-blue-400' : 'text-gray-500'}`} />
                                     <div>
-                                        <h3 className="font-bold text-sm">Livello 1</h3>
+                                        <h3 className="font-bold text-sm">Level 1</h3>
                                         <p className="text-xs text-gray-400">Broadcast Alert</p>
                                     </div>
                                 </div>
@@ -281,8 +281,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <Radio className={`w-6 h-6 ${currentLevel === 2 ? 'text-orange-400' : 'text-gray-500'}`} />
                                     )}
                                     <div>
-                                        <h3 className="font-bold text-sm">Livello 2</h3>
-                                        <p className="text-xs text-gray-400">{isLowMed ? 'Ping Manuale' : 'Fuori Banda (TETRA)'}</p>
+                                        <h3 className="font-bold text-sm">Level 2</h3>
+                                        <p className="text-xs text-gray-400">{isLowMed ? 'Manual Ping' : 'Out-of-band (TETRA)'}</p>
                                     </div>
                                 </div>
                                 {currentLevel === 2 && levelStatus === 'failed' && <X className="absolute right-4 top-5 text-red-500 w-5 h-5" />}
@@ -297,8 +297,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <ShieldAlert className={`w-6 h-6 ${currentLevel === 3 ? 'text-red-400 animate-pulse' : 'text-gray-500'}`} />
                                     )}
                                     <div>
-                                        <h3 className="font-bold text-sm">Livello 3</h3>
-                                        <p className="text-xs text-gray-400">{isLowMed ? 'Contatto Radio' : 'Escalation Estrema'}</p>
+                                        <h3 className="font-bold text-sm">Level 3</h3>
+                                        <p className="text-xs text-gray-400">{isLowMed ? 'Radio Contact' : 'Extreme Escalation'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -324,21 +324,27 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                         {currentLevel === 1 && (
                             <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="text-center mb-6">
-                                    <h2 className="text-3xl font-light mb-2">Broadcast Telematico</h2>
+                                    <h2 className="text-3xl font-light mb-2">Telematic Broadcast</h2>
                                     <p className="text-gray-400 text-sm">Parallel call to all registered territorial services.</p>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4 mb-6 px-4">
                                     {l1Nodes.map((node) => {
-                                        const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
-                                        const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
+                                        let shortName = node.url || `NODE_${node.id}`;
+                                        try {
+                                            const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
+                                            shortName = urlObj.pathname + urlObj.search;
+                                            if (shortName === '/') shortName = urlObj.hostname;
+                                        } catch (e) {
+                                            // Fallback to original url
+                                        }
 
                                         return (
                                             <div key={node.id} className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-500 ${node.status === 'pending' ? 'border-gray-700 bg-gray-800/50' : (node.status === 'success' ? 'border-green-500/50 bg-green-900/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]' : 'border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]')}`}>
                                                 <Server className={`w-8 h-8 mb-2 transition-colors ${node.status === 'pending' ? 'text-gray-500' : (node.status === 'success' ? 'text-green-400' : 'text-red-400')}`} />
                                                 <div className="text-xs font-mono text-gray-400 truncate max-w-full px-2" title={node.url}>{shortName}</div>
                                                 <div className={`text-[10px] mt-2 px-2 py-1 rounded transition-colors ${node.status === 'pending' ? 'bg-gray-800 text-gray-500' : (node.status === 'success' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400')}`}>
-                                                    {node.status === 'pending' ? (levelStatus === 'running' ? 'PINGING...' : 'IDLE') : (node.status === 'success' ? 'ACCETTATO' : `FALLITO/${node.errorCode || 'ERR'}`)}
+                                                    {node.status === 'pending' ? (levelStatus === 'running' ? 'PINGING...' : 'IDLE') : (node.status === 'success' ? 'ACCEPTED' : `FAILED/${node.errorCode || 'ERR'}`)}
                                                 </div>
                                             </div>
                                         );
@@ -349,23 +355,23 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                     {levelStatus === 'idle' && (
                                         <button onClick={startLevel1} className="group relative px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-bold tracking-wide transition-all overflow-hidden flex items-center">
                                             <div className="absolute inset-0 w-full h-full bg-white/20 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></div>
-                                            <Power className="w-5 h-5 mr-2" /> ESEGUI BROADCAST PING
+                                            <Power className="w-5 h-5 mr-2" /> EXECUTE BROADCAST PING
                                         </button>
                                     )}
                                     {levelStatus === 'running' && (
                                         <div className="flex items-center text-blue-400 font-mono tracking-widest animate-pulse">
                                             <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                                            SCANSIONE RETE IN CORSO...
+                                            NETWORK SCAN IN PROGRESS...
                                         </div>
                                     )}
                                     {levelStatus === 'failed' && (
                                         <button onClick={proceedToLevel2} className="px-8 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full font-bold transition-all flex items-center shadow-lg">
-                                            RETE NON DISPONIBILE - PROCEDI AL LIVELLO 2 <ChevronRight className="w-5 h-5 ml-2" />
+                                            NETWORK UNAVAILABLE - PROCEED TO LEVEL 2 <ChevronRight className="w-5 h-5 ml-2" />
                                         </button>
                                     )}
                                     {levelStatus === 'success' && (
                                         <div className="flex items-center px-8 py-3 bg-green-900/50 border border-green-500/50 text-green-400 rounded-full font-bold">
-                                            <CheckCircle2 className="w-5 h-5 mr-2" /> INTERVENTO ASSEGNATO
+                                            <CheckCircle2 className="w-5 h-5 mr-2" /> INTERVENTION ASSIGNED
                                         </div>
                                     )}
                                 </div>
@@ -377,15 +383,21 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                             isLowMed ? (
                                 <div className="flex flex-col h-full py-4 animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden">
                                     <div className="text-center mb-4 flex-shrink-0">
-                                        <h2 className="text-3xl font-light mb-2">Ping Manuale Servizi</h2>
+                                        <h2 className="text-3xl font-light mb-2">Manual Ping Services</h2>
                                         <p className="text-gray-400 text-sm">Select a specific service to engage manually. You can try multiple times.</p>
                                     </div>
 
                                     <div className="flex-1 overflow-y-auto px-4 mb-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             {l2Nodes.map((node, index) => {
-                                                const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
-                                                const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
+                                                let shortName = node.url || `NODE_${node.id}`;
+                                                try {
+                                                    const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
+                                                    shortName = urlObj.pathname + urlObj.search;
+                                                    if (shortName === '/') shortName = urlObj.hostname;
+                                                } catch (e) {
+                                                    // Fallback to original url
+                                                }
 
                                                 return (
                                                     <div key={node.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${node.status === 'pinging' ? 'border-blue-500 bg-blue-900/20' : node.status === 'success' ? 'border-green-500/50 bg-green-900/20' : node.status === 'failed' ? 'border-red-500/50 bg-red-900/20' : 'border-gray-700 bg-gray-800/50'}`}>
@@ -413,9 +425,9 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <button onClick={() => {
                                             setCurrentLevel(3);
                                             setLevelStatus('idle');
-                                            addLog("Passaggio al Livello 3: Contatto Radio.");
+                                            addLog("Moving to Level 3: Radio Contact.");
                                         }} className="px-8 py-3 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-full font-bold transition-all flex items-center shadow-lg">
-                                            PASSA AL LIVELLO 3 (CONTATTO RADIO) <ChevronRight className="w-5 h-5 ml-2" />
+                                            PROCEED TO LEVEL 3 (RADIO CONTACT) <ChevronRight className="w-5 h-5 ml-2" />
                                         </button>
                                     </div>
                                 </div>
@@ -425,20 +437,20 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
                                             <Radio className="w-10 h-10 text-orange-500" />
                                         </div>
-                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Ingaggio Fuori Banda</h2>
+                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Out-of-band Engagement</h2>
                                         <p className="text-orange-200/70 text-sm max-w-md mx-auto">
-                                            Contattare direttamente un comando tramite rete radio (es. TETRA) e ottenere autorizzazione verbale per l'impiego di una squadra.
+                                            Directly contact a command via radio network (e.g. TETRA) and obtain verbal authorization for the deployment of a team.
                                         </p>
                                     </div>
 
                                     <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
-                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
+                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Radio Authorization Code / Notes</label>
                                         <input
                                             type="text"
                                             value={l2AuthCode}
                                             onChange={(e) => setL2AuthCode(e.target.value)}
                                             className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
-                                            placeholder="es. AUTH-TETRA-77X"
+                                            placeholder="e.g. AUTH-TETRA-77X"
                                         />
 
                                         <div className="flex flex-col space-y-3">
@@ -462,20 +474,20 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <div className="inline-block p-4 bg-orange-500/10 rounded-full mb-3">
                                             <Radio className="w-10 h-10 text-orange-500" />
                                         </div>
-                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Contatto Radio</h2>
+                                        <h2 className="text-3xl font-light mb-2 text-orange-50">Radio Contact</h2>
                                         <p className="text-orange-200/70 text-sm max-w-md mx-auto">
                                             Contact a command directly via radio network and obtain verbal authorization.
                                         </p>
                                     </div>
 
                                     <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
-                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
+                                        <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Radio Authorization Code / Notes</label>
                                         <input
                                             type="text"
                                             value={l2AuthCode}
                                             onChange={(e) => setL2AuthCode(e.target.value)}
                                             className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
-                                            placeholder="es. AUTH-TETRA-77X"
+                                            placeholder="e.g. AUTH-TETRA-77X"
                                         />
 
                                         <div className="flex flex-col space-y-3">
@@ -494,7 +506,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <div className="inline-block p-4 bg-red-500/20 rounded-full mb-3 animate-pulse border border-red-500/30">
                                             <ShieldAlert className="w-12 h-12 text-red-500" />
                                         </div>
-                                        <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">ESCALATION ESTREMA</h2>
+                                        <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">EXTREME ESCALATION</h2>
                                         <p className="text-red-200/80 text-sm max-w-lg mx-auto leading-relaxed">
                                             Ordinary forces collapsed. Force the BPMN process transition to a branch dedicated to extreme calamities by activating the Prefecture or Military Command endpoints.
                                         </p>
@@ -509,7 +521,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <button onClick={handleLevel3Resolve} disabled={submitting} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-lg font-black tracking-widest shadow-[0_0_30px_rgba(220,38,38,0.4)] hover:shadow-[0_0_40px_rgba(220,38,38,0.6)] flex items-center justify-center transition-all group">
                                             {submitting ? <Loader2 className="w-6 h-6 animate-spin" /> : (
                                                 <>
-                                                    AUTORIZZA INTERVENTO MILITARE <ChevronRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
+                                                    AUTHORIZE MILITARY INTERVENTION <ChevronRight className="w-6 h-6 ml-2 group-hover:translate-x-1 transition-transform" />
                                                 </>
                                             )}
                                         </button>

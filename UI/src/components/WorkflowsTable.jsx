@@ -141,7 +141,7 @@ export default function WorkflowsTable({ searchQuery }) {
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 shrink-0">
                     <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
                         <i className="fas fa-list text-[#0B1B32]"></i>
-                        Lista Processi
+                        Process List
                     </h2>
                     <div className="flex items-center gap-3">
                         <button 
@@ -151,12 +151,12 @@ export default function WorkflowsTable({ searchQuery }) {
                             <i className="fas fa-plus mr-1"></i> Register New Plan
                         </button>
                         <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
-                            {workflowGroups.length} Processi
+                            {workflowGroups.length} Processes
                         </span>
                         <button
                             onClick={loadWorkflows}
                             className="text-gray-400 hover:text-[#0B1B32] transition-colors bg-gray-50 hover:bg-gray-100 p-2 rounded-full"
-                            title="Aggiorna"
+                            title="Refresh"
                         >
                             <i className="fas fa-sync-alt text-[12px]"></i>
                         </button>
@@ -178,7 +178,7 @@ export default function WorkflowsTable({ searchQuery }) {
                             <th className="px-6 py-4">Event Type</th>
                             <th className="px-6 py-4">Gravity</th>
                             <th className="px-6 py-4">Active Version</th>
-                            <th className="px-6 py-4 text-right">Azioni</th>
+                            <th className="px-6 py-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/20 bg-transparent">

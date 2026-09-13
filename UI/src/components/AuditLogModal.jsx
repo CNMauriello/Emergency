@@ -118,7 +118,7 @@ export default function AuditLogModal({ emergencyId, onClose }) {
                     
                     {log.override && (
                       <div className="mt-3 text-[10px] uppercase font-bold text-yellow-700 bg-yellow-100 inline-block px-2 py-1 rounded">
-                        <i className="fas fa-exclamation-triangle mr-1"></i> Override Manuale Rilevato
+                        <i className="fas fa-exclamation-triangle mr-1"></i> Manual Override Detected
                       </div>
                     )}
                   </div>

@@ -85,7 +85,7 @@ export default function History({ searchQuery }) {
                 </div>
                 <div className="flex gap-3">
                     <button onClick={exportToCSV} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2.5 rounded text-[13px] font-bold shadow-sm transition-colors flex items-center gap-2">
-                        <Download className="w-4 h-4" /> Esporta CSV
+                        <Download className="w-4 h-4" /> Export CSV
                     </button>
                 </div>
             </div>
@@ -100,7 +100,7 @@ export default function History({ searchQuery }) {
 
                     
                     <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
-                        {filteredLogs.length} Log Registrati
+                        {filteredLogs.length} Registered Logs
                     </span>
                 </div>
 
@@ -115,12 +115,12 @@ export default function History({ searchQuery }) {
                     <table className="w-full text-left relative">
                         <thead className="sticky top-0 bg-white/40 backdrop-blur-md z-10 shadow-sm border-b border-white/40">
                             <tr className="text-[#0B1B32] text-[11px] font-extrabold tracking-wider uppercase">
-                                <th className="px-6 py-4">ID Evento</th>
-                                <th className="px-6 py-4">Data</th>
-                                <th className="px-6 py-4">Operatore</th>
-                                <th className="px-6 py-4">Azione</th>
+                                <th className="px-6 py-4">Event ID</th>
+                                <th className="px-6 py-4">Date</th>
+                                <th className="px-6 py-4">Operator</th>
+                                <th className="px-6 py-4">Action</th>
                                 <th className="px-6 py-4">Details</th>
-                                <th className="px-6 py-4 text-center">Esito</th>
+                                <th className="px-6 py-4 text-center">Outcome</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/20 bg-transparent">

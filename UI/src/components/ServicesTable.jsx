@@ -38,7 +38,7 @@ export default function ServicesTable({
       await onRefresh()
     } catch (err) {
       console.error(
-        "Errore durante l'eliminazione del servizio:",
+        "Error during service deletion:",
         err
       )
 

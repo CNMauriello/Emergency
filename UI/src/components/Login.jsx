@@ -43,7 +43,7 @@ export default function Login({ onLoginSuccess }) {
         setIsRegistering(false);
         setPassword('');
         setError(null);
-        alert('Registrazione completata con successo! Ora puoi effettuare l\'accesso.');
+        alert('Registration completed successfully! You can now log in.');
       } catch (err) {
         setError(err.message || 'Error during registration.');
       } finally {
@@ -154,7 +154,7 @@ export default function Login({ onLoginSuccess }) {
             onClick={() => setActiveTab('user')}
             className={`flex-1 py-2 px-1 text-[11px] font-bold rounded-md transition-all duration-200 whitespace-nowrap ${activeTab === 'user' ? 'bg-white shadow-sm text-[#0B1B32]' : 'text-gray-400 hover:text-gray-600'}`}
           >
-            Utente
+            User
           </button>
         </div>
 

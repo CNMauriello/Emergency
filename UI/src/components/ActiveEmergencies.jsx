@@ -7,25 +7,25 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Mappa i tipi di emergenza con icone specifiche
+    // Map emergency types to specific icons
     const getIconForType = (em) => {
         switch (em.eventType) {
             case 'FIRE':
-                return <Flame className="text-[#f97316] w-6 h-6" />; // arancione
+                return <Flame className="text-[#f97316] w-6 h-6" />; // orange
             case 'FLOOD':
-                return <Droplets className="text-[#0ea5e9] w-6 h-6" />; // azzurra
+                return <Droplets className="text-[#0ea5e9] w-6 h-6" />; // blue
             case 'CAR_CRASH':
-                return <Car className="text-[#ef4444] w-6 h-6" />; // rossa
+                return <Car className="text-[#ef4444] w-6 h-6" />; // red
             case 'EARTHQUAKE':
-                return <Mountain className="text-[#8B4513] w-6 h-6" />; // marrone
+                return <Mountain className="text-[#8B4513] w-6 h-6" />; // brown
             default:
                 return <Home className="text-gray-500 w-6 h-6" />;
         }
     };
 
-    // Calcola i label degli step e lo step corrente in base all'emergenza
+    // Calculate step labels and current step based on the emergency
     const getWorkflowInfo = (em) => {
-        // Definiamo i nomi degli step in base al tipo di evento
+        // Define step names based on the event type
         const steps = em.eventType === 'FIRE'
             ? ['Dispatch', 'Containment', 'Resolution']
             : ['Assessment', 'Dispatch', 'Resolution'];
@@ -42,7 +42,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
         try {
             const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies`);
 
-            // Fallback temporaneo per testare la UI in caso di assenza del backend
+            // Temporary fallback to test the UI in case of backend absence
             if (!response.ok) {
                 throw new Error('Error retrieving emergencies');
             }
@@ -54,7 +54,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
 
             console.error("Unable to retrieve emergencies:", err);
             setError(err.message); // Save the TRUE error message
-            setEmergencies([]);    // Assicurati che la lista sia vuota
+            setEmergencies([]);    // Ensure the list is empty
 
         } finally {
             setLoading(false);
@@ -64,7 +64,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
 
     useEffect(() => {
         fetchEmergencies();
-        // Polling ogni 5 secondi
+        // Polling every 5 seconds
         const interval = setInterval(fetchEmergencies, 5000);
         return () => clearInterval(interval);
     }, []);
@@ -206,10 +206,10 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
                                         <div className="w-[350px] mb-6">
                                             <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-3">WORKFLOW STATUS</p>
                                             <div className="flex items-center justify-between relative px-2">
-                                                {/* Linea di base grigia */}
+                                                {/* Gray base line */}
                                                 <div className="absolute left-4 right-4 top-1/2 h-[2px] bg-gray-200 border-t border-b border-dashed border-gray-300 z-0 transform -translate-y-1/2"></div>
 
-                                                {/* Linea di progresso blu */}
+                                                {/* Blue progress line */}
                                                 <div
                                                     className="absolute left-4 top-1/2 h-[2px] bg-[#1976d2] z-0 transform -translate-y-1/2 transition-all duration-500"
                                                     style={{ width: currentStep === 1 ? '0%' : currentStep === 2 ? '50%' : 'calc(100% - 2rem)' }}

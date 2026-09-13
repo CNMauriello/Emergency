@@ -65,18 +65,20 @@ export default function Header({ currentView, user, searchQuery, setSearchQuery 
       {/* Right side controls */}
       <div className="flex items-center gap-6">
         {/* Search Bar (Visual Only) */}
-        <div className="hidden md:flex relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+        {currentView !== 'profile' && (
+          <div className="hidden md:flex relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-64 pl-10 pr-3 py-2 border border-gray-200 rounded-full leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#6ea8fe] focus:ring-1 focus:ring-[#6ea8fe] sm:text-sm transition-colors"
+              placeholder="Search something..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="block w-64 pl-10 pr-3 py-2 border border-gray-200 rounded-full leading-5 bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#6ea8fe] focus:ring-1 focus:ring-[#6ea8fe] sm:text-sm transition-colors"
-            placeholder="Search something..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        )}
 
         <div className="w-px h-8 bg-gray-200 hidden md:block"></div>
 

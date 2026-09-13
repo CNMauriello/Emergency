@@ -372,7 +372,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
           disabled={submitting || loadingCapabilities || capabilityError}
           className="w-full bg-[#0B1B32] hover:bg-slate-800 text-white font-medium py-2.5 rounded transition disabled:opacity-50 text-[14px]"
         >
-          {submitting ? 'Registrazione...' : 'Registra Servizio'}
+          {submitting ? 'Registering...' : 'Register Service'}
         </button>
       </form>
     </div>

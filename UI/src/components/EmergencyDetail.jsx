@@ -255,17 +255,17 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                         </div>
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-6 text-[13px] items-start">
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">TIPOLOGIA</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">TYPE</p>
                                 <p className="font-bold text-[#0B1B32] text-[15px]">{emergency.eventType.replace('_', ' ')}</p>
-                                <p className="text-gray-500 text-[11px] mt-1">{emergency.eventType.includes('CRASH') ? 'Priorità assoluta' : 'Priorità assoluta'}</p>
+                                <p className="text-gray-500 text-[11px] mt-1">{emergency.eventType.includes('CRASH') ? 'Absolute priority' : 'Absolute priority'}</p>
                             </div>
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">ORARIO RILEVAMENTO</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">DETECTION TIME</p>
                                 <p className="font-mono bg-gray-50 border border-gray-200 px-2.5 py-1 rounded font-bold inline-block text-[13px] text-gray-700 shadow-sm">{emergency.timestamp}</p>
-                                <p className="text-gray-500 text-[11px] mt-1.5">Sensore IoT & eCall</p>
+                                <p className="text-gray-500 text-[11px] mt-1.5">IoT Sensor & eCall</p>
                             </div>
                             <div>
-                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">COORDINATE (LAT/LONG)</p>
+                                <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">COORDINATES (LAT/LONG)</p>
                                 <div className="flex items-center text-[#0088cc] font-mono font-bold text-[13px] bg-[#e0f2fe] px-2.5 py-1 rounded border border-[#bae6fd] w-max">
                                     {emergency.latitude.toFixed(4)}° N, {emergency.longitude.toFixed(4)}° E
                                 </div>
@@ -273,7 +273,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                         </div>
 
                         <div className="mt-6 bg-gray-50 rounded-lg border border-gray-100 p-4 relative">
-                            <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-2 uppercase ml-7">INDIRIZZO FISICO</p>
+                            <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-2 uppercase ml-7">PHYSICAL ADDRESS</p>
                             <div className="flex items-start">
                                 <div className="bg-red-100 p-1.5 rounded-full mr-3 shrink-0 mt-0.5">
                                     <MapPin className="w-4 h-4 text-red-500" />
@@ -337,10 +337,10 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                         <div className="absolute top-0 left-0 w-1 h-full bg-red-500"></div>
                         <div className="flex items-center justify-between border-b border-red-200 pb-4 mb-5 bg-gradient-to-r from-red-50 to-white/50">
                             <h2 className="text-lg font-bold text-red-800 flex items-center">
-                                <AlertTriangle className="w-5 h-5 mr-2 text-red-600 animate-pulse" /> Ticket di Escalation Aperti (Richiesta Intervento)
+                                <AlertTriangle className="w-5 h-5 mr-2 text-red-600 animate-pulse" /> Open Escalation Tickets (Intervention Request)
                             </h2>
                             <span className="bg-red-100 text-red-800 border border-red-200 px-2.5 py-1 text-[11px] font-bold rounded uppercase shadow-sm">
-                                {emergencyTickets.length} Attivi
+                                {emergencyTickets.length} Active
                             </span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -348,18 +348,18 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 <div key={idx} className="bg-white p-4 rounded-xl border border-red-100 shadow-sm border-l-4 border-l-red-500 flex flex-col justify-between hover:shadow-md transition-shadow">
                                     <div>
                                         <div className="flex justify-between items-start mb-2">
-                                            <h3 className="font-bold text-gray-800">{ticket.taskName || ticket.name || 'Intervento Richiesto'}</h3>
+                                            <h3 className="font-bold text-gray-800">{ticket.taskName || ticket.name || 'Intervention Requested'}</h3>
                                             <span className="text-[10px] font-mono bg-red-50 border border-red-100 text-red-800 px-1.5 py-0.5 rounded font-bold shadow-sm">
                                                 {ticket.taskId || ticket.id || ticket.ticketId}
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-600 mb-3">
-                                            {ticket.message || ticket.description || 'Richiesta di intervento o validazione umana necessaria per far avanzare il processo BPMN.'}
+                                            {ticket.message || ticket.description || 'Intervention or human validation request required to advance the BPMN process.'}
                                         </p>
                                     </div>
                                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                                         <div className="text-[11px] text-gray-400">
-                                            <span className="font-semibold text-gray-600">Creazione:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' ')}
+                                            <span className="font-semibold text-gray-600">Created:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' ')}
                                         </div>
                                         <button
                                             onClick={() => setResolvingTicket({ ...ticket, severity: emergency?.severity })}
@@ -395,9 +395,9 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-[#0B1B32] tracking-wide">
-                                    Status Esecuzione Workflow BPMN
+                                    BPMN Workflow Execution Status
                                 </h2>
-                                <p className="text-gray-400 text-[13px] mt-0.5">Pipeline automatizzata di risposta ed escalation dell'evento</p>
+                                <p className="text-gray-400 text-[13px] mt-0.5">Automated response and event escalation pipeline</p>
                             </div>
                         </div>
                         <div className="flex items-center space-x-3">
@@ -406,9 +406,9 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                     <button
                                         onClick={() => setRecenterTrigger(prev => prev + 1)}
                                         className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
-                                        title="Centra diagramma BPMN"
+                                        title="Center BPMN diagram"
                                     >
-                                        <Maximize className="w-3.5 h-3.5 mr-1.5" /> Centra
+                                        <Maximize className="w-3.5 h-3.5 mr-1.5" /> Center
                                     </button>
                                     <button
                                         onClick={() => setPlayTrigger(prev => prev + 1)}
@@ -420,7 +420,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 </>
                             )}
                             <span className={`min-w-[120px] whitespace-nowrap justify-center flex items-center px-4 py-1.5 text-[11px] font-bold rounded shadow-sm ${visualizationData?.state === 'COMPLETED' ? 'bg-[#dcfce7] text-[#166534] border border-[#bbf7d0]' : 'bg-[#e0f2fe] text-[#0B1B32] border border-[#bae6fd]'}`}>
-                                {visualizationData?.state === 'ACTIVE' ? 'IN ESECUZIONE' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Please wait...'))}
+                                {visualizationData?.state === 'ACTIVE' ? 'RUNNING' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Please wait...'))}
                             </span>
                         </div>
                     </div>
@@ -433,7 +433,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                         onClick={() => setViewStack(viewStack.slice(0, -1))}
                                         className="absolute top-2 left-2 z-10 bg-white border border-gray-300 shadow-sm px-3 py-1.5 rounded text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"
                                     >
-                                        <ArrowLeft className="w-4 h-4 mr-1" /> Livello Superiore
+                                        <ArrowLeft className="w-4 h-4 mr-1" /> Upper Level
                                     </button>
                                 )}
                                 <ProcessBpmnViewer
@@ -456,7 +456,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                         <span>Loading BPMN diagram and status...</span>
                                     </>
                                 ) : (
-                                    <span>No workflow instance ID associato.</span>
+                                    <span>No workflow instance ID associated.</span>
                                 )}
                             </div>
                         )}
@@ -472,7 +472,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                     <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                 </div>
                                 <div className="text-gray-400 text-[11px] font-semibold tracking-wider flex items-center">
-                                    <Terminal className="w-3.5 h-3.5 mr-2 text-[#0088cc]" /> Log Servizi BPMN • Execution Stream
+                                    <Terminal className="w-3.5 h-3.5 mr-2 text-[#0088cc]" /> BPMN Services Log • Execution Stream
                                 </div>
                                 <div className="flex space-x-1">
                                     <span className="bg-[#003366] text-[#6ea8fe] px-3 py-1 rounded text-[10px] font-bold cursor-pointer">SYSTEM_LOG</span>
@@ -489,11 +489,11 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                     <div key={index} className="flex items-start">
                                         <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:0{index + 1}]</span>
                                         <span className="text-[#10b981] font-bold mr-2">[TRANSITION]</span>
-                                        <span>Transizione: <span className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-[10px] mx-1">{step}</span> — Eseguita con successo</span>
+                                        <span>Transition: <span className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-[10px] mx-1">{step}</span> — Executed successfully</span>
                                     </div>
                                 ))}
                                 {(!emergency.history || emergency.history.length === 0) && (
-                                    <div className="text-gray-500 italic">No log disponibile.</div>
+                                    <div className="text-gray-500 italic">No logs available.</div>
                                 )}
 
                                 <div className="text-gray-500 mt-4 animate-pulse">

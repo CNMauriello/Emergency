@@ -87,8 +87,8 @@ export default function Profile() {
                     <div className="absolute top-0 left-0 w-1 h-full bg-purple-500 group-hover/card:w-1.5 transition-all"></div>
                     <MapPin className="w-6 h-6 text-purple-500 mb-4 opacity-80" />
                     <div>
-                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Dipartimento</p>
-                        <p className="text-[#0B1B32] font-black text-xl">Centrale Operativa</p>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Department</p>
+                        <p className="text-[#0B1B32] font-black text-xl">Operations Center</p>
                     </div>
                 </div>
 
@@ -115,7 +115,7 @@ export default function Profile() {
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500"></span>
                         </div>
-                        Sistema Online / Attivo
+                        System Online / Active
                     </div>
                 </div>
               </div>
