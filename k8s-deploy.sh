@@ -146,6 +146,10 @@ kubectl apply \
   -f k8s/applications/ui/ui.yaml \
   -n "$NAMESPACE"
 
+kubectl apply \
+  -f k8s/infrastructure/mysql/mysql-external.yaml \
+  -n "$NAMESPACE"
+
 echo ""
 echo "=== FORCE IMAGE PULL ==="
 
