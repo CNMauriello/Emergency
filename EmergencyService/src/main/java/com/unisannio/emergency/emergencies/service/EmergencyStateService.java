@@ -78,8 +78,10 @@ public class EmergencyStateService {
     }
 
     @Transactional
-    public void updateStatus(String id, String newStatus, String workflowInstanceId) {
-        emergencyRepository.findByEventId(id).ifPresent(emergency -> {
+    public boolean updateStatus(String id, String newStatus, String workflowInstanceId) {
+        Optional<Emergency> optionalEmergency = emergencyRepository.findByEventId(id);
+        if (optionalEmergency.isPresent()) {
+            Emergency emergency = optionalEmergency.get();
             emergency.setStatus(EmergencyStatus.valueOf(newStatus));
             System.out.println("WorkflowInstanceId: " + workflowInstanceId);
             System.out.println("Status: " + newStatus);
@@ -88,7 +90,9 @@ public class EmergencyStateService {
             }
             emergency.getHistory().add(newStatus);
             emergencyRepository.save(emergency);
-        });
+            return true;
+        }
+        return false;
     }
 
     private boolean isSeverityEscalated(String currentSeverity, String newSeverity) {

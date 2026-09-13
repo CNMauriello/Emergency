@@ -35,7 +35,11 @@ public class EmergencyController {
     public ResponseEntity<Void> updateEmergencyStatus(
             @PathVariable String id,
             @RequestBody StatusUpdateRequestDto request) {
-        emergencyStateService.updateStatus(id, request.getStatus(), request.getWorkflowInstanceId());
-        return ResponseEntity.ok().build();
+        boolean updated = emergencyStateService.updateStatus(id, request.getStatus(), request.getWorkflowInstanceId());
+        if (updated) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
