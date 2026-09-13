@@ -293,7 +293,7 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
     if (!bpmnXml) {
         return (
             <div className="h-full flex items-center justify-center text-gray-500">
-                <Loader2 className="animate-spin mr-2" /> Caricamento Diagramma BPMN...
+                <Loader2 className="animate-spin mr-2" /> Loading Diagramma BPMN...
             </div>
         );
     }
@@ -301,7 +301,7 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
     if (error) {
         return (
             <div className="h-full flex items-center justify-center text-red-500 text-sm p-4">
-                Impossibile visualizzare il diagramma BPMN: {error}
+                Unable to display the BPMN diagram: {error}
             </div>
         );
     }

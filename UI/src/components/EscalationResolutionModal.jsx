@@ -21,7 +21,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             setCurrentLevel(1);
             setLevelStatus('idle');
             const tid = ticket?.taskId || ticket?.ticketId || ticket?.id || 'Sconosciuto';
-            setLogs([`Iniziata procedura di risoluzione per ticket ${tid}`]);
+            setLogs([`Started resolution procedure for ticket ${tid}`]);
 
             const eps = ticket?.failedEndpoints || [];
             if (eps.length > 0) {
@@ -57,13 +57,13 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error('Errore durante la chiusura del ticket');
+            if (!response.ok) throw new Error('Error closing the ticket');
 
             onSuccess();
             onClose();
         } catch (err) {
             console.error(err);
-            alert("Errore di comunicazione col server: " + err.message);
+            alert("Server communication error: " + err.message);
         } finally {
             setSubmitting(false);
         }
@@ -76,7 +76,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
         Promise.all(l1Nodes.map(async (node, i) => {
             try {
-                // Aggiungiamo un leggero ritardo casuale per visualizzare l'animazione di broadcast
+                // Addamo un leggero ritardo casuale per visualizzare l'animazione di broadcast
                 const delay = Math.random() * 1000 + 500;
                 await new Promise(r => setTimeout(r, delay));
 
@@ -110,11 +110,11 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             if (anySuccess) {
                 setLevelStatus('success');
                 addLog("Broadcast completato con successo: almeno un ente ha accettato l'ingaggio in parallelo!");
-                // Risolviamo l'escalation automaticamente dato che il broadcast è andato a buon fine
-                resolveEscalation("LEVEL_1_BROADCAST", "Risolto automaticamente tramite Broadcast Parallelo su rete telematico.");
+                // Resolveamo l'escalation automaticamente dato che il broadcast è andato a buon fine
+                resolveEscalation("LEVEL_1_BROADCAST", "Automatically resolved via Parallel Broadcast on telematic network.");
             } else {
                 setLevelStatus('failed');
-                addLog("Broadcast fallito: nessuna disponibilità trovata sulla rete ordinaria.");
+                addLog("Broadcast failed: no availability found on the ordinary network.");
             }
         });
     };
@@ -166,7 +166,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
     const handleLevel2Success = async () => {
         if (!l2AuthCode) {
-            alert("Inserire un codice di autorizzazione o motivazione.");
+            alert("Enter an authorization code or reason.");
             return;
         }
 
@@ -190,7 +190,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 addLog("Risorse non disponibili al momento.");
                 if (isLowMed) {
                     addLog("Contatto radio fallito.");
-                    alert("Nessun ente disponibile al contatto radio.");
+                    alert("No ente disponibile al contatto radio.");
                 } else {
                     handleLevel2Fail();
                 }
@@ -199,18 +199,18 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 alert("Codice non valido.");
                 setL2AuthCode("");
             } else {
-                addLog(`Errore inatteso: ${response.status}`);
+                addLog(`Unexpected error: ${response.status}`);
             }
         } catch (err) {
             console.error(err);
-            addLog(`Errore di comunicazione: ${err.message}`);
+            addLog(`Communication error: ${err.message}`);
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleLevel2Fail = () => {
-        addLog("Contatto radio fallito. Nessun ente disponibile fisicamente.");
+        addLog("Contatto radio fallito. No ente disponibile fisicamente.");
         setCurrentLevel(3);
         setLevelStatus('idle');
         addLog("Passaggio al Livello 3: Escalation Estrema.");
@@ -227,10 +227,10 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 addLog("Autorizzazione Militare confermata.");
                 resolveEscalation("LEVEL_3_EXTREME_MILITARY", "Risolto tramite intervento Forze Armate / Prefettura, bypass discovery.");
             } else {
-                addLog(`Errore durante l'autorizzazione militare: ${response.status}`);
+                addLog(`Error during military authorization: ${response.status}`);
             }
         } catch (err) {
-            addLog(`Errore di comunicazione: ${err.message}`);
+            addLog(`Communication error: ${err.message}`);
         } finally {
             setSubmitting(false);
         }
@@ -247,7 +247,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                             <Activity className="w-6 h-6 text-blue-400" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold tracking-wide">Risoluzione Escalation</h2>
+                            <h2 className="text-xl font-bold tracking-wide">Escalation Resolution</h2>
                             <p className="text-xs text-gray-400 font-mono">TICKET ID: {ticket.taskId || ticket.ticketId || ticket.id}</p>
                         </div>
                     </div>
@@ -325,7 +325,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                             <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="text-center mb-6">
                                     <h2 className="text-3xl font-light mb-2">Broadcast Telematico</h2>
-                                    <p className="text-gray-400 text-sm">Chiamata parallela a tutti i servizi del territorio registrati.</p>
+                                    <p className="text-gray-400 text-sm">Parallel call to all registered territorial services.</p>
                                 </div>
 
                                 <div className="grid grid-cols-3 gap-4 mb-6 px-4">
@@ -378,7 +378,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                 <div className="flex flex-col h-full py-4 animate-in fade-in slide-in-from-right-4 duration-500 overflow-hidden">
                                     <div className="text-center mb-4 flex-shrink-0">
                                         <h2 className="text-3xl font-light mb-2">Ping Manuale Servizi</h2>
-                                        <p className="text-gray-400 text-sm">Seleziona un servizio specifico da ingaggiare manualmente. Puoi riprovare più volte.</p>
+                                        <p className="text-gray-400 text-sm">Select a specific service to engage manually. You can try multiple times.</p>
                                     </div>
 
                                     <div className="flex-1 overflow-y-auto px-4 mb-4">
@@ -443,10 +443,10 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                                         <div className="flex flex-col space-y-3">
                                             <button onClick={handleLevel2Success} disabled={submitting} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors shadow-lg shadow-orange-900/20">
-                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INIETTA FORZATURA NEL BPMN</>}
+                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INJECT OVERRIDE IN BPMN</>}
                                             </button>
                                             <button onClick={handleLevel2Fail} disabled={submitting} className="w-full py-3 bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 rounded-lg font-bold transition-colors">
-                                                NESSUNA RISPOSTA RADIO (FALLIMENTO)
+                                                NO RADIO RESPONSE (FAILURE)
                                             </button>
                                         </div>
                                     </div>
@@ -464,7 +464,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         </div>
                                         <h2 className="text-3xl font-light mb-2 text-orange-50">Contatto Radio</h2>
                                         <p className="text-orange-200/70 text-sm max-w-md mx-auto">
-                                            Contattare direttamente un comando tramite rete radio e ottenere autorizzazione verbale.
+                                            Contact a command directly via radio network and obtain verbal authorization.
                                         </p>
                                     </div>
 
@@ -480,7 +480,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                                         <div className="flex flex-col space-y-3">
                                             <button onClick={handleLevel2Success} disabled={submitting} className="w-full py-3 bg-orange-600 hover:bg-orange-500 text-white rounded-lg font-bold flex items-center justify-center transition-colors shadow-lg shadow-orange-900/20">
-                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INIETTA FORZATURA NEL BPMN</>}
+                                                {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-5 h-5 mr-2" /> INJECT OVERRIDE IN BPMN</>}
                                             </button>
                                         </div>
                                     </div>
@@ -496,7 +496,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         </div>
                                         <h2 className="text-4xl font-black mb-2 text-red-500 tracking-wider">ESCALATION ESTREMA</h2>
                                         <p className="text-red-200/80 text-sm max-w-lg mx-auto leading-relaxed">
-                                            Forze ordinarie collassate. Forza la transizione del processo BPMN su un ramo dedicato alle calamità estreme attivando gli endpoint di Prefettura o Comando Militare.
+                                            Ordinary forces collapsed. Force the BPMN process transition to a branch dedicated to extreme calamities by activating the Prefecture or Military Command endpoints.
                                         </p>
                                     </div>
 

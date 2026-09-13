@@ -30,7 +30,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
             ? ['Dispatch', 'Containment', 'Resolution']
             : ['Assessment', 'Dispatch', 'Resolution'];
 
-        // Mappiamo lo stato del backend (OPEN, IN_PROGRESS, CLOSED) su un indice numerico (1, 2, 3)
+        // Map the backend status (OPEN, IN_PROGRESS, CLOSED) to a numeric index (1, 2, 3)
         let currentStep = 1;
         if (em.status === 'IN_PROGRESS') currentStep = 2;
         if (em.status === 'CLOSED') currentStep = 3;
@@ -44,7 +44,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
 
             // Fallback temporaneo per testare la UI in caso di assenza del backend
             if (!response.ok) {
-                throw new Error('Errore nel recupero emergenze');
+                throw new Error('Error retrieving emergencies');
             }
 
             const data = await response.json();
@@ -52,8 +52,8 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
             setError(null);
         } catch (err) {
 
-            console.error("Impossibile recuperare le emergenze:", err);
-            setError(err.message); // Salva il VERO messaggio di errore
+            console.error("Unable to retrieve emergencies:", err);
+            setError(err.message); // Save the TRUE error message
             setEmergencies([]);    // Assicurati che la lista sia vuota
 
         } finally {
@@ -81,10 +81,9 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
         return (
             <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-gray-50 p-8">
                 <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-                <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile connettersi al Server</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to connect to the Server</h2>
                 <p className="text-red-600 font-mono text-sm">{error}</p>
-                <p className="text-gray-500 mt-4 text-sm">Assicurati che il Gestore Operatori di Sala sia in
-                    esecuzione.</p>
+                <p className="text-gray-500 mt-4 text-sm">Make sure the Room Operator Manager is running.</p>
             </div>
         );
     }
@@ -93,11 +92,11 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         return (em.eventType || '').toLowerCase().includes(q) ||
-               (em.description || '').toLowerCase().includes(q) ||
-               (em.status || '').toLowerCase().includes(q) ||
-               (em.severity || '').toLowerCase().includes(q) ||
-               (em.eventId || '').toLowerCase().includes(q) ||
-               String(em.id || '').toLowerCase().includes(q);
+            (em.description || '').toLowerCase().includes(q) ||
+            (em.status || '').toLowerCase().includes(q) ||
+            (em.severity || '').toLowerCase().includes(q) ||
+            (em.eventId || '').toLowerCase().includes(q) ||
+            String(em.id || '').toLowerCase().includes(q);
     }).sort((a, b) => {
         const isAClosed = a.status === 'CLOSED';
         const isBClosed = b.status === 'CLOSED';
@@ -127,14 +126,14 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
                 {searchQuery && filteredEmergencies.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm text-gray-500">
                         <Search className="w-12 h-12 text-gray-400 mb-4 shadow-sm rounded-full bg-gray-50 p-2" />
-                        <h2 className="text-[16px] font-bold text-gray-700">Nessun risultato trovato</h2>
-                        <p className="text-[14px] mt-1 text-gray-500">Nessuna emergenza corrisponde alla ricerca "{searchQuery}".</p>
+                        <h2 className="text-[16px] font-bold text-gray-700">No results found</h2>
+                        <p className="text-[14px] mt-1 text-gray-500">No emergency matches the search "{searchQuery}".</p>
                     </div>
                 ) : emergencies.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white border border-gray-200 rounded-lg shadow-sm text-gray-500">
                         <AlertTriangle className="w-12 h-12 text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-2" />
-                        <h2 className="text-[16px] font-bold text-gray-700">Non ci sono emergenze</h2>
-                        <p className="text-[14px] mt-1 text-gray-500">Al momento non è in corso alcuna emergenza sulla mappa territoriale.</p>
+                        <h2 className="text-[16px] font-bold text-gray-700">There are no emergencies</h2>
+                        <p className="text-[14px] mt-1 text-gray-500">There is currently no emergency on the territorial map.</p>
                     </div>
                 ) : (
                     filteredEmergencies.map((em) => {
@@ -163,7 +162,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
                                 onClick={() => onViewDetail && onViewDetail(em.eventId || em.id)}
                                 className={`bg-white border border-gray-200 rounded-lg shadow-sm flex overflow-hidden cursor-pointer hover:border-blue-300 hover:shadow-md transition-all duration-200 ${isClosed ? 'opacity-60' : ''}`}
                             >
-                                {/* Indicatore di gravità laterale */}
+                                {/* Lateral gravity indicator */}
                                 <div className={`w-1.5 ${severityColor}`}></div>
 
                                 <div className="p-5 flex-1 flex flex-col justify-between">
@@ -187,7 +186,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
 
                                     {/* Body Card */}
                                     <div className="flex justify-between items-center">
-                                        {/* Dettagli Evento */}
+                                        {/* Event Details */}
                                         <div className="flex space-x-4">
                                             <div className="mt-0.5 opacity-80">{getIconForType(em)}</div>
                                             <div>

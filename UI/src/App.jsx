@@ -40,7 +40,7 @@ export default function App() {
       const data = await response.json()
       setServices(data)
     } catch (err) {
-      console.error('Errore durante il recupero dei servizi:', err)
+      console.error('Error retrieving services:', err)
       setError(true)
     } finally {
       setLoading(false)

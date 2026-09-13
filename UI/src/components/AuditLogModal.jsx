@@ -20,7 +20,7 @@ export default function AuditLogModal({ emergencyId, onClose }) {
         setLogs(data);
       } catch (err) {
         console.error(err);
-        setError(err.message || 'Errore nel recupero dei log di audit dal backend.');
+        setError(err.message || 'Error retrieving audit logs from backend.');
         setLogs([]);
       } finally {
         setLoading(false);
@@ -92,7 +92,7 @@ export default function AuditLogModal({ emergencyId, onClose }) {
           ) : logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
               <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
-              <h2 className="text-[15px] font-bold text-gray-700">Nessun log di audit registrato</h2>
+              <h2 className="text-[15px] font-bold text-gray-700">No audit log registered</h2>
               <p className="text-[13px] mt-1 text-gray-500">Non ci sono attualmente operazioni registrate per questa emergenza.</p>
             </div>
           ) : (

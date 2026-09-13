@@ -67,7 +67,7 @@ export const fetchWithAuth = async (url, options = {}) => {
 
                     setAuthTokens(newAccessToken, newRefreshToken);
 
-                    // Riprova la chiamata originale con il nuovo access token
+                    // Retry original call with new access token
                     headers = {
                         ...options.headers,
                         'Authorization': `Bearer ${newAccessToken}`
@@ -78,11 +78,11 @@ export const fetchWithAuth = async (url, options = {}) => {
                     triggerLogout();
                 }
             } catch (e) {
-                console.error("Errore durante il refresh del token", e);
+                console.error("Error refreshing token", e);
                 triggerLogout();
             }
         } else {
-            // Nessun refresh token disponibile
+            // No refresh token disponibile
             triggerLogout();
         }
     }

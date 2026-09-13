@@ -16,7 +16,7 @@ export default function History({ searchQuery }) {
             setAuditLogs(data);
         } catch (err) {
             console.error('Error fetching audit logs:', err);
-            setError(err.message || 'Errore nel recupero degli audit log dal backend.');
+            setError(err.message || 'Error retrieving audit logs from backend.');
             setAuditLogs([]);
         } finally {
             setLoading(false);
@@ -48,7 +48,7 @@ export default function History({ searchQuery }) {
     const exportToCSV = () => {
         if (!filteredLogs || filteredLogs.length === 0) return;
         
-        const headers = ['ID Evento', 'Data', 'Operatore', 'Azione', 'Dettagli', 'Esito'];
+        const headers = ['Event ID', 'Date', 'Operator', 'Action', 'Details', 'Outcome'];
         const csvRows = [headers.join(';')];
         
         filteredLogs.forEach(log => {
@@ -119,7 +119,7 @@ export default function History({ searchQuery }) {
                                 <th className="px-6 py-4">Data</th>
                                 <th className="px-6 py-4">Operatore</th>
                                 <th className="px-6 py-4">Azione</th>
-                                <th className="px-6 py-4">Dettagli</th>
+                                <th className="px-6 py-4">Details</th>
                                 <th className="px-6 py-4 text-center">Esito</th>
                             </tr>
                         </thead>
@@ -127,7 +127,7 @@ export default function History({ searchQuery }) {
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="text-center py-8 text-gray-500">
-                                        <i className="fas fa-spinner fa-spin mr-2"></i> Caricamento audit log...
+                                        <i className="fas fa-spinner fa-spin mr-2"></i> Loading audit log...
                                     </td>
                                 </tr>
                             ) : filteredLogs.length === 0 ? (
@@ -135,8 +135,8 @@ export default function History({ searchQuery }) {
                                     <td colSpan="6" className="text-center py-16">
                                         <div className="flex flex-col items-center justify-center text-gray-500">
                                             <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
-                                            <h2 className="text-[15px] font-bold text-gray-700">Nessun log di audit registrato</h2>
-                                            <p className="text-[13px] mt-1 text-gray-500">Non ci sono attualmente operazioni o azioni eseguite nel sistema.</p>
+                                            <h2 className="text-[15px] font-bold text-gray-700">No audit log registered</h2>
+                                            <p className="text-[13px] mt-1 text-gray-500">There are currently no operations or actions performed in the system.</p>
                                         </div>
                                     </td>
                                 </tr>

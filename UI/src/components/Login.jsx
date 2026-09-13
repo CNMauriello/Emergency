@@ -34,9 +34,9 @@ export default function Login({ onLoginSuccess }) {
         });
 
         if (!response.ok) {
-          if (response.status === 409) throw new Error('Username o Email già in uso.');
-          if (response.status === 401) throw new Error('Dati non validi (es. formato email).');
-          throw new Error('Errore durante la registrazione.');
+          if (response.status === 409) throw new Error('Username or Email already in use.');
+          if (response.status === 401) throw new Error('Invalid data (e.g. email format).');
+          throw new Error('Error during registration.');
         }
 
         // Registrazione ok, torna al login
@@ -45,7 +45,7 @@ export default function Login({ onLoginSuccess }) {
         setError(null);
         alert('Registrazione completata con successo! Ora puoi effettuare l\'accesso.');
       } catch (err) {
-        setError(err.message || 'Errore durante la registrazione.');
+        setError(err.message || 'Error during registration.');
       } finally {
         setLoading(false);
       }
@@ -72,12 +72,12 @@ export default function Login({ onLoginSuccess }) {
       }
 
       if (!response.ok) {
-        throw new Error('Credenziali non valide o backend non raggiungibile.');
+        throw new Error('Invalid credentials or backend unreachable.');
       }
 
       let data = await response.json();
 
-      // Se l'accesso è tramite AuthMicroService, recuperiamo i dettagli del profilo
+      // If access is via AuthMicroService, retrieve profile details
       if (activeTab !== 'operator') {
         try {
           const profileRes = await fetch(`${AUTH_SERVICE_URL}/api/auth/profile`, {
@@ -96,24 +96,24 @@ export default function Login({ onLoginSuccess }) {
 
       // Verifica congruenza tra tab scelta e ruolo effettivo
       if (activeTab === 'workflow_expert' && data.user.ruolo !== 'ROLE_WORKFLOW_EXPERT') {
-        throw new Error('Accesso negato: non sei un Esperto Workflow.');
+        throw new Error('Access denied: you are not a Workflow Expert.');
       }
       if (activeTab === 'service_operator' && data.user.ruolo !== 'ROLE_SERVICE_OPERATOR') {
-        throw new Error('Accesso negato: non sei un Operatore Servizi.');
+        throw new Error('Access denied: you are not a Service Operator.');
       }
       if (activeTab === 'user' && data.user.ruolo !== 'ROLE_USER') {
-        throw new Error('Accesso negato: usa la tab corrispondente al tuo ruolo.');
+        throw new Error('Access denied: use the tab corresponding to your role.');
       }
 
-      // Salva in sessionStorage per isolamento tab
+      // Save in sessionStorage for tab isolation
       setAuthTokens(data.accessToken, data.refreshToken);
       sessionStorage.setItem('operator_user', JSON.stringify(data.operatore || data.user || data));
 
       // Notifica App.jsx
       onLoginSuccess(data.operatore || data.user || data);
     } catch (err) {
-      console.error('Errore di login:', err);
-      setError(err.message || 'Errore durante l\'autenticazione');
+      console.error('Login error:', err);
+      setError(err.message || 'Error during authentication');
     } finally {
       setLoading(false);
     }
@@ -163,10 +163,10 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         <h1 className="text-2xl font-bold text-[#0B1B32] mb-1 tracking-wide text-center">
-          {activeTab === 'operator' ? 'Sala Operativa' : (activeTab === 'service_operator' ? (isRegistering ? 'Registrazione' : 'Operatore Servizi') : (activeTab === 'workflow_expert' ? (isRegistering ? 'Registrazione' : 'Esperto Workflow') : (isRegistering ? 'Registrazione' : 'Consultazione')))}
+          {activeTab === 'operator' ? 'Operations Room' : (activeTab === 'service_operator' ? (isRegistering ? 'Registration' : 'Service Operator') : (activeTab === 'workflow_expert' ? (isRegistering ? 'Registration' : 'Workflow Expert') : (isRegistering ? 'Registration' : 'Consultation')))}
         </h1>
         <p className={`text-xs ${activeTab === 'operator' ? 'text-[#0B1B32]' : 'text-gray-500'} uppercase font-bold tracking-widest mb-6 transition-colors text-center`}>
-          {activeTab === 'operator' ? 'Accesso Autorizzato' : (isRegistering ? 'Crea un Account' : 'Accesso Esterno')}
+          {activeTab === 'operator' ? 'Authorized Access' : (isRegistering ? 'Create an Account' : 'External Access')}
         </p>
 
         {error && (
@@ -181,23 +181,23 @@ export default function Login({ onLoginSuccess }) {
           {activeTab === 'user' && isRegistering && (
             <>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Nome</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Inserisci nome"
+                  placeholder="Enter name"
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1976d2] focus:border-transparent transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cognome</label>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Surname</label>
                 <input
                   type="text"
                   value={surname}
                   onChange={(e) => setSurname(e.target.value)}
-                  placeholder="Inserisci cognome"
+                  placeholder="Enter surname"
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1976d2] focus:border-transparent transition-all"
                   required
                 />
@@ -208,7 +208,7 @@ export default function Login({ onLoginSuccess }) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Inserisci email"
+                  placeholder="Enter email"
                   className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1976d2] focus:border-transparent transition-all"
                   required
                 />
@@ -222,7 +222,7 @@ export default function Login({ onLoginSuccess }) {
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder={activeTab === 'operator' ? "Inserisci matricola" : "Scegli uno username"}
+              placeholder={activeTab === 'operator' ? "Enter badge number" : "Choose a username"}
               className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#1976d2] focus:border-transparent transition-all"
               required
             />
@@ -246,7 +246,7 @@ export default function Login({ onLoginSuccess }) {
             className={`w-full bg-[#0B1B32] hover:bg-[#0B1B32] text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2 mt-4 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             {loading ? <i className="fas fa-spinner fa-spin"></i> : <i className={activeTab === 'user' && isRegistering ? "fas fa-user-plus" : "fas fa-sign-in-alt"}></i>}
-            {loading ? 'Attendere...' : (activeTab === 'user' && isRegistering ? 'Registrati' : 'Accedi al Sistema')}
+            {loading ? 'Please wait...' : (activeTab === 'user' && isRegistering ? 'Register' : 'Login')}
           </button>
         </form>
 
@@ -254,14 +254,14 @@ export default function Login({ onLoginSuccess }) {
           <div className="mt-6 text-sm text-center">
             {isRegistering ? (
               <p className="text-gray-500">
-                Hai già un account?{' '}
+                Already have an account?{' '}
                 <button type="button" onClick={() => setIsRegistering(false)} className="text-[#1976d2] font-bold hover:underline">
                   Accedi
                 </button>
               </p>
             ) : (
               <p className="text-gray-500">
-                Non hai un account?{' '}
+                Don't have an account?{' '}
                 <button type="button" onClick={() => setIsRegistering(true)} className="text-[#1976d2] font-bold hover:underline">
                   Registrati
                 </button>
@@ -271,7 +271,7 @@ export default function Login({ onLoginSuccess }) {
         )}
 
         <div className="mt-8 text-[11px] text-gray-400 text-center uppercase tracking-widest shrink-0">
-          Sistema Centralizzato Gestione Emergenze<br />FARO © 2026
+          Centralized Emergency Management System<br />FARO © 2026
         </div>
       </div>
     </div>

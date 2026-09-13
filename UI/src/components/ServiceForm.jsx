@@ -38,7 +38,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
         setCapabilities(data)
       } catch (error) {
         console.error(
-          'Errore durante il recupero delle capability:',
+          'Error retrieving capabilities:',
           error
         )
 
@@ -84,7 +84,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
     e.preventDefault()
 
     if (form.capabilities.length === 0) {
-      alert('Seleziona almeno una capability offerta!')
+      alert('Select at least one offered capability!')
       return
     }
 
@@ -113,7 +113,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
       })
 
       if (response.ok) {
-        alert('Servizio registrato con successo!')
+        alert('Service registered successfully!')
 
         setForm(INITIAL_FORM)
 
@@ -124,17 +124,17 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
         const err = await response.text()
 
         alert(
-          `Errore dal backend (${response.status}): ${err}`
+          `Error from backend (${response.status}): ${err}`
         )
       }
     } catch (error) {
       console.error(
-        'Errore durante il salvataggio:',
+        'Error during saving:',
         error
       )
 
       alert(
-        'Impossibile comunicare con il server. Controlla la console.'
+        'Unable to communicate with the server. Check the console.'
       )
     } finally {
       setSubmitting(false)
@@ -144,8 +144,8 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
   // Testo mostrato nel campo dropdown
   const capabilityLabel =
     form.capabilities.length === 0
-      ? 'Seleziona capability...'
-      : `${form.capabilities.length} capability selezionate`
+      ? 'Select capability...'
+      : `${form.capabilities.length} capabilities selected`
 
   return (
     <div className="w-full bg-white border border-gray-200 rounded shadow-sm h-fit">
@@ -154,12 +154,12 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
       <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-[14px] font-semibold text-[#0B1B32] flex items-center gap-2">
           <i className="fas fa-sliders-h text-gray-500"></i>
-          Configurazione Servizio
+          Service Configuration
         </h2>
 
         <div className="flex items-center gap-2">
           <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-1 rounded">
-            MODO: NEW
+            MODE: NEW
           </span>
           {onClose && (
             <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700 transition-colors">
@@ -173,11 +173,11 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
         onSubmit={handleSubmit}
         className="p-4 space-y-4"
       >
-        {/* ROW 1: Tipo Servizio + Stato Operativo */}
+        {/* ROW 1: Service Type + Operational Status */}
         <div className="flex gap-4">
           <div className="flex-1">
             <label className="block text-[11px] font-medium text-gray-600 mb-1">
-              Tipo Servizio
+              Service Type
             </label>
             <div className="relative">
               <select
@@ -196,7 +196,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
 
           <div className="flex-1">
             <label className="block text-[11px] font-medium text-gray-600 mb-1">
-              Stato Operativo
+              Operational Status
             </label>
             <div className="relative">
               <select
@@ -223,16 +223,16 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
             type="url"
             value={form.endpoint}
             onChange={handleChange('endpoint')}
-            placeholder="es. http://caserma-01.local/engage"
+            placeholder="e.g. http://caserma-01.local/engage"
             className="w-full bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
             required
           />
         </div>
 
-        {/* ROW 3: Posizione Geografica */}
+        {/* ROW 3: Geographic Position */}
         <div>
           <label className="block text-[11px] font-medium text-gray-600 mb-1">
-            Posizione Geografica
+            Geographic Position
           </label>
           <div className="flex gap-4">
             <input
@@ -240,7 +240,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
               step="any"
               value={form.latitude}
               onChange={handleChange('latitude')}
-              placeholder="Latitudine"
+              placeholder="Latitude"
               className="flex-1 bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
               required
             />
@@ -249,7 +249,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
               step="any"
               value={form.longitude}
               onChange={handleChange('longitude')}
-              placeholder="Longitudine"
+              placeholder="Longitude"
               className="flex-1 bg-white border border-gray-300 rounded p-2 text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder-gray-400"
               required
             />
@@ -259,16 +259,16 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
           {(() => {
             const lat = parseFloat(form.latitude);
             const lon = parseFloat(form.longitude);
-            const isValidCoordinates = !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
+            const isValidCoordinatess = !isNaN(lat) && !isNaN(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
 
-            if (isValidCoordinates) {
+            if (isValidCoordinatess) {
               return (
                 <a 
                   href={`https://www.google.com/maps?q=${lat},${lon}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-1.5 block w-full h-40 bg-gray-100 rounded overflow-hidden shadow-inner border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer relative"
-                  title="Apri su Google Maps"
+                  title="Open in Google Maps"
                 >
                   <iframe 
                     width="100%" 
@@ -300,19 +300,19 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
           })()}
         </div>
 
-        {/* ROW 4: Capability Offerte */}
+        {/* ROW 4: Offered Capabilities */}
         <div>
           <label className="block text-[11px] font-medium text-gray-600 mb-1">
-            Capability Offerte
+            Offered Capabilities
           </label>
 
           {loadingCapabilities ? (
             <div className="text-sm text-gray-400">
-              Caricamento capability...
+              Loading capability...
             </div>
           ) : capabilityError ? (
             <div className="text-sm text-red-500">
-              Errore.
+              Error.
             </div>
           ) : (
             <div className="relative">
@@ -331,7 +331,7 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
                 <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded shadow-lg max-h-48 overflow-y-auto">
                   {capabilities.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
-                      Nessuna capability disponibile.
+                      No capability disponibile.
                     </div>
                   ) : (
                     <div className="p-2 space-y-1">

@@ -29,10 +29,10 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
     const [dispatching, setDispatching] = useState(false);
     const [tickets, setTickets] = useState([]);
 
-    // Stato per la modale di risoluzione escalation
+    // Status per la modale di risoluzione escalation
     const [resolvingTicket, setResolvingTicket] = useState(null);
 
-    // Stato per la visualizzazione BPMN
+    // Status per la visualizzazione BPMN
     const [visualizationData, setVisualizationData] = useState(null);
     const [viewStack, setViewStack] = useState([]); // Stack of child workflow instance IDs
 
@@ -50,7 +50,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     setCapabilities(data);
                 }
             } catch (err) {
-                console.error("Errore capabilities", err);
+                console.error("Capabilities error", err);
             }
         };
         loadCapabilities();
@@ -68,7 +68,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
 
                 // Usa GET /emergencies/{id}
                 const emRes = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}`, { headers });
-                if (!emRes.ok) throw new Error(`Emergenza non trovata (Status: ${emRes.status})`);
+                if (!emRes.ok) throw new Error(`Emergency not found (Status: ${emRes.status})`);
                 const emData = await emRes.json();
                 setEmergency(emData);
 
@@ -90,7 +90,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
 
                 setError(null);
             } catch (err) {
-                console.error("Errore di connessione", err);
+                console.error("Connection error", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
@@ -110,10 +110,10 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${emergency.latitude}&lon=${emergency.longitude}`);
                     if (res.ok) {
                         const data = await res.json();
-                        setFetchedAddress(data.display_name || 'Indirizzo non trovato');
+                        setFetchedAddress(data.display_name || 'Address non trovato');
                     }
                 } catch (err) {
-                    console.error("Errore recupero indirizzo da Nominatim", err);
+                    console.error("Error retrieving address from Nominatim", err);
                 }
             };
             fetchAddress();
@@ -134,7 +134,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     setVisualizationData(data);
                 }
             } catch (err) {
-                console.error("Errore recupero dati BPMN", err);
+                console.error("Error retrieving BPMN data", err);
             }
         };
 
@@ -147,7 +147,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
         if (!selectedUnit) return;
         setDispatching(true);
         try {
-            // Usa il nuovo endpoint PATCH /emergencies/{id}/status invece del POST
+            // Use the new PATCH /emergencies/{id}/status endpoint instead of POST
             const response = await fetchWithAuth(`${API_BASE_URL}/api/emergencies/${emergencyId}/status`, {
                 method: 'PATCH',
                 headers: {
@@ -161,29 +161,29 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                 })
             });
 
-            if (!response.ok) throw new Error('Errore durante l\'aggiornamento di stato dal backend');
+            if (!response.ok) throw new Error('Error updating status from backend');
 
             setSelectedUnit('');
         } catch (err) {
-            console.error("Errore durante l'ingaggio", err);
-            alert("Impossibile confermare l'aggiornamento di stato: " + err.message);
+            console.error("Error during engagement", err);
+            alert("Unable to confirm status update: " + err.message);
         } finally {
             setDispatching(false);
         }
     };
 
-    if (!emergencyId) return <div className="p-8 text-gray-500">Nessuna emergenza selezionata.</div>;
+    if (!emergencyId) return <div className="p-8 text-gray-500">Noa emergenza selezionata.</div>;
     if (loading) return <div className="p-8 flex justify-center"><Loader2 className="animate-spin w-8 h-8 bg-[#0B1B32]" /></div>;
 
     if (error || !emergency) {
         return (
             <div className="p-8 bg-gray-50 min-h-screen">
                 <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold">
-                    <ArrowLeft className="w-4 h-4 mr-1" /> Torna alla lista
+                    <ArrowLeft className="w-4 h-4 mr-1" /> Back to list
                 </button>
                 <div className="flex flex-col items-center justify-center py-20">
                     <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">Impossibile caricare i dettagli</h2>
+                    <h2 className="text-xl font-bold text-gray-800 mb-2">Unable to load details</h2>
                     <p className="text-red-600 font-mono text-sm">{error || "Dati non disponibili"}</p>
                 </div>
             </div>
@@ -225,7 +225,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
     return (
         <div className="p-8 bg-transparent min-h-screen">
             <button onClick={onBack} className="flex items-center text-gray-500 hover:text-gray-800 mb-6 text-sm font-bold tracking-wide transition-colors group">
-                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" /> Torna alla lista
+                <ArrowLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" /> Back to list
             </button>
 
             <div className="flex items-center space-x-4 mb-8">
@@ -239,9 +239,9 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
             </div>
 
             <div className="flex flex-col gap-8">
-                {/* TOP SECTION: Dettagli Operativi e Mappa */}
+                {/* TOP SECTION: Operational Details e Mappa */}
                 <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Card Dettagli Operativi */}
+                    {/* Card Operational Details */}
                     <div className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow border border-gray-200/60 lg:col-span-2 flex flex-col relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1B32]"></div>
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
@@ -249,7 +249,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 <div className="bg-[#0B1B32]/10 p-1.5 rounded mr-3">
                                     <i className="fas fa-layer-group text-[#0B1B32] text-[14px]"></i>
                                 </div>
-                                Dettagli Operativi
+                                Operational Details
                             </h2>
                             <span className="bg-gray-50 border border-gray-200 text-gray-500 px-3 py-1.5 text-[12px] font-mono rounded font-bold uppercase tracking-wider">ID: {emergency.eventId}</span>
                         </div>
@@ -364,13 +364,13 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                         <button
                                             onClick={() => setResolvingTicket({ ...ticket, severity: emergency?.severity })}
                                             disabled={isUser}
-                                            title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
+                                            title={isUser ? "Non hai i permessi per risolvere le escalation" : "Resolve Escalation"}
                                             className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${isUser
                                                 ? 'bg-gray-400 cursor-not-allowed'
                                                 : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
                                                 }`}
                                         >
-                                            <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
+                                            <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Resolve Escalation
                                         </button>
                                     </div>
                                 </div>
@@ -379,7 +379,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     </div>
                 )}
 
-                {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
+                {/* BOTTOM SECTION: Status Esecuzione Workflow (BPMN) */}
                 <div className="relative z-0 w-full mt-4">
                     {/* Sfondo tridimensionale / Glassmorphism */}
                     <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
@@ -395,7 +395,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-[#0B1B32] tracking-wide">
-                                    Stato Esecuzione Workflow BPMN
+                                    Status Esecuzione Workflow BPMN
                                 </h2>
                                 <p className="text-gray-400 text-[13px] mt-0.5">Pipeline automatizzata di risposta ed escalation dell'evento</p>
                             </div>
@@ -420,7 +420,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 </>
                             )}
                             <span className={`min-w-[120px] whitespace-nowrap justify-center flex items-center px-4 py-1.5 text-[11px] font-bold rounded shadow-sm ${visualizationData?.state === 'COMPLETED' ? 'bg-[#dcfce7] text-[#166534] border border-[#bbf7d0]' : 'bg-[#e0f2fe] text-[#0B1B32] border border-[#bae6fd]'}`}>
-                                {visualizationData?.state === 'ACTIVE' ? 'IN ESECUZIONE' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Attendere...'))}
+                                {visualizationData?.state === 'ACTIVE' ? 'IN ESECUZIONE' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Please wait...'))}
                             </span>
                         </div>
                     </div>
@@ -453,10 +453,10 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 {emergency?.workflowInstanceId ? (
                                     <>
                                         <Loader2 className="animate-spin mb-3 w-8 h-8" />
-                                        <span>Caricamento diagramma e stato BPMN...</span>
+                                        <span>Loading BPMN diagram and status...</span>
                                     </>
                                 ) : (
-                                    <span>Nessun workflow instance ID associato.</span>
+                                    <span>No workflow instance ID associato.</span>
                                 )}
                             </div>
                         )}
@@ -493,7 +493,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                     </div>
                                 ))}
                                 {(!emergency.history || emergency.history.length === 0) && (
-                                    <div className="text-gray-500 italic">Nessun log disponibile.</div>
+                                    <div className="text-gray-500 italic">No log disponibile.</div>
                                 )}
 
                                 <div className="text-gray-500 mt-4 animate-pulse">
@@ -506,7 +506,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                 </div>
                 </div>
 
-            {/* Modale Risoluzione Escalation */}
+            {/* Modale Escalation Resolution */}
             <EscalationResolutionModal
                 ticket={resolvingTicket}
                 isOpen={!!resolvingTicket}

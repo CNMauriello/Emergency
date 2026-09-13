@@ -95,7 +95,7 @@ export default function Profile() {
               </div>
           </div>
 
-          {/* Stato Operativo */}
+          {/* Operational Status */}
           <div>
               <h2 className="text-xl font-black text-[#0B1B32] mb-6 flex items-center gap-3">
                 <div className="bg-[#dcfce7] p-2 rounded-xl text-green-600 shadow-sm">

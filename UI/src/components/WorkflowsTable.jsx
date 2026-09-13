@@ -25,7 +25,7 @@ export default function WorkflowsTable({ searchQuery }) {
         } catch (err) {
             console.error('Error fetching workflows:', err);
             setWorkflows([]);
-            setError(err.message || 'Errore nel recupero dei workflow dal backend.');
+            setError(err.message || 'Error retrieving workflows from the backend.');
         } finally {
             setLoading(false);
         }
@@ -53,23 +53,23 @@ export default function WorkflowsTable({ searchQuery }) {
             loadWorkflows();
         } catch (err) {
             console.error(err);
-            alert("Errore nell'aggiornamento della versione attiva: " + err.message);
+            alert("Error updating the active version: " + err.message);
         }
     };
 
     const handleViewBpmn = async (processKey) => {
         try {
             const response = await fetchWithAuth(`${API_BASE_URL}/api/workflows/${processKey}/xml`);
-            if (!response.ok) throw new Error('Errore nel recupero del BPMN');
+            if (!response.ok) throw new Error('Error retrieving the BPMN');
             
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('text/html')) {
-                throw new Error('Il server ha restituito una pagina HTML invece del diagramma BPMN.');
+                throw new Error('The server returned an HTML page instead of the BPMN diagram.');
             }
             
             const xml = await response.text();
             if (!xml.includes('<bpmn:definitions') && !xml.includes('<definitions')) {
-                throw new Error('Il contenuto restituito non è un file BPMN valido.');
+                throw new Error('The returned content is not a valid BPMN file.');
             }
             
             setViewerXml(xml);
@@ -77,7 +77,7 @@ export default function WorkflowsTable({ searchQuery }) {
             setViewerOpen(true);
         } catch (err) {
             console.error(err);
-            alert("Impossibile caricare il diagramma BPMN. Assicurati che il backend sia attivo e che la versione attiva esista. (" + err.message + ")");
+            alert("Unable to load the BPMN diagram. Make sure the backend is running and the active version exists. (" + err.message + ")");
         }
     };
 
@@ -148,7 +148,7 @@ export default function WorkflowsTable({ searchQuery }) {
                             onClick={() => setIsWorkflowModalOpen(true)}
                             className="bg-[#0B1B32] hover:bg-slate-800 text-white px-4 py-2 rounded text-[11px] uppercase font-bold shadow-sm transition-colors"
                         >
-                            <i className="fas fa-plus mr-1"></i> Registra Nuovo Piano
+                            <i className="fas fa-plus mr-1"></i> Register New Plan
                         </button>
                         <span className="bg-[#e3f2fd] text-[#1976d2] text-[12px] font-bold px-3 py-1 rounded-full">
                             {workflowGroups.length} Processi
@@ -185,7 +185,7 @@ export default function WorkflowsTable({ searchQuery }) {
                         {loading ? (
                             <tr>
                                 <td colSpan="5" className="text-center py-8 text-gray-500">
-                                    <i className="fas fa-spinner fa-spin mr-2"></i> Caricamento processi...
+                                    <i className="fas fa-spinner fa-spin mr-2"></i> Loading processes...
                                 </td>
                             </tr>
                         ) : workflowGroups.length === 0 ? (
@@ -193,8 +193,8 @@ export default function WorkflowsTable({ searchQuery }) {
                                 <td colSpan="5" className="text-center py-16">
                                     <div className="flex flex-col items-center justify-center text-gray-500">
                                         <i className="fas fa-exclamation-triangle text-4xl text-yellow-400 mb-4 shadow-sm rounded-full bg-yellow-50 p-3"></i>
-                                        <p className="text-[15px] font-bold text-gray-700">Nessun piano BPMN registrato</p>
-                                        <p className="text-[13px] mt-1">Non ci sono attualmente workflow configurati nel sistema.</p>
+                                        <p className="text-[15px] font-bold text-gray-700">No BPMN plan registered</p>
+                                        <p className="text-[13px] mt-1">There are currently no workflows configured in the system.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -225,7 +225,7 @@ export default function WorkflowsTable({ searchQuery }) {
                                         onChange={(e) => handleActiveVersionChange(group.processKey, e.target.value)}
                                         className="border border-gray-300 rounded p-1 text-[12px] bg-white outline-none focus:border-[#1976d2] focus:ring-1 focus:ring-[#1976d2] text-gray-800"
                                     >
-                                        <option value="" disabled>Seleziona versione...</option>
+                                        <option value="" disabled>Select version...</option>
                                         {group.versions.map(v => (
                                             <option key={v} value={v}>v{v.toString().replace('v', '')}</option>
                                         ))}

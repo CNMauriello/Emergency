@@ -38,7 +38,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
     const expectedId = `${formData.eventType}_${formData.severity}`;
 
     if (file.name !== `${expectedId}.bpmn`) {
-      setFileError(`Il nome del file deve essere ${expectedId}.bpmn`);
+      setFileError(`The file name must be ${expectedId}.bpmn`);
       return;
     }
 
@@ -48,20 +48,20 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
       const match = content.match(/<([a-zA-Z0-9]+:)?process[^>]*\sid="([^"]+)"/i);
       
       if (!match) {
-        setFileError("Nessun tag 'process' con un 'id' trovato nel file BPMN.");
+        setFileError("No 'process' tag with an 'id' found in the BPMN file.");
         return;
       }
 
       const processId = match[2];
       if (processId !== expectedId) {
-        setFileError(`L'ID del processo nel file ("${processId}") non corrisponde a "${expectedId}".`);
+        setFileError(`L'ID del processo nel file ("${processId}") does not match "${expectedId}".`);
       } else {
         setFileError(null); // Valid!
       }
     };
     
     reader.onerror = () => {
-      setFileError("Errore durante la lettura del file.");
+      setFileError("Error reading the file.");
     };
 
     reader.readAsText(file);
@@ -72,7 +72,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValidFile) {
-        setError('Inserisci un file .bpmn valido prima di procedere.');
+        setError('Please insert a valid .bpmn file before proceeding.');
         return;
     }
 
@@ -95,7 +95,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
       });
 
       if (!response.ok) {
-        throw new Error('Errore durante la creazione del workflow.');
+        throw new Error('Error creating the workflow.');
       }
       
       const newWorkflow = await response.json();
@@ -103,7 +103,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
       onClose();
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Errore durante la creazione del workflow.');
+      setError(err.message || 'Error creating the workflow.');
       setLoading(false);
     }
   };
@@ -116,7 +116,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
         <div className="bg-[#0B1B32] p-5 flex justify-between items-center text-white shrink-0">
           <div>
             <h2 className="text-lg font-bold flex items-center gap-2">
-              <i className="fas fa-project-diagram text-[#6ea8fe]"></i> Registra Nuovo Piano
+              <i className="fas fa-project-diagram text-[#6ea8fe]"></i> Register New Plan
             </h2>
             <p className="text-xs text-gray-400 mt-1 uppercase tracking-wider">Upload File BPMN</p>
           </div>
@@ -147,7 +147,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
                   </div>
                 ) : (
                   <div className="text-center">
-                    <p className="text-sm font-medium text-gray-600">Trascina un file qui o clicca per sfogliare</p>
+                    <p className="text-sm font-medium text-gray-600">Drag a file here or click to browse</p>
                     <p className="text-xs text-gray-400 mt-1">Solo formati .bpmn ammessi</p>
                   </div>
                 )}
@@ -202,7 +202,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
               disabled={loading}
               className="px-5 py-2.5 text-sm font-bold text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
             >
-              Annulla
+              Cancel
             </button>
             <button 
               type="submit" 
@@ -210,7 +210,7 @@ export default function WorkflowModal({ onClose, onWorkflowCreated }) {
               className="px-5 py-2.5 text-sm font-bold text-white bg-[#1976d2] rounded hover:bg-[#1565c0] transition-colors flex items-center gap-2 shadow-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {loading ? <i className="fas fa-spinner fa-spin"></i> : <Save className="w-4 h-4" />} 
-              {loading ? 'Salvataggio...' : 'Registra Workflow'}
+              {loading ? 'Saving...' : 'Register Workflow'}
             </button>
           </div>
         </form>
