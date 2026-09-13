@@ -9,24 +9,17 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
 
     // Mappa i tipi di emergenza con icone specifiche
     const getIconForType = (em) => {
-        const severityUpper = (em.severity || '').toUpperCase();
-        let colorClass = 'text-gray-500';
-        if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') colorClass = 'text-[#d32f2f]';
-        else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') colorClass = 'text-[#ef5350]';
-        else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') colorClass = 'text-[#ed6c02]';
-        else if (severityUpper === 'BASSA' || severityUpper === 'LOW') colorClass = 'text-[#eab308]';
-
         switch (em.eventType) {
             case 'FIRE':
-                return <Flame className={`${colorClass} w-6 h-6`} />;
+                return <Flame className="text-[#f97316] w-6 h-6" />; // arancione
             case 'FLOOD':
-                return <Droplets className={`${colorClass} w-6 h-6`} />;
+                return <Droplets className="text-[#0ea5e9] w-6 h-6" />; // azzurra
             case 'CAR_CRASH':
-                return <Car className={`${colorClass} w-6 h-6`} />;
+                return <Car className="text-[#ef4444] w-6 h-6" />; // rossa
             case 'EARTHQUAKE':
-                return <Mountain className={`${colorClass} w-6 h-6`} />;
+                return <Mountain className="text-[#8B4513] w-6 h-6" />; // marrone
             default:
-                return <Home className={`${colorClass} w-6 h-6`} />;
+                return <Home className="text-gray-500 w-6 h-6" />;
         }
     };
 
@@ -148,14 +141,19 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
                         const { steps, currentStep } = getWorkflowInfo(em);
                         const severityUpper = (em.severity || '').toUpperCase();
                         let severityColor = 'bg-gray-400';
+                        let severityGlow = '';
                         if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') {
                             severityColor = 'bg-[#d32f2f]';
+                            severityGlow = 'shadow-[0_0_15px_rgba(211,47,47,0.8)] border border-[#d32f2f]';
                         } else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') {
                             severityColor = 'bg-[#ef5350]';
+                            severityGlow = 'shadow-[0_0_12px_rgba(239,83,80,0.7)] border border-[#ef5350]';
                         } else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') {
                             severityColor = 'bg-[#ed6c02]';
+                            severityGlow = 'shadow-[0_0_12px_rgba(237,108,2,0.7)] border border-[#ed6c02]';
                         } else if (severityUpper === 'BASSA' || severityUpper === 'LOW') {
                             severityColor = 'bg-[#eab308]';
+                            severityGlow = 'shadow-[0_0_12px_rgba(234,179,8,0.7)] border border-[#eab308]';
                         }
                         const isClosed = em.status === 'CLOSED';
 
@@ -172,7 +170,7 @@ const ActiveEmergencies = ({ onViewDetail, searchQuery }) => {
                                     {/* Header Card */}
                                     <div className="flex justify-between items-center mb-3">
                                         <div className="flex items-center space-x-3">
-                                            <span className={`px-2 py-0.5 text-[10px] font-bold text-white rounded ${severityColor}`}>
+                                            <span className={`px-2 py-0.5 text-[10px] font-bold text-white rounded ${severityColor} ${severityGlow}`}>
                                                 {em.severity}
                                             </span>
                                             <span className="text-[13px] text-gray-500 font-medium">{em.eventId || `ID: ${em.id}`}</span>

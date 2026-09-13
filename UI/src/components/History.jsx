@@ -90,7 +90,12 @@ export default function History({ searchQuery }) {
                 </div>
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col flex-1 overflow-hidden min-h-0">
+            <div className="relative z-0 flex flex-col flex-1 min-h-0 mt-2">
+                <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+                <div className="absolute bottom-10 -right-10 w-[500px] h-[300px] bg-cyan-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-b from-[#0B1B32]/2 to-transparent -z-10 pointer-events-none rounded-[2rem]"></div>
+                
+                <div className="bg-white/80 backdrop-blur-2xl border border-white/60 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] transition-all duration-300 flex flex-col flex-1 overflow-hidden min-h-0 relative">
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 bg-gray-50/30 flex-shrink-0">
 
                     
@@ -107,18 +112,18 @@ export default function History({ searchQuery }) {
                 )}
 
                 <div className="flex-1 overflow-y-auto">
-                    <table className="w-full text-left">
-                        <thead className="sticky top-0 z-10">
-                            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200">
-                                <th className="px-6 py-4 bg-gray-50">ID Evento</th>
-                                <th className="px-6 py-4 bg-gray-50">Data</th>
-                                <th className="px-6 py-4 bg-gray-50">Operatore</th>
-                                <th className="px-6 py-4 bg-gray-50">Azione</th>
-                                <th className="px-6 py-4 bg-gray-50">Dettagli</th>
-                                <th className="px-6 py-4 text-center bg-gray-50">Esito</th>
+                    <table className="w-full text-left relative">
+                        <thead className="sticky top-0 bg-white/40 backdrop-blur-md z-10 shadow-sm border-b border-white/40">
+                            <tr className="text-[#0B1B32] text-[11px] font-extrabold tracking-wider uppercase">
+                                <th className="px-6 py-4">ID Evento</th>
+                                <th className="px-6 py-4">Data</th>
+                                <th className="px-6 py-4">Operatore</th>
+                                <th className="px-6 py-4">Azione</th>
+                                <th className="px-6 py-4">Dettagli</th>
+                                <th className="px-6 py-4 text-center">Esito</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 bg-white">
+                        <tbody className="divide-y divide-white/20 bg-transparent">
                             {loading ? (
                                 <tr>
                                     <td colSpan="6" className="text-center py-8 text-gray-500">
@@ -136,7 +141,7 @@ export default function History({ searchQuery }) {
                                     </td>
                                 </tr>
                             ) : filteredLogs.map((log) => (
-                                <tr key={log.id} className={`hover:bg-gray-50 transition-colors ${log.override ? 'bg-yellow-50/20' : ''}`}>
+                                <tr key={log.id} className={`hover:bg-white/40 transition-colors border-b border-white/20 ${log.override ? 'bg-yellow-50/20' : ''}`}>
                                     <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32] font-mono">{log.emergencyId}</td>
                                     <td className="px-6 py-4 text-[13px] text-gray-600">
                                         {log.timestamp ? new Date(log.timestamp).toLocaleDateString() : 'N/A'}
@@ -153,7 +158,11 @@ export default function History({ searchQuery }) {
                                         {log.details}
                                     </td>
                                     <td className="px-6 py-4 flex justify-center items-center">
-                                        <div className="p-1.5 bg-gray-50 rounded-full border border-gray-200">
+                                        <div className={`p-1.5 rounded-full border shadow-sm ${
+                                            log.outcome === 'SUCCESS' ? 'bg-green-50 border-green-200 shadow-[0_0_8px_rgba(34,197,94,0.3)]' :
+                                            log.outcome === 'WARNING' ? 'bg-yellow-50 border-yellow-200 shadow-[0_0_8px_rgba(234,179,8,0.3)]' :
+                                            'bg-blue-50 border-blue-200 shadow-[0_0_8px_rgba(59,130,246,0.3)]'
+                                        }`}>
                                             {getActionIcon(log.outcome)}
                                         </div>
                                     </td>
@@ -162,6 +171,7 @@ export default function History({ searchQuery }) {
                         </tbody>
                     </table>
                 </div>
+            </div>
             </div>
         </div>
     );

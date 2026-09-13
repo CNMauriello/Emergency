@@ -132,7 +132,12 @@ export default function WorkflowsTable({ searchQuery }) {
             </div>
 
             {/* Table Area */}
-            <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col min-h-0 overflow-hidden">
+            <div className="relative z-0 flex flex-col flex-1 min-h-0 mt-2">
+                <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+                <div className="absolute bottom-10 -right-10 w-[500px] h-[300px] bg-cyan-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-b from-[#0B1B32]/2 to-transparent -z-10 pointer-events-none rounded-[2rem]"></div>
+                
+                <div className="bg-white/80 backdrop-blur-2xl border border-white/60 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] transition-all duration-300 flex flex-col flex-1 overflow-hidden min-h-0 relative">
                 <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 shrink-0">
                     <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
                         <i className="fas fa-list text-[#0B1B32]"></i>
@@ -167,8 +172,8 @@ export default function WorkflowsTable({ searchQuery }) {
 
                 <div className="overflow-y-auto flex-1">
                     <table className="w-full text-left relative">
-                        <thead className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 shadow-sm">
-                            <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase border-b border-gray-200">
+                        <thead className="sticky top-0 bg-white/40 backdrop-blur z-10 shadow-sm border-b border-white/40">
+                            <tr className="text-[#0B1B32] text-[11px] font-extrabold tracking-wider uppercase">
                             <th className="px-6 py-4">Process Key</th>
                             <th className="px-6 py-4">Event Type</th>
                             <th className="px-6 py-4">Gravity</th>
@@ -176,7 +181,7 @@ export default function WorkflowsTable({ searchQuery }) {
                             <th className="px-6 py-4 text-right">Azioni</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-white/20 bg-transparent">
                         {loading ? (
                             <tr>
                                 <td colSpan="5" className="text-center py-8 text-gray-500">
@@ -194,7 +199,7 @@ export default function WorkflowsTable({ searchQuery }) {
                                 </td>
                             </tr>
                         ) : workflowGroups.map((group) => (
-                            <tr key={group.processKey} className="hover:bg-blue-50/30 transition-colors">
+                            <tr key={group.processKey} className="hover:bg-white/40 transition-colors border-b border-white/20">
                                 <td className="px-6 py-4 text-[13px] font-bold text-[#0B1B32]">{group.processKey}</td>
                                 <td className="px-6 py-4 text-[13px] text-gray-600">{group.eventType}</td>
                                 <td className="px-6 py-4">
@@ -202,10 +207,10 @@ export default function WorkflowsTable({ searchQuery }) {
                                         const derivedGravity = group.gravity || (group.processKey.includes('_') ? group.processKey.split('_').pop() : 'UNKNOWN');
                                         const severityUpper = derivedGravity.toUpperCase();
                                         let severityBg = 'bg-gray-400';
-                                        if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') severityBg = 'bg-[#d32f2f]';
-                                        else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') severityBg = 'bg-[#ef5350]';
-                                        else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') severityBg = 'bg-[#ed6c02]';
-                                        else if (severityUpper === 'BASSA' || severityUpper === 'LOW') severityBg = 'bg-[#eab308]';
+                                        if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') severityBg = 'bg-[#d32f2f] shadow-[0_0_15px_rgba(211,47,47,0.8)] border border-[#d32f2f]';
+                                        else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') severityBg = 'bg-[#ef5350] shadow-[0_0_12px_rgba(239,83,80,0.7)] border border-[#ef5350]';
+                                        else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') severityBg = 'bg-[#ed6c02] shadow-[0_0_12px_rgba(237,108,2,0.7)] border border-[#ed6c02]';
+                                        else if (severityUpper === 'BASSA' || severityUpper === 'LOW') severityBg = 'bg-[#eab308] shadow-[0_0_12px_rgba(234,179,8,0.7)] border border-[#eab308]';
                                         
                                         return (
                                             <span className={`px-2.5 py-1 text-[10px] font-bold text-white rounded ${severityBg}`}>
@@ -240,6 +245,7 @@ export default function WorkflowsTable({ searchQuery }) {
                     </tbody>
                     </table>
                 </div>
+            </div>
             </div>
 
             {isWorkflowModalOpen && (

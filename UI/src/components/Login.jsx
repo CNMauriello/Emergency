@@ -120,11 +120,14 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B1B32]">
-      <div className="bg-white p-10 rounded-xl shadow-xl w-[400px] border border-gray-100 flex flex-col items-center max-h-[90vh] overflow-y-auto">
-
+    <div className="min-h-screen flex items-center justify-center bg-[#0B1B32] relative overflow-hidden z-0">
+      {/* Sfondo tridimensionale / Luci centrali dietro il form */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#0088cc]/20 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 ml-20 mt-20 w-[400px] h-[400px] bg-cyan-400/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+      
+      <div className="bg-white/95 backdrop-blur-3xl p-10 rounded-[2rem] shadow-[0_15px_50px_rgba(0,136,204,0.1)] w-[400px] border border-white/50 flex flex-col items-center max-h-[90vh] overflow-y-auto relative">
         {/* Toggle tabs */}
-        <div className="flex w-full mb-8 bg-gray-100 rounded-lg p-1 relative z-10 shrink-0 overflow-x-auto hide-scrollbar">
+        <div className="flex w-full mb-8 bg-white/50 backdrop-blur-md rounded-lg p-1 relative z-10 shrink-0 overflow-x-auto hide-scrollbar border border-white/60">
           <button
             type="button"
             onClick={() => { setActiveTab('operator'); setIsRegistering(false); }}

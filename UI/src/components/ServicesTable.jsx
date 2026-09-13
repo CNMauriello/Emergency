@@ -103,8 +103,12 @@ export default function ServicesTable({
   }
 
   return (
-    <>
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col h-full overflow-hidden">
+    <div className="relative z-0 flex flex-col flex-1 h-full mt-2">
+      <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+      <div className="absolute bottom-10 -right-10 w-[500px] h-[300px] bg-cyan-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-b from-[#0B1B32]/2 to-transparent -z-10 pointer-events-none rounded-[2rem]"></div>
+      
+      <div className="flex-1 bg-white/80 backdrop-blur-2xl border border-white/60 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] transition-all duration-300 flex flex-col h-full overflow-hidden relative">
         <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100">
           <h2 className="text-[17px] font-bold text-[#0B1B32] flex items-center gap-3">
             Catalogo Servizi
@@ -126,8 +130,8 @@ export default function ServicesTable({
 
         <div className="flex-1 overflow-y-auto">
           <table className="w-full text-left border-collapse relative">
-            <thead className="sticky top-0 bg-gray-50/95 backdrop-blur z-10 shadow-sm border-b border-gray-200">
-              <tr className="text-gray-500 text-[11px] font-bold tracking-wider uppercase">
+            <thead className="sticky top-0 bg-white/40 backdrop-blur-md z-10 shadow-sm border-b border-white/40">
+              <tr className="text-[#0B1B32] text-[11px] font-extrabold tracking-wider uppercase">
               <th className="px-6 py-4 font-bold text-[#0B1B32]">
                 ID
               </th>
@@ -162,7 +166,7 @@ export default function ServicesTable({
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-white/20 bg-transparent">
             {/* LOADING */}
             {loading && (
               <tr>
@@ -220,10 +224,10 @@ export default function ServicesTable({
                     <tr
                       key={s.id}
                       onClick={() => handleRowClick(s.id)}
-                      className={`border-b border-gray-100 cursor-pointer transition ${
+                      className={`border-b border-white/20 cursor-pointer transition ${
                         isExpanded
-                          ? 'bg-blue-50'
-                          : 'hover:bg-gray-50'
+                          ? 'bg-white/50'
+                          : 'hover:bg-white/40'
                       }`}
                     >
                       <td className="px-6 py-5 text-[13px] font-bold text-[#1976d2]">
@@ -299,7 +303,7 @@ export default function ServicesTable({
                       <tr key={`${s.id}-details`}>
                         <td
                           colSpan={compactMode ? 5 : 7}
-                          className="bg-blue-50 border-b border-blue-100"
+                          className="bg-white/30 border-b border-white/20 backdrop-blur-md"
                         >
                           <div className="p-5">
                             <div className="flex items-center gap-2 mb-4">
@@ -504,6 +508,6 @@ export default function ServicesTable({
           </div>
         </div>
       )}
-    </>
+    </div>
   )
 }

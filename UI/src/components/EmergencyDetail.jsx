@@ -201,23 +201,24 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
         iconSize: [25, 41],
         iconAnchor: [12, 41],
         popupAnchor: [1, -34],
-        shadowSize: [41, 41]
+        shadowSize: [41, 41],
+        className: 'luminous-marker'
     });
 
     const severityUpper = (emergency?.severity || '').toUpperCase();
     let severityBg = 'bg-gray-400';
     let severityText = 'text-gray-500';
     if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') {
-        severityBg = 'bg-[#d32f2f]';
+        severityBg = 'bg-[#d32f2f] shadow-[0_0_15px_rgba(211,47,47,0.8)] border border-[#d32f2f]';
         severityText = 'text-[#d32f2f]';
     } else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') {
-        severityBg = 'bg-[#ef5350]';
+        severityBg = 'bg-[#ef5350] shadow-[0_0_12px_rgba(239,83,80,0.7)] border border-[#ef5350]';
         severityText = 'text-[#ef5350]';
     } else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') {
-        severityBg = 'bg-[#ed6c02]';
+        severityBg = 'bg-[#ed6c02] shadow-[0_0_12px_rgba(237,108,2,0.7)] border border-[#ed6c02]';
         severityText = 'text-[#ed6c02]';
     } else if (severityUpper === 'BASSA' || severityUpper === 'LOW') {
-        severityBg = 'bg-[#eab308]';
+        severityBg = 'bg-[#eab308] shadow-[0_0_12px_rgba(234,179,8,0.7)] border border-[#eab308]';
         severityText = 'text-[#eab308]';
     }
 
@@ -232,7 +233,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                 <span className={`px-2.5 py-1 text-[11px] font-bold text-white rounded shadow-sm ${severityBg}`}>
                     {emergency.severity}
                 </span>
-                <span className={`px-2.5 py-1 text-[11px] font-bold rounded shadow-sm ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white'}`}>
+                <span className={`px-2.5 py-1 text-[11px] font-bold rounded shadow-sm ${emergency.status === 'CLOSED' ? 'bg-gray-200 text-gray-700' : 'bg-[#0088cc] text-white shadow-[0_0_12px_rgba(0,136,204,0.7)] border border-[#0088cc]'}`}>
                     {emergency.status}
                 </span>
             </div>
@@ -245,8 +246,8 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                         <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1B32]"></div>
                         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-5">
                             <h2 className="text-lg font-bold text-[#0B1B32] flex items-center tracking-wide">
-                                <div className="bg-[#e0f2fe] p-1.5 rounded mr-3">
-                                    <i className="fas fa-layer-group text-[#0088cc] text-[14px]"></i>
+                                <div className="bg-[#0B1B32]/10 p-1.5 rounded mr-3">
+                                    <i className="fas fa-layer-group text-[#0B1B32] text-[14px]"></i>
                                 </div>
                                 Dettagli Operativi
                             </h2>
@@ -256,7 +257,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">TIPOLOGIA</p>
                                 <p className="font-bold text-[#0B1B32] text-[15px]">{emergency.eventType.replace('_', ' ')}</p>
-                                <p className="text-gray-500 text-[11px] mt-1">{emergency.eventType.includes('CRASH') ? 'Multi-veicolo (3 coinvolti)' : 'Priorità assoluta'}</p>
+                                <p className="text-gray-500 text-[11px] mt-1">{emergency.eventType.includes('CRASH') ? 'Priorità assoluta' : 'Priorità assoluta'}</p>
                             </div>
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">ORARIO RILEVAMENTO</p>
@@ -266,14 +267,13 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                             <div>
                                 <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-1.5 uppercase">COORDINATE (LAT/LONG)</p>
                                 <div className="flex items-center text-[#0088cc] font-mono font-bold text-[13px] bg-[#e0f2fe] px-2.5 py-1 rounded border border-[#bae6fd] w-max">
-                                    {emergency.latitude.toFixed(4)}° N, {emergency.longitude.toFixed(4)}° E 
-                                    <Copy className="w-3 h-3 ml-2 cursor-pointer hover:text-[#0B1B32]" title="Copia" />
+                                    {emergency.latitude.toFixed(4)}° N, {emergency.longitude.toFixed(4)}° E
                                 </div>
                             </div>
                         </div>
 
                         <div className="mt-6 bg-gray-50 rounded-lg border border-gray-100 p-4 relative">
-                            <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-2 uppercase ml-7">INDIRIZZO FISICO VALIDATO</p>
+                            <p className="text-gray-400 text-[10px] font-bold tracking-widest mb-2 uppercase ml-7">INDIRIZZO FISICO</p>
                             <div className="flex items-start">
                                 <div className="bg-red-100 p-1.5 rounded-full mr-3 shrink-0 mt-0.5">
                                     <MapPin className="w-4 h-4 text-red-500" />
@@ -297,20 +297,20 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             />
-                            
+
                             {/* Area di intervento */}
-                            <MapCircle 
-                                center={[emergency.latitude, emergency.longitude]} 
-                                radius={200} 
-                                pathOptions={{ 
-                                    color: '#ef4444', 
-                                    fillColor: '#ef4444', 
+                            <MapCircle
+                                center={[emergency.latitude, emergency.longitude]}
+                                radius={200}
+                                pathOptions={{
+                                    color: '#ef4444',
+                                    fillColor: '#ef4444',
                                     fillOpacity: 0.15,
                                     weight: 1,
                                     dashArray: '4, 4'
                                 }}
                             />
-                            
+
                             <Marker position={[emergency.latitude, emergency.longitude]} icon={customMarkerIcon}>
                                 <Popup>
                                     <div className="text-center p-1">
@@ -320,23 +320,14 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 </Popup>
                             </Marker>
                         </MapContainer>
-                        
+
                         <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-md shadow-sm z-[400] text-[10px] font-bold text-gray-700 border border-gray-200/50 flex items-center tracking-wider">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 animate-pulse"></div> SATELLITE FEED • EO-COPERNICUS
                         </div>
 
-                        <div className="absolute top-4 right-4 bg-white/70 backdrop-blur px-2 py-1 rounded shadow-sm z-[400] text-center border border-white/50">
-                            <div className="text-[10px] font-bold text-[#0B1B32] uppercase tracking-wider">{emergency.address ? emergency.address.split(',')[1] : 'SAN GIOVANNI'}</div>
-                            <div className="text-[9px] text-gray-500 uppercase">{emergency.address ? emergency.address.split(',')[2] : 'A TEDUCCIO'}</div>
-                        </div>
-                        
-                        <div className="absolute bottom-4 left-4 z-[400] text-[10px] font-bold text-[#0088cc] tracking-widest bg-white/70 backdrop-blur px-2 py-1 rounded">
-                            FOV: <span className="text-gray-500">1.4km</span> • ELEV: <span className="text-gray-500">18m</span>
-                        </div>
 
-                        <div className="absolute bottom-4 right-4 z-[400] text-[10px] font-bold text-gray-400 tracking-widest bg-white/70 backdrop-blur px-2 py-1 rounded">
-                            OPTICAL HD ZOOM: 18.4x
-                        </div>
+
+
                     </div>
                 </div>
 
@@ -375,8 +366,8 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                             disabled={isUser}
                                             title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
                                             className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${isUser
-                                                    ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
+                                                ? 'bg-gray-400 cursor-not-allowed'
+                                                : 'bg-red-600 hover:bg-red-700 hover:shadow-md'
                                                 }`}
                                         >
                                             <ShieldAlert className="w-3.5 h-3.5 mr-1" /> Risolvi Escalation
@@ -389,8 +380,14 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                 )}
 
                 {/* BOTTOM SECTION: Stato Esecuzione Workflow (BPMN) */}
-                <div className="bg-white p-8 rounded-xl shadow-lg border border-gray-200/60 w-full flex flex-col h-full min-h-[600px] relative overflow-hidden hover:shadow-xl transition-shadow">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-[#0B1B32]"></div>
+                <div className="relative z-0 w-full mt-4">
+                    {/* Sfondo tridimensionale / Glassmorphism */}
+                    <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+                    <div className="absolute bottom-10 -right-10 w-[500px] h-[300px] bg-cyan-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-b from-[#0B1B32]/2 to-transparent -z-10 pointer-events-none rounded-[2rem]"></div>
+                    
+                    <div className="bg-white/80 backdrop-blur-2xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 w-full flex flex-col h-full min-h-[600px] relative overflow-hidden hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] transition-all duration-300">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-[#0B1B32] to-[#0088cc]"></div>
                     <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
                         <div className="flex items-center">
                             <div className="bg-[#0B1B32] p-2 rounded-lg mr-4 text-white shadow-sm">
@@ -479,21 +476,15 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 </div>
                                 <div className="flex space-x-1">
                                     <span className="bg-[#003366] text-[#6ea8fe] px-3 py-1 rounded text-[10px] font-bold cursor-pointer">SYSTEM_LOG</span>
-                                    <span className="text-gray-500 hover:text-gray-300 px-3 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors">DISPATCH_TELEMETRY</span>
-                                    <span className="text-gray-500 hover:text-gray-300 px-3 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors">AUDIT_TRAIL</span>
                                 </div>
                             </div>
-                            
+
                             {/* Terminal Body */}
                             <div className="p-5 max-h-[250px] overflow-y-auto space-y-2">
                                 <div className="text-gray-500 mb-4 pb-3 border-b border-gray-800 border-dashed">
-                                    {'>_'} SYSTEM_LOG INITIALIZED • CONNECTION: SECURE_WSS://NAPOLI-HUB-01
+                                    {'>_'} SYSTEM_LOG INITIALIZED
                                 </div>
-                                <div className="flex items-start">
-                                    <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:00]</span>
-                                    <span className="text-[#3b82f6] font-bold mr-2">[INIT]</span>
-                                    <span>Ricezione payload eCall: Crash rilevato Sensore ID-8849. Gravità stimata: 0.89</span>
-                                </div>
+
                                 {emergency.history && emergency.history.map((step, index) => (
                                     <div key={index} className="flex items-start">
                                         <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:0{index + 1}]</span>
@@ -504,19 +495,16 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                 {(!emergency.history || emergency.history.length === 0) && (
                                     <div className="text-gray-500 italic">Nessun log disponibile.</div>
                                 )}
-                                <div className="flex items-start mt-2">
-                                    <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:12]</span>
-                                    <span className="text-[#06b6d4] font-bold mr-2">[TELEMETRY]</span>
-                                    <span className="text-[#06b6d4]">Dati compressi crittografati con SHA-256 e sincronizzati su nodo regionale. Nessun allarme residuo.</span>
-                                </div>
+
                                 <div className="text-gray-500 mt-4 animate-pulse">
                                     {'>_'} <span className="inline-block w-2 h-4 bg-gray-500 align-middle"></span>
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+                </div>
 
             {/* Modale Risoluzione Escalation */}
             <EscalationResolutionModal
