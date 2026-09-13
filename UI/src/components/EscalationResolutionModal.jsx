@@ -6,14 +6,15 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     const [currentLevel, setCurrentLevel] = useState(1);
     const [levelStatus, setLevelStatus] = useState('idle'); // idle, running, failed, success
     const [logs, setLogs] = useState([]);
-    
+
     // States for specific levels
     const [l1Nodes, setL1Nodes] = useState([]);
     const [l2Nodes, setL2Nodes] = useState([]);
     const [l2AuthCode, setL2AuthCode] = useState('');
     const [submitting, setSubmitting] = useState(false);
 
-    const isLowMed = ticket?.severity === 'LOW' || ticket?.severity === 'MEDIUM';
+    const severityUpper = (ticket?.severity || '').toUpperCase();
+    const isLowMed = severityUpper === 'LOW' || severityUpper === 'MEDIUM';
 
     useEffect(() => {
         if (isOpen) {
@@ -21,14 +22,14 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             setLevelStatus('idle');
             const tid = ticket?.taskId || ticket?.ticketId || ticket?.id || 'Sconosciuto';
             setLogs([`Iniziata procedura di risoluzione per ticket ${tid}`]);
-            
+
             const eps = ticket?.failedEndpoints || [];
             if (eps.length > 0) {
                 setL1Nodes(eps.map((ep, i) => ({ id: i, url: ep, status: 'pending' })));
                 setL2Nodes(eps.map((ep, i) => ({ id: i, url: ep, status: 'idle' })));
             } else {
-                setL1Nodes(Array.from({length: 6}).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'pending' })));
-                setL2Nodes(Array.from({length: 6}).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'idle' })));
+                setL1Nodes(Array.from({ length: 6 }).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'pending' })));
+                setL2Nodes(Array.from({ length: 6 }).map((_, i) => ({ id: i, url: `http://node-${i}.local`, status: 'idle' })));
             }
         }
     }, [isOpen, ticket]);
@@ -42,7 +43,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         try {
             const user = getAuthUser();
             const operatorId = user?.username || user?.id || 'OP-ADMIN';
-            
+
             const payload = {
                 operatorId,
                 resolutionStrategy: strategy,
@@ -57,7 +58,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             });
 
             if (!response.ok) throw new Error('Errore durante la chiusura del ticket');
-            
+
             onSuccess();
             onClose();
         } catch (err) {
@@ -72,7 +73,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
         if (levelStatus === 'running') return;
         setLevelStatus('running');
         addLog("Avvio Broadcast Alert parallelo verso i nodi telematici...");
-        
+
         Promise.all(l1Nodes.map(async (node, i) => {
             try {
                 // Aggiungiamo un leggero ritardo casuale per visualizzare l'animazione di broadcast
@@ -83,7 +84,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
                 });
-                
+
                 if (response.ok) {
                     setL1Nodes(prev => {
                         const next = [...prev];
@@ -141,7 +142,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
-            
+
             if (response.ok) {
                 setL2Nodes(prev => {
                     const next = [...prev];
@@ -168,7 +169,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             alert("Inserire un codice di autorizzazione o motivazione.");
             return;
         }
-        
+
         setSubmitting(true);
         try {
             const payload = { authorizationCode: l2AuthCode };
@@ -228,7 +229,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
             } else {
                 addLog(`Errore durante l'autorizzazione militare: ${response.status}`);
             }
-        } catch(err) {
+        } catch (err) {
             addLog(`Errore di comunicazione: ${err.message}`);
         } finally {
             setSubmitting(false);
@@ -238,7 +239,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
     return (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md transition-opacity">
             <div className="bg-[#0B1B32] text-white w-full max-w-5xl rounded-2xl shadow-2xl border border-gray-700 overflow-hidden flex flex-col h-[85vh]">
-                
+
                 {/* HEADER */}
                 <div className="flex justify-between items-center p-5 border-b border-gray-800 bg-gray-900/50">
                     <div className="flex items-center space-x-3">
@@ -318,7 +319,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                     {/* RIGHT PANEL - MAIN ACTION AREA */}
                     <div className="w-2/3 p-6 flex flex-col relative overflow-hidden">
-                        
+
                         {/* LEVEL 1 UI */}
                         {currentLevel === 1 && (
                             <div className="flex flex-col h-full justify-center animate-in fade-in slide-in-from-right-4 duration-500">
@@ -331,7 +332,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                     {l1Nodes.map((node) => {
                                         const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
                                         const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
-                                        
+
                                         return (
                                             <div key={node.id} className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all duration-500 ${node.status === 'pending' ? 'border-gray-700 bg-gray-800/50' : (node.status === 'success' ? 'border-green-500/50 bg-green-900/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]' : 'border-red-500/50 bg-red-900/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]')}`}>
                                                 <Server className={`w-8 h-8 mb-2 transition-colors ${node.status === 'pending' ? 'text-gray-500' : (node.status === 'success' ? 'text-green-400' : 'text-red-400')}`} />
@@ -379,13 +380,13 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                         <h2 className="text-3xl font-light mb-2">Ping Manuale Servizi</h2>
                                         <p className="text-gray-400 text-sm">Seleziona un servizio specifico da ingaggiare manualmente. Puoi riprovare più volte.</p>
                                     </div>
-                            
+
                                     <div className="flex-1 overflow-y-auto px-4 mb-4">
                                         <div className="grid grid-cols-2 gap-4">
                                             {l2Nodes.map((node, index) => {
                                                 const urlObj = new URL(node.url.startsWith('http') ? node.url : `http://${node.url}`);
                                                 const shortName = urlObj.hostname.split('.')[0] || `NODE_${node.id}`;
-                                                
+
                                                 return (
                                                     <div key={node.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 ${node.status === 'pinging' ? 'border-blue-500 bg-blue-900/20' : node.status === 'success' ? 'border-green-500/50 bg-green-900/20' : node.status === 'failed' ? 'border-red-500/50 bg-red-900/20' : 'border-gray-700 bg-gray-800/50'}`}>
                                                         <div className="flex items-center space-x-3 overflow-hidden">
@@ -395,7 +396,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                                                 {node.status === 'failed' && <span className="text-[10px] text-red-400 truncate">{node.errorCode}</span>}
                                                             </div>
                                                         </div>
-                                                        <button 
+                                                        <button
                                                             onClick={() => pingManualNode(index)}
                                                             disabled={node.status === 'pinging' || node.status === 'success'}
                                                             className={`px-3 py-1.5 rounded text-xs font-bold transition-colors ${node.status === 'pinging' ? 'bg-blue-600 text-white cursor-wait' : node.status === 'success' ? 'bg-green-600 text-white cursor-not-allowed' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
@@ -407,7 +408,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                             })}
                                         </div>
                                     </div>
-                            
+
                                     <div className="flex justify-center flex-shrink-0">
                                         <button onClick={() => {
                                             setCurrentLevel(3);
@@ -432,8 +433,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                                     <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
                                         <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={l2AuthCode}
                                             onChange={(e) => setL2AuthCode(e.target.value)}
                                             className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
@@ -469,8 +470,8 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
 
                                     <div className="bg-gray-800/50 p-6 rounded-2xl border border-gray-700 w-full max-w-md mx-auto shadow-xl">
                                         <label className="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-wider">Codice Autorizzazione Radio / Note</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={l2AuthCode}
                                             onChange={(e) => setL2AuthCode(e.target.value)}
                                             className="w-full bg-black/50 border border-gray-600 rounded-lg p-3 text-white focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono mb-5"
@@ -488,7 +489,7 @@ const EscalationResolutionModal = ({ ticket, isOpen, onClose, onSuccess }) => {
                                 <div className="flex flex-col h-full justify-center relative animate-in zoom-in-95 duration-500">
                                     {/* Red Alert Background Glow */}
                                     <div className="absolute inset-0 bg-red-900/10 blur-3xl pointer-events-none rounded-full"></div>
-                                    
+
                                     <div className="text-center mb-6 relative z-10">
                                         <div className="inline-block p-4 bg-red-500/20 rounded-full mb-3 animate-pulse border border-red-500/30">
                                             <ShieldAlert className="w-12 h-12 text-red-500" />

@@ -362,7 +362,7 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                                             <span className="font-semibold text-gray-600">Creazione:</span> {ticket.timestamp || ticket.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' ')}
                                         </div>
                                         <button
-                                            onClick={() => setResolvingTicket(ticket)}
+                                            onClick={() => setResolvingTicket({ ...ticket, severity: emergency?.severity })}
                                             disabled={isUser}
                                             title={isUser ? "Non hai i permessi per risolvere le escalation" : "Risolvi Escalation"}
                                             className={`px-3 py-1.5 text-white text-xs font-bold rounded flex items-center transition-colors shadow-sm ${isUser
