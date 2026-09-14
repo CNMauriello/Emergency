@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_UNKNOWN" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.48.0">
+  <bpmn:process id="UNKNOWN" name="Emergency Response Plan (Unknown)" isExecutable="true">
+    <bpmn:startEvent id="Start_Emergency" name="Start Emergency Response">
+      <bpmn:outgoing>Flow_Start_Split</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:parallelGateway id="Gateway_Split" name="Dispatch All Units">
+      <bpmn:incoming>Flow_Start_Split</bpmn:incoming>
+      <bpmn:outgoing>Flow_Split_Police</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Split_Ambulance</bpmn:outgoing>
+      <bpmn:outgoing>Flow_Split_Fire</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_Start_Split" sourceRef="Start_Emergency" targetRef="Gateway_Split" />
+    <bpmn:callActivity id="Call_Police" name="Call Police">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;PoliceIntervention&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Split_Police</bpmn:incoming>
+      <bpmn:outgoing>Flow_Police_Merge</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Split_Police" sourceRef="Gateway_Split" targetRef="Call_Police" />
+    <bpmn:callActivity id="Call_Ambulance" name="Call Ambulance">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;Ambulance&#34;" target="requiredCapability" />
+          <zeebe:input source="=coordinates.latitude" target="latitude" />
+          <zeebe:input source="=coordinates.longitude" target="longitude" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Split_Ambulance</bpmn:incoming>
+      <bpmn:outgoing>Flow_Ambulance_Merge</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Split_Ambulance" sourceRef="Gateway_Split" targetRef="Call_Ambulance" />
+    <bpmn:callActivity id="Call_Fire" name="Call Fire Dept">
+      <bpmn:extensionElements>
+        <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=&#34;FireSuppression&#34;" target="requiredCapability" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_Split_Fire</bpmn:incoming>
+      <bpmn:outgoing>Flow_Fire_Merge</bpmn:outgoing>
+    </bpmn:callActivity>
+    <bpmn:sequenceFlow id="Flow_Split_Fire" sourceRef="Gateway_Split" targetRef="Call_Fire" />
+    <bpmn:parallelGateway id="Gateway_Merge" name="All Units Dispatched">
+      <bpmn:incoming>Flow_Police_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_Ambulance_Merge</bpmn:incoming>
+      <bpmn:incoming>Flow_Fire_Merge</bpmn:incoming>
+      <bpmn:outgoing>Flow_Merge_End</bpmn:outgoing>
+    </bpmn:parallelGateway>
+    <bpmn:sequenceFlow id="Flow_Police_Merge" sourceRef="Call_Police" targetRef="Gateway_Merge" />
+    <bpmn:sequenceFlow id="Flow_Ambulance_Merge" sourceRef="Call_Ambulance" targetRef="Gateway_Merge" />
+    <bpmn:sequenceFlow id="Flow_Fire_Merge" sourceRef="Call_Fire" targetRef="Gateway_Merge" />
+    <bpmn:endEvent id="End_Emergency" name="End Response">
+      <bpmn:incoming>Flow_Merge_End</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_Merge_End" sourceRef="Gateway_Merge" targetRef="End_Emergency" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_UNKNOWN">
+    <bpmndi:BPMNPlane id="BPMNPlane_UNKNOWN" bpmnElement="UNKNOWN">
+      <bpmndi:BPMNShape id="Start_Emergency_di" bpmnElement="Start_Emergency">
+        <dc:Bounds x="182" y="200" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="159" y="246" width="82" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_Police_di" bpmnElement="Call_Police">
+        <dc:Bounds x="400" y="80" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
+        <dc:Bounds x="400" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Call_Fire_di" bpmnElement="Call_Fire">
+        <dc:Bounds x="400" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Merge_di" bpmnElement="Gateway_Merge">
+        <dc:Bounds x="550" y="193" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="582" y="256" width="56" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Emergency_di" bpmnElement="End_Emergency">
+        <dc:Bounds x="682" y="200" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="673" y="253" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_Split_di" bpmnElement="Gateway_Split">
+        <dc:Bounds x="315" y="193" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="226" y="193" width="87" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_Start_Split_di" bpmnElement="Flow_Start_Split">
+        <di:waypoint x="218" y="218" />
+        <di:waypoint x="315" y="218" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Split_Police_di" bpmnElement="Flow_Split_Police">
+        <di:waypoint x="340" y="193" />
+        <di:waypoint x="340" y="120" />
+        <di:waypoint x="400" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Split_Ambulance_di" bpmnElement="Flow_Split_Ambulance">
+        <di:waypoint x="365" y="218" />
+        <di:waypoint x="400" y="218" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Split_Fire_di" bpmnElement="Flow_Split_Fire">
+        <di:waypoint x="340" y="243" />
+        <di:waypoint x="340" y="320" />
+        <di:waypoint x="400" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Police_Merge_di" bpmnElement="Flow_Police_Merge">
+        <di:waypoint x="500" y="120" />
+        <di:waypoint x="575" y="120" />
+        <di:waypoint x="575" y="193" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Ambulance_Merge_di" bpmnElement="Flow_Ambulance_Merge">
+        <di:waypoint x="500" y="218" />
+        <di:waypoint x="550" y="218" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Fire_Merge_di" bpmnElement="Flow_Fire_Merge">
+        <di:waypoint x="500" y="320" />
+        <di:waypoint x="575" y="320" />
+        <di:waypoint x="575" y="243" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Merge_End_di" bpmnElement="Flow_Merge_End">
+        <di:waypoint x="600" y="218" />
+        <di:waypoint x="682" y="218" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
