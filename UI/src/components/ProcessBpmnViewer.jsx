@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import 'bpmn-js/dist/assets/diagram-js.css';
 import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css';
 
-const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [], calledProcessInstances = {}, onChildProcessClick, playTrigger = 0, onAnimationComplete, recenterTrigger = 0 }) => {
+const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], incidents = [], sequenceFlows = [], calledProcessInstances = {}, onChildProcessClick, playTrigger = 0, onAnimationComplete, recenterTrigger = 0, darkMode = false }) => {
     const containerRef = useRef(null);
     const viewerRef = useRef(null);
     const loadedXmlRef = useRef(null);
@@ -119,10 +119,10 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                     canvas.removeMarker(el.id, 'highlight-incident');
                     canvas.removeMarker(el.id, 'highlight-flow');
                     canvas.removeMarker(el.id, 'highlight-call-activity');
-                    canvas.removeMarker(el.id, 'highlight-completed-animated');
-                    canvas.removeMarker(el.id, 'highlight-active-animated');
+                    canvas.removeMarker(el.id, 'highlight-completed-pulse');
+                    canvas.removeMarker(el.id, 'highlight-active-pulse');
                     canvas.removeMarker(el.id, 'highlight-flow-animated');
-                    canvas.removeMarker(el.id, 'highlight-incident-animated');
+                    canvas.removeMarker(el.id, 'highlight-incident-pulse');
                 } catch (e) { }
             });
         } catch (e) {
@@ -177,14 +177,32 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                 for (const el of currentStepElements) {
                     if (!visitedNodes.has(el.id)) {
                         visitedNodes.add(el.id);
+                        
+                        let pulseClass = '';
+                        let finalClass = '';
+
                         if (compNodes.has(el.id)) {
-                            canvas.addMarker(el.id, 'highlight-completed-animated');
+                            pulseClass = 'highlight-completed-pulse';
+                            finalClass = 'highlight-completed';
                         } else if (actNodes.has(el.id)) {
-                            canvas.addMarker(el.id, 'highlight-active-animated');
+                            pulseClass = 'highlight-active-pulse';
+                            finalClass = 'highlight-active';
+                        } else if (incNodes.has(el.id)) {
+                            pulseClass = 'highlight-incident-pulse';
+                            finalClass = 'highlight-incident';
                         }
-                        if (incNodes.has(el.id)) {
-                            canvas.addMarker(el.id, 'highlight-incident-animated');
+
+                        if (pulseClass) {
+                            canvas.addMarker(el.id, pulseClass);
+                            setTimeout(() => {
+                                if (isCancelled) return;
+                                try {
+                                    canvas.removeMarker(el.id, pulseClass);
+                                    canvas.addMarker(el.id, finalClass);
+                                } catch (e) {}
+                            }, 500);
                         }
+
                         if (calledProcessInstances && calledProcessInstances[el.id]) {
                             canvas.addMarker(el.id, 'highlight-call-activity');
                         }
@@ -310,73 +328,144 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
         <>
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .highlight-completed .djs-visual > :nth-child(1) {
-                    stroke: #0d1b78ff !important;
+                ${darkMode ? `
+                .djs-container svg {
+                    background-color: transparent !important;
+                }
+                .djs-visual > rect,
+                .djs-visual > circle,
+                .djs-visual > polygon {
+                    stroke: #475569 !important;
+                    fill: #1e293b !important;
+                }
+                .djs-visual > path {
+                    stroke: #475569 !important;
+                }
+                .djs-connection .djs-visual > path {
+                    marker-end: url(#sequenceflow-end-dark) !important;
+                }
+                .djs-label {
+                    fill: #cbd5e1 !important;
+                }
+                ` : ''}
+
+                .highlight-completed.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
                     stroke-width: 2.5px !important;
-                    fill: #b7d1e4ff !important;
+                    fill: ${darkMode ? '#0f2942' : '#b7d1e4ff'} !important;
                 }
-                .highlight-active .djs-visual > :nth-child(1) {
-                    stroke: #0d1b78ff !important;
+                .highlight-completed.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+                .highlight-completed.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-completed.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+
+                .highlight-active.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
                     stroke-width: 3.75px !important;
-                    fill: #b7d1e4ff !important;
+                    fill: ${darkMode ? '#0f2942' : '#b7d1e4ff'} !important;
                 }
-                .highlight-incident .djs-visual > :nth-child(1) {
-                    stroke: #d32f2f !important;
+                .highlight-active.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+                .highlight-active.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-active.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+
+                .highlight-incident.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
                     stroke-width: 3.75px !important;
-                    fill: #f8d7dcff !important;
+                    fill: ${darkMode ? '#451a1a' : '#f8d7dcff'} !important;
                 }
-                .highlight-flow .djs-visual > path {
-                    stroke: #0d1b78ff !important;
+                .highlight-incident.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                    fill: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                }
+                .highlight-incident.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-incident.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                }
+
+                .highlight-flow.djs-connection .djs-visual > path {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
                     stroke-width: 2.5px !important;
-                    marker-end: url(#sequenceflow-end-blue) !important;
+                    marker-end: url(${darkMode ? '#sequenceflow-end-dark-flow' : '#sequenceflow-end-blue'}) !important;
                 }
-                .highlight-call-activity .djs-visual > :nth-child(1) {
-                    stroke: #10b981 !important;
+                .highlight-call-activity.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#34d399' : '#10b981'} !important;
                     stroke-width: 3.75px !important;
                     cursor: pointer !important;
                 }
                 .highlight-call-activity:hover .djs-visual > :nth-child(1) {
-                    fill: #d1fae5 !important;
+                    fill: ${darkMode ? '#064e3b' : '#d1fae5'} !important;
                 }
                 .bjs-powered-by, .bjs-breadcrumbs {
                     display: none !important;
                 }
 
                 /* ANIMATION CLASSES */
-                @keyframes fillNodeCompleted {
-                  0% { fill: #ffffff; stroke: #ccc; stroke-width: 1.25px; }
-                  50% { fill: #b7d1e4ff; stroke: #0d1b78ff; stroke-width: 3.75px; }
-                  100% { fill: #b7d1e4ff; stroke: #0d1b78ff; stroke-width: 2.5px; }
-                }
-                .highlight-completed-animated .djs-visual > :nth-child(1) {
-                  animation: fillNodeCompleted 1s ease-in-out forwards !important;
+                .djs-visual > rect,
+                .djs-visual > circle,
+                .djs-visual > polygon,
+                .djs-visual > path {
+                    transition: fill 0.3s ease-out, stroke 0.3s ease-out, stroke-width 0.3s ease-out;
                 }
 
-                @keyframes fillNodeActive {
-                  0% { fill: #ffffff; stroke: #ccc; stroke-width: 1.25px; }
-                  50% { fill: #b7d1e4ff; stroke: #0d1b78ff; stroke-width: 5px; }
-                  100% { fill: #b7d1e4ff; stroke: #0d1b78ff; stroke-width: 3.75px; }
+                .highlight-completed-pulse.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#0f2942' : '#b7d1e4ff'} !important;
+                    stroke-width: 3.75px !important;
                 }
-                .highlight-active-animated .djs-visual > :nth-child(1) {
-                  animation: fillNodeActive 1s ease-in-out forwards !important;
+                .highlight-completed-pulse.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+                .highlight-completed-pulse.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-completed-pulse.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
                 }
 
-                @keyframes fillNodeIncident {
-                  0% { fill: #ffffff; stroke: #ccc; }
-                  100% { fill: #f8d7dcff; stroke: #d32f2f; stroke-width: 3.75px; }
+                .highlight-active-pulse.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#0f2942' : '#b7d1e4ff'} !important;
+                    stroke-width: 5px !important;
                 }
-                .highlight-incident-animated .djs-visual > :nth-child(1) {
-                  animation: fillNodeIncident 1s ease-in-out forwards !important;
+                .highlight-active-pulse.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                    fill: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+                .highlight-active-pulse.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-active-pulse.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
+                }
+
+                .highlight-incident-pulse.djs-shape .djs-visual > :nth-child(1) {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                    fill: ${darkMode ? '#451a1a' : '#f8d7dcff'} !important;
+                    stroke-width: 3.75px !important;
+                }
+                .highlight-incident-pulse.djs-shape .djs-visual > path {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                    fill: ${darkMode ? '#f87171' : '#d32f2f'} !important;
+                }
+                .highlight-incident-pulse.djs-shape .djs-visual > circle:not(:first-child),
+                .highlight-incident-pulse.djs-shape .djs-visual > polygon:not(:first-child) {
+                    stroke: ${darkMode ? '#f87171' : '#d32f2f'} !important;
                 }
 
                 @keyframes drawFlow {
-                  0% { stroke-dasharray: var(--path-length, 1000); stroke-dashoffset: var(--path-length, 1000); stroke: #ccc; }
-                  100% { stroke-dasharray: var(--path-length, 1000); stroke-dashoffset: 0; stroke: #0d1b78ff; }
+                  0% { stroke-dasharray: var(--path-length, 1000); stroke-dashoffset: var(--path-length, 1000); stroke: ${darkMode ? '#475569' : '#ccc'}; }
+                  100% { stroke-dasharray: var(--path-length, 1000); stroke-dashoffset: 0; stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'}; }
                 }
-                .highlight-flow-animated .djs-visual > path {
-                  stroke: #0d1b78ff !important;
+                .highlight-flow-animated.djs-connection .djs-visual > path {
+                  stroke: ${darkMode ? '#6ea8fe' : '#0d1b78ff'} !important;
                   stroke-width: 2.5px !important;
-                  marker-end: url(#sequenceflow-end-blue) !important;
+                  marker-end: url(${darkMode ? '#sequenceflow-end-dark-flow' : '#sequenceflow-end-blue'}) !important;
                   animation: drawFlow 2.5s linear forwards !important;
                 }
             `}} />
@@ -385,9 +474,15 @@ const ProcessBpmnViewer = ({ bpmnXml, activeNodes = [], completedNodes = [], inc
                     <marker id="sequenceflow-end-blue" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="20" orient="auto">
                         <path d="M 1 5 L 11 10 L 1 15 Z" fill="#0d1b78ff" stroke="#0d1b78ff" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
                     </marker>
+                    <marker id="sequenceflow-end-dark" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="20" orient="auto">
+                        <path d="M 1 5 L 11 10 L 1 15 Z" fill="#475569" stroke="#475569" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+                    </marker>
+                    <marker id="sequenceflow-end-dark-flow" viewBox="0 0 20 20" refX="11" refY="10" markerWidth="10" markerHeight="20" orient="auto">
+                        <path d="M 1 5 L 11 10 L 1 15 Z" fill="#6ea8fe" stroke="#6ea8fe" strokeWidth="1" strokeLinejoin="round" strokeLinecap="round" />
+                    </marker>
                 </defs>
             </svg>
-            <div ref={containerRef} className="absolute inset-0 w-full h-full border border-gray-200 rounded overflow-hidden bg-white" />
+            <div ref={containerRef} className={`absolute inset-0 w-full h-full border ${darkMode ? 'border-gray-800 bg-[#0B1221]' : 'border-gray-200 bg-white'} rounded overflow-hidden`} />
         </>
     );
 };
