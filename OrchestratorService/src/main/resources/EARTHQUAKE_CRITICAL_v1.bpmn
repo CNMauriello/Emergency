@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Earthquake_Critical" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.51.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Earthquake_Critical" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.48.0">
   <bpmn:process id="EARTHQUAKE_CRITICAL" name="Earthquake Critical Response Plan" isExecutable="true">
     <bpmn:startEvent id="Start_Earthquake_Plan" name="Start Earthquake Response Plan">
       <bpmn:outgoing>Flow_Start</bpmn:outgoing>
@@ -175,7 +175,7 @@
       <bpmndi:BPMNShape id="Start_Earthquake_Plan_di" bpmnElement="Start_Earthquake_Plan">
         <dc:Bounds x="150" y="382" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="127" y="425" width="85" height="27" />
+          <dc:Bounds x="126" y="436" width="83" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Init_Split_di" bpmnElement="Gateway_Init_Split">
@@ -194,73 +194,50 @@
         <dc:Bounds x="550" y="375" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
-        <dc:Bounds x="650" y="375" width="50" height="50" />
+        <dc:Bounds x="695" y="375" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="566" y="380" width="68" height="27" />
+          <dc:Bounds x="611" y="356" width="68" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Medical_Split_di" bpmnElement="Gateway_Medical_Split">
-        <dc:Bounds x="780" y="195" width="50" height="50" />
+        <dc:Bounds x="825" y="195" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_Ambulance_di" bpmnElement="Call_Ambulance">
-        <dc:Bounds x="890" y="110" width="150" height="80" />
+        <dc:Bounds x="935" y="110" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Call_TraumaCare_di" bpmnElement="Call_TraumaCare">
-        <dc:Bounds x="890" y="240" width="150" height="80" />
+        <dc:Bounds x="935" y="240" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Medical_Join_di" bpmnElement="Gateway_Medical_Join">
-        <dc:Bounds x="1100" y="195" width="50" height="50" />
+        <dc:Bounds x="1145" y="195" width="50" height="50" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_Ask_Evacuation_di" bpmnElement="Activity_Ask_Evacuation">
-        <dc:Bounds x="750" y="580" width="150" height="80" />
+        <dc:Bounds x="795" y="580" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_Wait_Evacuation_di" bpmnElement="Event_Wait_Evacuation">
-        <dc:Bounds x="950" y="602" width="36" height="36" />
+        <dc:Bounds x="995" y="602" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="926" y="645" width="85" height="14" />
+          <dc:Bounds x="971" y="645" width="85" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="check_evacuation_di" bpmnElement="check_evacuation">
-        <dc:Bounds x="1040" y="580" width="150" height="80" />
+        <dc:Bounds x="1085" y="580" width="150" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="check_evacuation_gateway_di" bpmnElement="check_evacuation_gateway" isMarkerVisible="true">
-        <dc:Bounds x="1240" y="595" width="50" height="50" />
+        <dc:Bounds x="1285" y="595" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1225" y="565" width="82" height="14" />
+          <dc:Bounds x="1270" y="573" width="83" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
+        <dc:Bounds x="1562" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1609" y="386" width="57" height="40" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_SAR_di" bpmnElement="Activity_SAR">
-        <dc:Bounds x="1340" y="680" width="150" height="80" />
+        <dc:Bounds x="1395" y="680" width="150" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
-        <dc:Bounds x="1560" y="382" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1605" y="386" width="60" height="40" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_Injured_People_di" bpmnElement="Flow_Injured_People">
-        <di:waypoint x="675" y="375" />
-        <di:waypoint x="675" y="220" />
-        <di:waypoint x="780" y="220" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="690" y="193" width="71" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Trapped_People_di" bpmnElement="Flow_Trapped_People">
-        <di:waypoint x="675" y="425" />
-        <di:waypoint x="675" y="620" />
-        <di:waypoint x="750" y="620" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="652" y="638" width="75" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_Safe_di" bpmnElement="Flow_Safe">
-        <di:waypoint x="700" y="400" />
-        <di:waypoint x="1560" y="400" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1101" y="382" width="65" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Start_di" bpmnElement="Flow_Start">
         <di:waypoint x="186" y="400" />
         <di:waypoint x="250" y="400" />
@@ -295,65 +272,88 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Context_di" bpmnElement="Flow_To_Context">
         <di:waypoint x="600" y="400" />
-        <di:waypoint x="650" y="400" />
+        <di:waypoint x="695" y="400" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Injured_People_di" bpmnElement="Flow_Injured_People">
+        <di:waypoint x="720" y="375" />
+        <di:waypoint x="720" y="220" />
+        <di:waypoint x="825" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="735" y="193" width="71" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Trapped_People_di" bpmnElement="Flow_Trapped_People">
+        <di:waypoint x="720" y="425" />
+        <di:waypoint x="720" y="620" />
+        <di:waypoint x="795" y="620" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="697" y="638" width="75" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Safe_di" bpmnElement="Flow_Safe">
+        <di:waypoint x="745" y="400" />
+        <di:waypoint x="1562" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="935" y="373" width="123" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Ambulance_di" bpmnElement="Flow_To_Ambulance">
-        <di:waypoint x="805" y="195" />
-        <di:waypoint x="805" y="150" />
-        <di:waypoint x="890" y="150" />
+        <di:waypoint x="850" y="195" />
+        <di:waypoint x="850" y="150" />
+        <di:waypoint x="935" y="150" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_TraumaCare_di" bpmnElement="Flow_To_TraumaCare">
-        <di:waypoint x="805" y="245" />
-        <di:waypoint x="805" y="280" />
-        <di:waypoint x="890" y="280" />
+        <di:waypoint x="850" y="245" />
+        <di:waypoint x="850" y="280" />
+        <di:waypoint x="935" y="280" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_From_Ambulance_di" bpmnElement="Flow_From_Ambulance">
-        <di:waypoint x="1040" y="150" />
-        <di:waypoint x="1125" y="150" />
-        <di:waypoint x="1125" y="195" />
+        <di:waypoint x="1085" y="150" />
+        <di:waypoint x="1170" y="150" />
+        <di:waypoint x="1170" y="195" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_From_TraumaCare_di" bpmnElement="Flow_From_TraumaCare">
-        <di:waypoint x="1040" y="280" />
-        <di:waypoint x="1125" y="280" />
-        <di:waypoint x="1125" y="245" />
+        <di:waypoint x="1085" y="280" />
+        <di:waypoint x="1170" y="280" />
+        <di:waypoint x="1170" y="245" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Medical_Done_di" bpmnElement="Flow_Medical_Done">
-        <di:waypoint x="1150" y="220" />
-        <di:waypoint x="1578" y="220" />
-        <di:waypoint x="1578" y="382" />
+        <di:waypoint x="1195" y="220" />
+        <di:waypoint x="1580" y="220" />
+        <di:waypoint x="1580" y="382" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Timer_di" bpmnElement="Flow_To_Timer">
-        <di:waypoint x="900" y="620" />
-        <di:waypoint x="950" y="620" />
+        <di:waypoint x="945" y="620" />
+        <di:waypoint x="995" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Check_Evac_di" bpmnElement="Flow_To_Check_Evac">
-        <di:waypoint x="986" y="620" />
-        <di:waypoint x="1040" y="620" />
+        <di:waypoint x="1031" y="620" />
+        <di:waypoint x="1085" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Check_Gateway_di" bpmnElement="Flow_To_Check_Gateway">
-        <di:waypoint x="1190" y="620" />
-        <di:waypoint x="1240" y="620" />
+        <di:waypoint x="1235" y="620" />
+        <di:waypoint x="1285" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Fully_Evacuated_di" bpmnElement="Flow_Fully_Evacuated">
-        <di:waypoint x="1290" y="620" />
-        <di:waypoint x="1578" y="620" />
-        <di:waypoint x="1578" y="418" />
+        <di:waypoint x="1335" y="620" />
+        <di:waypoint x="1580" y="620" />
+        <di:waypoint x="1580" y="418" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1312" y="602" width="39" height="14" />
+          <dc:Bounds x="1430" y="602" width="39" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Not_Evacuated_di" bpmnElement="Flow_Not_Evacuated">
-        <di:waypoint x="1265" y="645" />
-        <di:waypoint x="1265" y="720" />
-        <di:waypoint x="1340" y="720" />
+        <di:waypoint x="1310" y="645" />
+        <di:waypoint x="1310" y="720" />
+        <di:waypoint x="1395" y="720" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1269" y="675" width="62" height="14" />
+          <dc:Bounds x="1319" y="693" width="62" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_SAR_Done_di" bpmnElement="Flow_SAR_Done">
-        <di:waypoint x="1490" y="720" />
-        <di:waypoint x="1578" y="720" />
-        <di:waypoint x="1578" y="418" />
+        <di:waypoint x="1545" y="720" />
+        <di:waypoint x="1580" y="720" />
+        <di:waypoint x="1580" y="418" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

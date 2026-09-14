@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react'
 import { API_BASE_URL, fetchWithAuth } from '../config.js'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix per l'icona di default di leaflet in React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
 const INITIAL_FORM = {
   type: 'FIRE_STATION',
@@ -263,26 +274,35 @@ export default function ServiceForm({ onServiceRegistered, onClose }) {
 
             if (isValidCoordinatess) {
               return (
-                <a 
-                  href={`https://www.google.com/maps?q=${lat},${lon}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1.5 block w-full h-40 bg-gray-100 rounded overflow-hidden shadow-inner border border-gray-200 hover:opacity-90 transition-opacity cursor-pointer relative"
-                  title="Open in Google Maps"
+                <div 
+                  className="mt-1.5 block w-full h-40 bg-gray-100 rounded overflow-hidden shadow-inner border border-gray-200 relative"
                 >
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    frameBorder="0" 
-                    scrolling="no" 
-                    marginHeight="0" 
-                    marginWidth="0" 
-                    className="pointer-events-none"
-                    src={`https://maps.google.com/maps?q=${lat},${lon}&z=14&output=embed`}
-                    title="Mappa Posizione"
-                  ></iframe>
-                  <div className="absolute inset-0"></div>
-                </a>
+                  <MapContainer
+                    center={[lat, lon]}
+                    zoom={14}
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={false}
+                    dragging={false}
+                    scrollWheelZoom={false}
+                    doubleClickZoom={false}
+                    touchZoom={false}
+                  >
+                    <TileLayer
+                      url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                      attribution='&copy; Google Maps'
+                      maxZoom={20}
+                      detectRetina={true}
+                    />
+                    <Marker position={[lat, lon]} />
+                  </MapContainer>
+                  <a 
+                    href={`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=14/${lat}/${lon}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute inset-0 z-[400]"
+                    title="Open in OpenStreetMap"
+                  ></a>
+                </div>
               );
             }
 

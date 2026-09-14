@@ -195,32 +195,41 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
 
     const emergencyTickets = tickets.filter(t => (t.eventId === emergency.eventId || t.event_id === emergency.eventId));
 
-    const customMarkerIcon = new L.Icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41],
-        iconAnchor: [12, 41],
-        popupAnchor: [1, -34],
-        shadowSize: [41, 41],
-        className: 'luminous-marker'
-    });
-
     const severityUpper = (emergency?.severity || '').toUpperCase();
     let severityBg = 'bg-gray-400';
     let severityText = 'text-gray-500';
+    let markerColor = '#9ca3af';
+
     if (severityUpper === 'CRITICA' || severityUpper === 'CRITICAL') {
         severityBg = 'bg-[#d32f2f] shadow-[0_0_15px_rgba(211,47,47,0.8)] border border-[#d32f2f]';
         severityText = 'text-[#d32f2f]';
+        markerColor = '#d32f2f';
     } else if (severityUpper === 'ALTA' || severityUpper === 'HIGH') {
         severityBg = 'bg-[#ef5350] shadow-[0_0_12px_rgba(239,83,80,0.7)] border border-[#ef5350]';
         severityText = 'text-[#ef5350]';
+        markerColor = '#ef5350';
     } else if (severityUpper === 'MEDIA' || severityUpper === 'MEDIUM') {
         severityBg = 'bg-[#ed6c02] shadow-[0_0_12px_rgba(237,108,2,0.7)] border border-[#ed6c02]';
         severityText = 'text-[#ed6c02]';
+        markerColor = '#ed6c02';
     } else if (severityUpper === 'BASSA' || severityUpper === 'LOW') {
         severityBg = 'bg-[#eab308] shadow-[0_0_12px_rgba(234,179,8,0.7)] border border-[#eab308]';
         severityText = 'text-[#eab308]';
+        markerColor = '#eab308';
     }
+
+    const customMarkerIcon = L.divIcon({
+        className: 'custom-pulsing-icon bg-transparent border-0',
+        html: `
+            <div class="relative flex items-center justify-center w-8 h-8">
+                <span class="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style="background-color: ${markerColor}"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 border-2 border-white shadow-md" style="background-color: ${markerColor}"></span>
+            </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+        popupAnchor: [0, -16]
+    });
 
     return (
         <div className="p-8 bg-transparent min-h-screen">
@@ -294,8 +303,10 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                             zoomControl={false}
                         >
                             <TileLayer
-                                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                                url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+                                attribution='&copy; Google Maps'
+                                maxZoom={20}
+                                detectRetina={true}
                             />
 
                             {/* Area di intervento */}
@@ -385,126 +396,126 @@ const EmergencyDetail = ({ emergencyId, onBack, userRole }) => {
                     <div className="absolute -top-10 -left-10 w-96 h-96 bg-[#0088cc]/10 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
                     <div className="absolute bottom-10 -right-10 w-[500px] h-[300px] bg-cyan-400/10 rounded-full blur-[100px] -z-10 pointer-events-none"></div>
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-b from-[#0B1B32]/2 to-transparent -z-10 pointer-events-none rounded-[2rem]"></div>
-                    
+
                     <div className="bg-white/80 backdrop-blur-2xl p-8 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-white/60 w-full flex flex-col h-full min-h-[600px] relative overflow-hidden hover:shadow-[0_8px_40px_rgb(0,0,0,0.12)] transition-all duration-300">
                         <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-[#0B1B32] to-[#0088cc]"></div>
-                    <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
-                        <div className="flex items-center">
-                            <div className="bg-[#0B1B32] p-2 rounded-lg mr-4 text-white shadow-sm">
-                                <i className="fas fa-project-diagram text-[20px]"></i>
+                        <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-5">
+                            <div className="flex items-center">
+                                <div className="bg-[#0B1B32] p-2 rounded-lg mr-4 text-white shadow-sm">
+                                    <i className="fas fa-project-diagram text-[20px]"></i>
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-bold text-[#0B1B32] tracking-wide">
+                                        BPMN Workflow Execution Status
+                                    </h2>
+                                    <p className="text-gray-400 text-[13px] mt-0.5">Automated response and event escalation pipeline</p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-[#0B1B32] tracking-wide">
-                                    BPMN Workflow Execution Status
-                                </h2>
-                                <p className="text-gray-400 text-[13px] mt-0.5">Automated response and event escalation pipeline</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                            {visualizationData && (
-                                <>
-                                    <button
-                                        onClick={() => setRecenterTrigger(prev => prev + 1)}
-                                        className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
-                                        title="Center BPMN diagram"
-                                    >
-                                        <Maximize className="w-3.5 h-3.5 mr-1.5" /> Center
-                                    </button>
-                                    <button
-                                        onClick={() => setPlayTrigger(prev => prev + 1)}
-                                        className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
-                                        title="Riproduci animazione percorso BPMN"
-                                    >
-                                        <Play className="w-3.5 h-3.5 mr-1.5" /> Play
-                                    </button>
-                                </>
-                            )}
-                            <span className={`min-w-[120px] whitespace-nowrap justify-center flex items-center px-4 py-1.5 text-[11px] font-bold rounded shadow-sm ${visualizationData?.state === 'COMPLETED' ? 'bg-[#dcfce7] text-[#166534] border border-[#bbf7d0]' : 'bg-[#e0f2fe] text-[#0B1B32] border border-[#bae6fd]'}`}>
-                                {visualizationData?.state === 'ACTIVE' ? 'RUNNING' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Please wait...'))}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 w-full relative min-h-[400px]">
-                        {visualizationData ? (
-                            <>
-                                {viewStack.length > 0 && (
-                                    <button
-                                        onClick={() => setViewStack(viewStack.slice(0, -1))}
-                                        className="absolute top-2 left-2 z-10 bg-white border border-gray-300 shadow-sm px-3 py-1.5 rounded text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"
-                                    >
-                                        <ArrowLeft className="w-4 h-4 mr-1" /> Upper Level
-                                    </button>
-                                )}
-                                <ProcessBpmnViewer
-                                    bpmnXml={visualizationData.bpmnXml}
-                                    activeNodes={visualizationData.activeNodes}
-                                    completedNodes={visualizationData.completedNodes}
-                                    sequenceFlows={visualizationData.sequenceFlows}
-                                    incidents={visualizationData.incidents}
-                                    calledProcessInstances={visualizationData.calledProcessInstances}
-                                    onChildProcessClick={(childKey) => setViewStack([...viewStack, childKey])}
-                                    playTrigger={playTrigger}
-                                    recenterTrigger={recenterTrigger}
-                                />
-                            </>
-                        ) : (
-                            <div className="h-full flex items-center justify-center text-gray-500 flex-col">
-                                {emergency?.workflowInstanceId ? (
+                            <div className="flex items-center space-x-3">
+                                {visualizationData && (
                                     <>
-                                        <Loader2 className="animate-spin mb-3 w-8 h-8" />
-                                        <span>Loading BPMN diagram and status...</span>
+                                        <button
+                                            onClick={() => setRecenterTrigger(prev => prev + 1)}
+                                            className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
+                                            title="Center BPMN diagram"
+                                        >
+                                            <Maximize className="w-3.5 h-3.5 mr-1.5" /> Center
+                                        </button>
+                                        <button
+                                            onClick={() => setPlayTrigger(prev => prev + 1)}
+                                            className="w-[150px] justify-center bg-[#f8fafc] hover:bg-[#e2e8f0] text-[#0f172a] border border-gray-200 px-3 py-1.5 rounded flex items-center text-[11px] font-bold transition-all shadow-sm hover:shadow"
+                                            title="Riproduci animazione percorso BPMN"
+                                        >
+                                            <Play className="w-3.5 h-3.5 mr-1.5" /> Play
+                                        </button>
                                     </>
-                                ) : (
-                                    <span>No workflow instance ID associated.</span>
                                 )}
+                                <span className={`min-w-[120px] whitespace-nowrap justify-center flex items-center px-4 py-1.5 text-[11px] font-bold rounded shadow-sm ${visualizationData?.state === 'COMPLETED' ? 'bg-[#dcfce7] text-[#166534] border border-[#bbf7d0]' : 'bg-[#e0f2fe] text-[#0B1B32] border border-[#bae6fd]'}`}>
+                                    {visualizationData?.state === 'ACTIVE' ? 'RUNNING' : (visualizationData?.state === 'COMPLETED' ? '✓ COMPLETED' : (visualizationData?.state || 'Please wait...'))}
+                                </span>
                             </div>
-                        )}
-                    </div>
+                        </div>
 
-                    <div className="mt-8 border-t border-gray-100 pt-6">
-                        <div className="bg-[#0B1221] rounded-xl border border-gray-800 font-mono text-[12px] text-gray-300 overflow-hidden flex flex-col shadow-2xl">
-                            {/* Mac-like Header */}
-                            <div className="bg-[#151E32] px-4 py-2.5 flex items-center justify-between border-b border-gray-800">
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <div className="flex-1 w-full relative min-h-[400px]">
+                            {visualizationData ? (
+                                <>
+                                    {viewStack.length > 0 && (
+                                        <button
+                                            onClick={() => setViewStack(viewStack.slice(0, -1))}
+                                            className="absolute top-2 left-2 z-10 bg-white border border-gray-300 shadow-sm px-3 py-1.5 rounded text-sm font-bold text-gray-700 hover:bg-gray-50 flex items-center"
+                                        >
+                                            <ArrowLeft className="w-4 h-4 mr-1" /> Upper Level
+                                        </button>
+                                    )}
+                                    <ProcessBpmnViewer
+                                        bpmnXml={visualizationData.bpmnXml}
+                                        activeNodes={visualizationData.activeNodes}
+                                        completedNodes={visualizationData.completedNodes}
+                                        sequenceFlows={visualizationData.sequenceFlows}
+                                        incidents={visualizationData.incidents}
+                                        calledProcessInstances={visualizationData.calledProcessInstances}
+                                        onChildProcessClick={(childKey) => setViewStack([...viewStack, childKey])}
+                                        playTrigger={playTrigger}
+                                        recenterTrigger={recenterTrigger}
+                                    />
+                                </>
+                            ) : (
+                                <div className="h-full flex items-center justify-center text-gray-500 flex-col">
+                                    {emergency?.workflowInstanceId ? (
+                                        <>
+                                            <Loader2 className="animate-spin mb-3 w-8 h-8" />
+                                            <span>Loading BPMN diagram and status...</span>
+                                        </>
+                                    ) : (
+                                        <span>No workflow instance ID associated.</span>
+                                    )}
                                 </div>
-                                <div className="text-gray-400 text-[11px] font-semibold tracking-wider flex items-center">
-                                    <Terminal className="w-3.5 h-3.5 mr-2 text-[#0088cc]" /> BPMN Services Log • Execution Stream
-                                </div>
-                                <div className="flex space-x-1">
-                                    <span className="bg-[#003366] text-[#6ea8fe] px-3 py-1 rounded text-[10px] font-bold cursor-pointer">SYSTEM_LOG</span>
-                                </div>
-                            </div>
+                            )}
+                        </div>
 
-                            {/* Terminal Body */}
-                            <div className="p-5 max-h-[250px] overflow-y-auto space-y-2">
-                                <div className="text-gray-500 mb-4 pb-3 border-b border-gray-800 border-dashed">
-                                    {'>_'} SYSTEM_LOG INITIALIZED
-                                </div>
-
-                                {emergency.history && emergency.history.map((step, index) => (
-                                    <div key={index} className="flex items-start">
-                                        <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:0{index + 1}]</span>
-                                        <span className="text-[#10b981] font-bold mr-2">[TRANSITION]</span>
-                                        <span>Transition: <span className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-[10px] mx-1">{step}</span> — Executed successfully</span>
+                        <div className="mt-8 border-t border-gray-100 pt-6">
+                            <div className="bg-[#0B1221] rounded-xl border border-gray-800 font-mono text-[12px] text-gray-300 overflow-hidden flex flex-col shadow-2xl">
+                                {/* Mac-like Header */}
+                                <div className="bg-[#151E32] px-4 py-2.5 flex items-center justify-between border-b border-gray-800">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
                                     </div>
-                                ))}
-                                {(!emergency.history || emergency.history.length === 0) && (
-                                    <div className="text-gray-500 italic">No logs available.</div>
-                                )}
+                                    <div className="text-gray-400 text-[11px] font-semibold tracking-wider flex items-center">
+                                        <Terminal className="w-3.5 h-3.5 mr-2 text-[#0088cc]" /> BPMN Services Log • Execution Stream
+                                    </div>
+                                    <div className="flex space-x-1">
+                                        <span className="bg-[#003366] text-[#6ea8fe] px-3 py-1 rounded text-[10px] font-bold cursor-pointer">SYSTEM_LOG</span>
+                                    </div>
+                                </div>
 
-                                <div className="text-gray-500 mt-4 animate-pulse">
-                                    {'>_'} <span className="inline-block w-2 h-4 bg-gray-500 align-middle"></span>
+                                {/* Terminal Body */}
+                                <div className="p-5 max-h-[250px] overflow-y-auto space-y-2">
+                                    <div className="text-gray-500 mb-4 pb-3 border-b border-gray-800 border-dashed">
+                                        {'>_'} SYSTEM_LOG INITIALIZED
+                                    </div>
+
+                                    {emergency.history && emergency.history.map((step, index) => (
+                                        <div key={index} className="flex items-start">
+                                            <span className="text-gray-500 mr-3 w-[70px] shrink-0">[{new Date().toLocaleTimeString().slice(0, 5)}:0{index + 1}]</span>
+                                            <span className="text-[#10b981] font-bold mr-2">[TRANSITION]</span>
+                                            <span>Transition: <span className="bg-gray-800 text-gray-200 px-1.5 py-0.5 rounded text-[10px] mx-1">{step}</span> — Executed successfully</span>
+                                        </div>
+                                    ))}
+                                    {(!emergency.history || emergency.history.length === 0) && (
+                                        <div className="text-gray-500 italic">No logs available.</div>
+                                    )}
+
+                                    <div className="text-gray-500 mt-4 animate-pulse">
+                                        {'>_'} <span className="inline-block w-2 h-4 bg-gray-500 align-middle"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        </div>
                     </div>
                 </div>
-                </div>
+            </div>
 
             {/* Modale Escalation Resolution */}
             <EscalationResolutionModal

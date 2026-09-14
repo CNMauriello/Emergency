@@ -77,7 +77,7 @@ public class EventAnalysisDelegate {
                 default -> "UNKNOWN";
             };
 
-            case "UNKNOWN" -> "GENERIC_RESPONSE";
+            case "UNKNOWN" -> "UNKNOWN";
 
             default -> "UNKNOWN";
         };

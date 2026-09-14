@@ -412,7 +412,8 @@ INSERT INTO workflows (process_key, event_type, severity, version, enabled) VALU
 ('EARTHQUAKE_LOW', 'EARTHQUAKE', 'LOW', 1, true),
 ('EARTHQUAKE_MEDIUM', 'EARTHQUAKE', 'MEDIUM', 1, true),
 ('EARTHQUAKE_HIGH', 'EARTHQUAKE', 'HIGH', 1, true),
-('EARTHQUAKE_CRITICAL', 'EARTHQUAKE', 'CRITICAL', 1, true);
+('EARTHQUAKE_CRITICAL', 'EARTHQUAKE', 'CRITICAL', 1, true),
+('UNKNOWN', 'UNKNOWN', 'UNKNOWN', 1, true);
 
 USE registry_db;
 

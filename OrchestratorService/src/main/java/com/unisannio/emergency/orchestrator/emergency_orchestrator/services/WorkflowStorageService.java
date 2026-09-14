@@ -112,7 +112,7 @@ public class WorkflowStorageService {
                 case "CRITICAL" -> "EARTHQUAKE_CRITICAL";
                 default -> "UNKNOWN";
             };
-            case "UNKNOWN" -> "GENERIC_RESPONSE";
+            case "UNKNOWN" -> "UNKNOWN";
             default -> "UNKNOWN";
         };
     }

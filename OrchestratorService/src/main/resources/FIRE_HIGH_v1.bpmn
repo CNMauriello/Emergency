@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_Emergency_Response_Plan_High_V2" targetNamespace="http://unisannio.com/emergency" exporter="Camunda Modeler" exporterVersion="5.48.0">
   <bpmn:process id="FIRE_HIGH" name="Emergency Response Plan (High)" isExecutable="true">
-    
     <bpmn:startEvent id="Start_Emergency_Response_Plan" name="Start Emergency Response">
       <bpmn:outgoing>Flow_Start</bpmn:outgoing>
     </bpmn:startEvent>
-    
-    <!-- INITIAL DISPATCH: FIRE, CROWD, COMM -->
     <bpmn:parallelGateway id="Gateway_Init_Split">
       <bpmn:incoming>Flow_Start</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Fire</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_Crowd</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_Comm</bpmn:outgoing>
     </bpmn:parallelGateway>
-    
     <bpmn:callActivity id="Activity_Fire_Suppression" name="Call Fire Suppression">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
@@ -24,7 +20,6 @@
       <bpmn:incoming>Flow_To_Fire</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Fire</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:callActivity id="Activity_Crowd_Control" name="Ask for Crowd Control">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
@@ -35,7 +30,6 @@
       <bpmn:incoming>Flow_To_Crowd</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Crowd</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:callActivity id="Activity_Emerg_Comm" name="Establish Emergency Comm">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" propagateAllChildVariables="false" />
@@ -46,33 +40,26 @@
       <bpmn:incoming>Flow_To_Comm</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Comm</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:parallelGateway id="Gateway_Init_Join">
       <bpmn:incoming>Flow_From_Fire</bpmn:incoming>
       <bpmn:incoming>Flow_From_Crowd</bpmn:incoming>
       <bpmn:incoming>Flow_From_Comm</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Context</bpmn:outgoing>
     </bpmn:parallelGateway>
-    
-    <!-- INCIDENT CONTEXT GATEWAY -->
     <bpmn:inclusiveGateway id="Gateway_Emergency_Context" name="Emergency Context Flags">
       <bpmn:incoming>Flow_To_Context</bpmn:incoming>
       <bpmn:outgoing>Flow_Has_Injured</bpmn:outgoing>
       <bpmn:outgoing>Flow_Has_Trapped</bpmn:outgoing>
       <bpmn:outgoing>Flow_No_Flags</bpmn:outgoing>
     </bpmn:inclusiveGateway>
-    
-    <!-- INJURED SUB-PROCESS -->
     <bpmn:sequenceFlow id="Flow_Has_Injured" name="Injured People" sourceRef="Gateway_Emergency_Context" targetRef="Gateway_Injured_Split">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_injured</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    
     <bpmn:parallelGateway id="Gateway_Injured_Split">
       <bpmn:incoming>Flow_Has_Injured</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Ambulance</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_MedEmerg</bpmn:outgoing>
     </bpmn:parallelGateway>
-    
     <bpmn:callActivity id="Call_Ambulance" name="Request Ambulance">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
@@ -83,7 +70,6 @@
       <bpmn:incoming>Flow_To_Ambulance</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Ambulance</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:callActivity id="Call_MedEmerg" name="Advanced Medical Emergency">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
@@ -94,24 +80,19 @@
       <bpmn:incoming>Flow_To_MedEmerg</bpmn:incoming>
       <bpmn:outgoing>Flow_From_MedEmerg</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:parallelGateway id="Gateway_Injured_Join">
       <bpmn:incoming>Flow_From_Ambulance</bpmn:incoming>
       <bpmn:incoming>Flow_From_MedEmerg</bpmn:incoming>
       <bpmn:outgoing>Flow_Injured_Done</bpmn:outgoing>
     </bpmn:parallelGateway>
-    
-    <!-- TRAPPED SUB-PROCESS -->
     <bpmn:sequenceFlow id="Flow_Has_Trapped" name="People in building" sourceRef="Gateway_Emergency_Context" targetRef="Gateway_Trapped_Split">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    
     <bpmn:parallelGateway id="Gateway_Trapped_Split">
       <bpmn:incoming>Flow_Has_Trapped</bpmn:incoming>
       <bpmn:outgoing>Flow_To_Evacuation</bpmn:outgoing>
       <bpmn:outgoing>Flow_To_SAR</bpmn:outgoing>
     </bpmn:parallelGateway>
-    
     <bpmn:callActivity id="Call_Evacuation" name="Execute Evacuation">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
@@ -122,7 +103,6 @@
       <bpmn:incoming>Flow_To_Evacuation</bpmn:incoming>
       <bpmn:outgoing>Flow_From_Evacuation</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:callActivity id="Call_SAR" name="Search And Rescue">
       <bpmn:extensionElements>
         <zeebe:calledElement processId="=&#34;Capability_Provider&#34;" />
@@ -133,26 +113,19 @@
       <bpmn:incoming>Flow_To_SAR</bpmn:incoming>
       <bpmn:outgoing>Flow_From_SAR</bpmn:outgoing>
     </bpmn:callActivity>
-    
     <bpmn:parallelGateway id="Gateway_Trapped_Join">
       <bpmn:incoming>Flow_From_Evacuation</bpmn:incoming>
       <bpmn:incoming>Flow_From_SAR</bpmn:incoming>
       <bpmn:outgoing>Flow_Trapped_Done</bpmn:outgoing>
     </bpmn:parallelGateway>
-
-    <!-- NO FLAGS PATH -->
     <bpmn:sequenceFlow id="Flow_No_Flags" name="No injured or trapped" sourceRef="Gateway_Emergency_Context" targetRef="End_Emergency_Response">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=incident_context.has_trapped = false and incident_context.has_injured = false</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-
-    <!-- END EVENT -->
     <bpmn:endEvent id="End_Emergency_Response" name="Emergency Response Completed">
       <bpmn:incoming>Flow_No_Flags</bpmn:incoming>
       <bpmn:incoming>Flow_Injured_Done</bpmn:incoming>
       <bpmn:incoming>Flow_Trapped_Done</bpmn:incoming>
     </bpmn:endEvent>
-    
-    <!-- BASIC FLOWS -->
     <bpmn:sequenceFlow id="Flow_Start" sourceRef="Start_Emergency_Response_Plan" targetRef="Gateway_Init_Split" />
     <bpmn:sequenceFlow id="Flow_To_Fire" sourceRef="Gateway_Init_Split" targetRef="Activity_Fire_Suppression" />
     <bpmn:sequenceFlow id="Flow_To_Crowd" sourceRef="Gateway_Init_Split" targetRef="Activity_Crowd_Control" />
@@ -171,13 +144,14 @@
     <bpmn:sequenceFlow id="Flow_From_Evacuation" sourceRef="Call_Evacuation" targetRef="Gateway_Trapped_Join" />
     <bpmn:sequenceFlow id="Flow_From_SAR" sourceRef="Call_SAR" targetRef="Gateway_Trapped_Join" />
     <bpmn:sequenceFlow id="Flow_Trapped_Done" sourceRef="Gateway_Trapped_Join" targetRef="End_Emergency_Response" />
-    
   </bpmn:process>
-  
   <bpmndi:BPMNDiagram id="BPMNDiagram_Emergency_Response_Plan_High_V2">
     <bpmndi:BPMNPlane id="BPMNPlane_Emergency_Response_Plan_High_V2" bpmnElement="FIRE_HIGH">
       <bpmndi:BPMNShape id="Start_Emergency_Response_Plan_di" bpmnElement="Start_Emergency_Response_Plan">
         <dc:Bounds x="150" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="127" y="426" width="82" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Init_Split_di" bpmnElement="Gateway_Init_Split" isMarkerVisible="true">
         <dc:Bounds x="250" y="375" width="50" height="50" />
@@ -196,8 +170,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Emergency_Context_di" bpmnElement="Gateway_Emergency_Context">
         <dc:Bounds x="650" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="696" y="418" width="68" height="27" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      
       <bpmndi:BPMNShape id="Gateway_Injured_Split_di" bpmnElement="Gateway_Injured_Split" isMarkerVisible="true">
         <dc:Bounds x="750" y="175" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -210,7 +186,6 @@
       <bpmndi:BPMNShape id="Gateway_Injured_Join_di" bpmnElement="Gateway_Injured_Join" isMarkerVisible="true">
         <dc:Bounds x="1050" y="175" width="50" height="50" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="Gateway_Trapped_Split_di" bpmnElement="Gateway_Trapped_Split" isMarkerVisible="true">
         <dc:Bounds x="750" y="575" width="50" height="50" />
       </bpmndi:BPMNShape>
@@ -223,12 +198,35 @@
       <bpmndi:BPMNShape id="Gateway_Trapped_Join_di" bpmnElement="Gateway_Trapped_Join" isMarkerVisible="true">
         <dc:Bounds x="1050" y="575" width="50" height="50" />
       </bpmndi:BPMNShape>
-
       <bpmndi:BPMNShape id="End_Emergency_Response_di" bpmnElement="End_Emergency_Response">
         <dc:Bounds x="1200" y="382" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1252" y="380" width="56" height="40" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-
-      <!-- DI EDGES -->
+      <bpmndi:BPMNEdge id="Flow_Has_Injured_di" bpmnElement="Flow_Has_Injured">
+        <di:waypoint x="675" y="375" />
+        <di:waypoint x="675" y="200" />
+        <di:waypoint x="750" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="687" y="276" width="46" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Has_Trapped_di" bpmnElement="Flow_Has_Trapped">
+        <di:waypoint x="675" y="425" />
+        <di:waypoint x="675" y="600" />
+        <di:waypoint x="750" y="600" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="683" y="516" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_No_Flags_di" bpmnElement="Flow_No_Flags">
+        <di:waypoint x="700" y="400" />
+        <di:waypoint x="1200" y="400" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="919" y="375" width="131" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Start_di" bpmnElement="Flow_Start">
         <di:waypoint x="186" y="400" />
         <di:waypoint x="250" y="400" />
@@ -265,12 +263,6 @@
         <di:waypoint x="600" y="400" />
         <di:waypoint x="650" y="400" />
       </bpmndi:BPMNEdge>
-      
-      <bpmndi:BPMNEdge id="Flow_Has_Injured_di" bpmnElement="Flow_Has_Injured">
-        <di:waypoint x="675" y="375" />
-        <di:waypoint x="675" y="200" />
-        <di:waypoint x="750" y="200" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Ambulance_di" bpmnElement="Flow_To_Ambulance">
         <di:waypoint x="775" y="175" />
         <di:waypoint x="775" y="140" />
@@ -296,12 +288,6 @@
         <di:waypoint x="1218" y="200" />
         <di:waypoint x="1218" y="382" />
       </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Flow_Has_Trapped_di" bpmnElement="Flow_Has_Trapped">
-        <di:waypoint x="675" y="425" />
-        <di:waypoint x="675" y="600" />
-        <di:waypoint x="750" y="600" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_To_Evacuation_di" bpmnElement="Flow_To_Evacuation">
         <di:waypoint x="775" y="575" />
         <di:waypoint x="775" y="540" />
@@ -326,11 +312,6 @@
         <di:waypoint x="1100" y="600" />
         <di:waypoint x="1218" y="600" />
         <di:waypoint x="1218" y="418" />
-      </bpmndi:BPMNEdge>
-
-      <bpmndi:BPMNEdge id="Flow_No_Flags_di" bpmnElement="Flow_No_Flags">
-        <di:waypoint x="700" y="400" />
-        <di:waypoint x="1200" y="400" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
