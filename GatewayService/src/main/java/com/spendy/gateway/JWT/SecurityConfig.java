@@ -64,8 +64,9 @@ public class SecurityConfig {
                         .pathMatchers("/api/workflows", "/api/workflows/**").hasAnyAuthority("ROLE_WORKFLOW_EXPERT", "ROLE_ROOM_OPERATOR")
                         //Operatore dei servizi
                         .pathMatchers(HttpMethod.PATCH, "/api/services/{id}").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
-                        .pathMatchers(HttpMethod.POST, "/api/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
+                        .pathMatchers(HttpMethod.POST, "/api/services").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/services").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
+                        .pathMatchers(HttpMethod.DELETE, "/api/services/{id}").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/api/capabilities").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
                         .pathMatchers("/api/services/**").hasAnyAuthority("ROLE_SERVICE_OPERATOR", "ROLE_ROOM_OPERATOR")
                         // Operatore di sala
